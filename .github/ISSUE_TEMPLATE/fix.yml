@@ -1,0 +1,27 @@
+name: '🔧 버그 수정'
+description: '버그 수정 관련 이슈를 생성할 때 사용하는 템플릿입니다'
+title: '[Fix] '
+labels: '🔧 Fix'
+body:
+  - type: textarea
+    attributes:
+      label: 📝 Description
+      description: 발생한 버그에 대한 설명을 작성해 주세요.
+      placeholder: 어떤 버그가 발생했는지, 예상 동작과 실제 동작을 구체적으로 작성해주세요.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: 💎 Tasks
+      description: 버그 수정을 위한 세부 작업 목록을 체크리스트로 작성해주세요.
+      placeholder: |-
+        - [ ] 버그 원인 분석
+        - [ ] 수정 코드 작성
+        - [ ] 테스트 및 검증
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: 📌 ETC
+      description: 버그 재현 방법이나 환경 정보가 있다면 작성해주세요.
+      placeholder: 재현 단계, 환경 정보, 에러 메시지, 스크린샷 등

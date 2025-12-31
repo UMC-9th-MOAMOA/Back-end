@@ -1,0 +1,27 @@
+name: '💫 기능 개발'
+description: '새로운 기능 개발 관련 이슈를 생성할 때 사용하는 템플릿입니다'
+title: '[Feat] '
+labels: '💫 Feature'
+body:
+  - type: textarea
+    attributes:
+      label: 📝 Description
+      description: 개발할 기능에 대한 설명을 작성해 주세요.
+      placeholder: 어떤 기능을 개발해야 하는지, 기능의 목적과 배경을 구체적으로 작성해주세요.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: 💎 Tasks
+      description: 기능 개발을 위한 세부 작업 목록을 체크리스트로 작성해주세요.
+      placeholder: |-
+        - [ ] 기능 설계 및 분석
+        - [ ] 코드 구현
+        - [ ] 테스트 및 검증
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: 📌 ETC
+      description: 참고 자료나 요구사항이 있다면 작성해주세요.
+      placeholder: 기획서, 와이어프레임, API 문서, 참고 링크 등

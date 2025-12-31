@@ -1,0 +1,27 @@
+name: '⚙️ 개발 환경 세팅'
+description: '개발 환경 설정 관련 이슈를 생성할 때 사용하는 템플릿입니다'
+title: '[Chore] '
+labels: '⚙️ Setting'
+body:
+  - type: textarea
+    attributes:
+      label: 📝 Description
+      description: 환경 설정과 관련된 내용을 작성해 주세요.
+      placeholder: 어떤 환경 설정이 필요한지, 현재 어떤 문제가 있는지 구체적으로 작성해주세요.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: 💎 Tasks
+      description: 환경 설정을 위한 세부 작업 목록을 체크리스트로 작성해주세요.
+      placeholder: |-
+        - [ ] 개발 도구 설치 및 설정
+        - [ ] 환경 변수 설정
+        - [ ] 의존성 패키지 설치
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: 📌 ETC
+      description: 환경 정보나 참고 링크가 있다면 작성해주세요.
+      placeholder: OS 정보, 버전 정보, 설정 가이드 링크, 에러 메시지 등
