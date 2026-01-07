@@ -26,16 +26,20 @@ reviews:
   poem: true                            # 가끔 가벼운 재미 요소 허용 🙂
 
   # 백엔드 핵심만 리뷰
-  path_filters:
-    - src/main/java/**
-    - src/test/java/**
-    - src/main/resources/**
-    - build.gradle
-    - build.gradle.kts
-    - !**/generated/**
-    - !**/build/**
-    - !**/.gradle/**
-    - !**/node_modules/**
+path_filters:
+  include:
+    - "src/main/java/**"
+    - "src/test/java/**"
+    - "src/main/resources/**"
+    - "build.gradle"
+    - "build.gradle.kts"
+  exclude:
+    - "**/generated/**"
+    - "**/build/**"
+    - "**/.gradle/**"
+    - "**/node_modules/**"
+
+
 
     # ===== Auto Review =====
 auto_review:
