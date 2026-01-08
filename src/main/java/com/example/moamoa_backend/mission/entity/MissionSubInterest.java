@@ -25,11 +25,11 @@ public class MissionSubInterest extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @JoinColumn(name = "sub_interest_id")
+    @JoinColumn(name = "sub_interest_id", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
     private SubInterest subInterest;
 
-    @JoinColumn(name = "mission_id")
+    @JoinColumn(name = "mission_id", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
     private Mission mission;
 }

@@ -26,7 +26,7 @@ public class Inquiry extends BaseEntity {
     private String title;
 
     @Column(nullable = false, columnDefinition = "TEXT")
-    private String content;//이거 텍스트
+    private String content;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

@@ -26,20 +26,20 @@ public class Member extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false, length = 100)
     private String email;
 
     @Column(nullable = true)
     private String password;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
     private String name;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Provider provider;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String providerId;
 
     @Enumerated(EnumType.STRING)
