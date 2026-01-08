@@ -1,0 +1,69 @@
+package com.example.moamoa_backend.member.entity;
+
+import com.example.moamoa_backend.global.entity.BaseEntity;
+import com.example.moamoa_backend.member.enums.Provider;
+import com.example.moamoa_backend.member.enums.Role;
+import com.example.moamoa_backend.member.enums.SpareTime;
+import com.example.moamoa_backend.member.enums.MemberStatus;
+import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import java.time.LocalDateTime;
+
+@Entity
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(uniqueConstraints = {
+        @UniqueConstraint(
+                name = "uk_member_provider_id", // 제약조건 이름
+                columnNames = {"provider", "providerId"} // 두 컬럼 조합 유일
+        )
+})
+public class Member extends BaseEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(unique = true, nullable = false)
+    private String email;
+
+    @Column(nullable = true)
+    private String password;
+
+    @Column(nullable = false)
+    private String name;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Provider provider;
+
+    @Column(nullable = false)
+    private String providerId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private MemberStatus status;
+
+    @Column(nullable = true)
+    private LocalDateTime deletedAt;
+
+    @Column(nullable = true)
+    private Integer dailyGoal;
+
+    @Column(nullable = true)
+    private Integer weeklyGoal;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = true)
+    private SpareTime spareTime;
+
+    @Column(nullable = true)
+    private String phoneNumber;
+
+}
