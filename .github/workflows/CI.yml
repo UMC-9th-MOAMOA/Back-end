@@ -1,0 +1,73 @@
+name: CI with Gradle
+# develop 브랜치 기준으로 Java(Spring Boot) 프로젝트를
+# 자동 빌드하는 CI 워크플로
+
+on:
+  # develop 브랜치에 직접 push 될 때 CI 실행
+  push:
+    branches: [ "develop" ]
+
+  # develop 브랜치로 PR이 열리거나 업데이트될 때 CI 실행
+  pull_request:
+    branches: [ "develop" ]
+
+jobs:
+  build:
+    # GitHub에서 제공하는 Ubuntu 최신 러너 사용
+    runs-on: ubuntu-latest
+
+    # 코드 읽기 권한만 부여 (최소 권한 원칙)
+    permissions:
+      contents: read
+
+    steps:
+    # 현재 레포지토리 코드를 러너에 체크아웃
+    - uses: actions/checkout@v4
+
+    # Java 21 환경 세팅 (프로젝트 JDK 버전과 동일)
+    # gradle 캐시를 활성화해 의존성 다운로드 속도 개선
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        cache: 'gradle'
+
+    # Linux 환경에서 gradlew 실행 권한 문제 방지
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    # Gradle Wrapper로 프로젝트 빌드
+    # -x test       : 테스트는 실행하지 않음 (현재 테스트 미작성 상태)
+    # --no-daemon   : CI 환경에서 Gradle 데몬 사용 금지 (안정성 향상)
+    - name: Build with Gradle Wrapper
+      run: ./gradlew build -x test --no-daemon
+
+  # 의존성 그래프를 GitHub에 제출하는 잡
+  # (Dependabot Alerts / Dependency Graph 용도)
+  dependency-submission:
+    runs-on: ubuntu-latest
+
+    # build 잡이 성공했을 때만 실행
+    needs: build
+
+    # 의존성 그래프 제출을 위해 write 권한 필요
+    permissions:
+      contents: write
+
+    steps:
+    # 레포지토리 코드 체크아웃
+    - uses: actions/checkout@v4
+
+    # build 잡과 동일한 Java 21 환경 사용
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        cache: 'gradle'
+
+    # Gradle 의존성 정보를 GitHub에 제출
+    # → Dependabot 보안 알림 및 의존성 시각화에 사용됨
+    - name: Generate and submit dependency graph
+      uses: gradle/actions/dependency-submission@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
