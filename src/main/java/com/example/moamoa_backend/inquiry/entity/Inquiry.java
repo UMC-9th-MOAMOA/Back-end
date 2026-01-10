@@ -8,6 +8,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -42,5 +44,13 @@ public class Inquiry extends BaseEntity {
     private boolean isSecret;
 
     //createdAt = 질문일시
+
+    // 질문 이미지
+    @OneToMany(mappedBy = "inquiry", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<InquiryImage> inquiryImages = new ArrayList<>();
+
+    // ⭐ 답변 이미지
+    @OneToMany(mappedBy = "inquiry", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AnswerImage> answerImages = new ArrayList<>();
 
 }
