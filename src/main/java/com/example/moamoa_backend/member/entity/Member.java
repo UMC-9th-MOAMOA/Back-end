@@ -1,10 +1,7 @@
 package com.example.moamoa_backend.member.entity;
 
 import com.example.moamoa_backend.global.entity.BaseEntity;
-import com.example.moamoa_backend.member.enums.Provider;
-import com.example.moamoa_backend.member.enums.Role;
-import com.example.moamoa_backend.member.enums.SpareTime;
-import com.example.moamoa_backend.member.enums.MemberStatus;
+import com.example.moamoa_backend.member.enums.*;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -66,4 +63,7 @@ public class Member extends BaseEntity {
     @Column(nullable = true)
     private String phoneNumber;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Gender gender;
 }
