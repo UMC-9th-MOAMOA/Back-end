@@ -1,6 +1,7 @@
 package com.example.moamoa_backend.inquiry.entity;
 
 import com.example.moamoa_backend.global.entity.BaseEntity;
+import com.example.moamoa_backend.inquiry.enums.InquiryCategory;
 import com.example.moamoa_backend.inquiry.enums.InquiryStatus;
 import com.example.moamoa_backend.member.entity.Member;
 import jakarta.persistence.*;
@@ -52,5 +53,10 @@ public class Inquiry extends BaseEntity {
     // ⭐ 답변 이미지
     @OneToMany(mappedBy = "inquiry", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AnswerImage> answerImages = new ArrayList<>();
+
+    // ⭐ 문의 카테고리
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private InquiryCategory category;
 
 }
