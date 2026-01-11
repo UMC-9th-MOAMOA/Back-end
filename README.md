@@ -103,34 +103,23 @@ src/main/java/com/example/app
 
 ---
 
-
 ## 🌱 브랜치 전략 & 커밋 컨벤션
 
 브랜치/커밋/PR/리뷰 규칙은 아래 문서를 기준으로 운영합니다.
 - 👉 [GitHub 협업 규칙 문서](docs/conventions/github-rule.md)
 
-### Branch Roles (요약)
-- `main`: 운영(배포) 브랜치 — 직접 커밋 금지, PR로만 병합
-- `develop`: 개발 통합 브랜치 — 모든 작업 브랜치의 기본 병합 대상
-- 작업 브랜치: `develop`에서 분기 → 작업 → `develop`으로 PR
-- `hotfix/*`: 운영 긴급 수정 — `main`에서 분기 → `main` 병합 → `develop`에도 반영
-
-### Branch Naming (요약)
-형식: `type/work-desc/#issue-number`  
-예시:
-- `feat/login/#12`
-- `fix/token-refresh/#34`
-- `refactor/member-domain/#57`
-- `chore/github-actions/#3`
-
-### Commit Message (요약)
-형식: `type: subject`  
-예시:
-- `feat: User 엔티티 및 레포지토리 생성`
-- `fix: 토큰 재발급 로직 NPE 수정`
-
-
-
-
-
-
+### 요약
+- **Branch**: `develop`에서 작업 브랜치 생성 → 작업 후 `develop`으로 PR
+    - `main`: 배포 브랜치(PR로만 병합)
+    - `hotfix/*`: 운영 긴급 수정( `main` → `develop` 반영 필수)
+  
+- **Branch naming**: `type/work-desc/#issue-number`
+    - 예) `feat/login/#12`, `docs/conventions/#19`
+  
+- **Commit**: `type: subject` (type는 소문자)
+    - 예) `feat: ...`, `docs: ...`
+  
+- **PR / Issue 제목**: `[Type] 작업 요약`
+    - 예) `[Feat] ...`, `[Docs] ...`
+  
+- **이슈 자동 종료**: PR 본문에 `Closes #이슈번호`
