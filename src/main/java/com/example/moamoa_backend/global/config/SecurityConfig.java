@@ -15,7 +15,11 @@ import org.springframework.security.web.SecurityFilterChain;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    // Encoder Bean 등록
+    /**
+     * Creates and exposes a BCryptPasswordEncoder bean used for hashing user passwords.
+     *
+     * @return a BCryptPasswordEncoder instance for encoding passwords
+     */
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -26,6 +30,14 @@ public class SecurityConfig {
             "/api/v1/auth/login"
     };
 
+    /**
+     * Configure and return the application's SecurityFilterChain for a stateless, token-based security setup.
+     *
+     * The chain disables CSRF, the default form login, and HTTP Basic auth; enforces stateless session management;
+     * permits access to Swagger/OpenAPI endpoints and the URIs listed in {@code allowUris}; and requires authentication for all other requests.
+     *
+     * @return the configured SecurityFilterChain
+     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http

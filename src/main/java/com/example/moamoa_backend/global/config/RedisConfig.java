@@ -23,14 +23,20 @@ public class RedisConfig {
     @Value("${spring.data.redis.port}")
     private int port;
 
+    /**
+     * Create a Lettuce-based connection factory configured for the standalone Redis instance.
+     *
+     * @return a RedisConnectionFactory configured for the injected host and port
+     */
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
         RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration(host, port);
         return new LettuceConnectionFactory(redisStandaloneConfiguration);
     }
     /**
-     * Object 전용 RedisTemplate
-     * - 출석 정보 (LocalDate/LocalDateTime) 저장용
+     * Create a RedisTemplate<String, Object> configured for storing objects with string keys and JSON-serialized values (supports LocalDate/LocalDateTime).
+     *
+     * @return a RedisTemplate configured with StringRedisSerializer for keys and hash keys, and GenericJacksonJsonRedisSerializer for values and hash values
      */
     @Bean
     public RedisTemplate<String, Object> objectRedisTemplate(
