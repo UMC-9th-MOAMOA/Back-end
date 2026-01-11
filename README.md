@@ -89,70 +89,46 @@ src/main/java/com/example/app
 ```
 ---
 
-## 🌱 브랜치 전략
+## 🧾 개발 컨벤션
+아래 문서를 기준으로 네이밍/협업 규칙을 통일합니다.
 
-## Branch Strategy
+[![GitHub 협업 규칙](https://img.shields.io/badge/GitHub_협업_규칙-181717?style=for-the-badge&logo=github&logoColor=white)](docs/conventions/github-rule.md)
 
-본 프로젝트는 **Git Flow**를 기반으로 하되,  
-`release` 브랜치는 사용하지 않고 **`main` / `develop` / 작업 브랜치** 구조로 운영합니다.
+[![메서드 명명 규칙](https://img.shields.io/badge/메서드%20명명%20규칙-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](docs/conventions/method-naming.md)
 
+[![클래스 명명 규칙](https://img.shields.io/badge/클래스%20명명%20규칙-E76F00?style=for-the-badge&logo=coffeescript&logoColor=white)](docs/conventions/class-naming.md)
 
-## 1) Branch Roles
-
-### main
-- 운영(Production) 배포 브랜치
-- 실제 서비스에 배포되는 코드만 존재
-- 직접 커밋 ❌ (Pull Request를 통해서만 병합)
-
-### develop
-- 다음 배포를 위한 개발 통합 브랜치
-- 모든 기능 및 수정 브랜치의 기본 병합 대상
-- 배포 전 최종 검증이 이루어지는 브랜치
-
-### 작업 브랜치 (feature / fix / refactor 등)
-- 신규 기능, 버그 수정, 리팩토링 등 개별 작업 단위 브랜치
-- `develop`에서 분기하여 작업 후 `develop`으로 Pull Request 생성
-
-### hotfix/
-- 운영 환경에서 발생한 긴급 버그 수정용 브랜치
-- `main`에서 분기하여 수정 후 `main`에 병합
-- 병합 후 동일 내용을 `develop`에도 반영
+[![필드 명명 규칙](https://img.shields.io/badge/필드%20명명%20규칙-0F766E?style=for-the-badge&logo=mysql&logoColor=white)](docs/conventions/field-naming.md)
 
 
-## 2) Branch Naming Convention
+---
 
-작업 브랜치는 아래 규칙을 따릅니다.
 
-### 형식 
-`이슈타입/작업-설명/#이슈번호`
-### 예시
+## 🌱 브랜치 전략 & 커밋 컨벤션
+
+브랜치/커밋/PR/리뷰 규칙은 아래 문서를 기준으로 운영합니다.
+- 👉 [GitHub 협업 규칙 문서](docs/conventions/github-rule.md)
+
+### Branch Roles (요약)
+- `main`: 운영(배포) 브랜치 — 직접 커밋 금지, PR로만 병합
+- `develop`: 개발 통합 브랜치 — 모든 작업 브랜치의 기본 병합 대상
+- 작업 브랜치: `develop`에서 분기 → 작업 → `develop`으로 PR
+- `hotfix/*`: 운영 긴급 수정 — `main`에서 분기 → `main` 병합 → `develop`에도 반영
+
+### Branch Naming (요약)
+형식: `type/work-desc/#issue-number`  
+예시:
 - `feat/login/#12`
 - `fix/token-refresh/#34`
 - `refactor/member-domain/#57`
 - `chore/github-actions/#3`
 
+### Commit Message (요약)
+형식: `type: subject`  
+예시:
+- `feat: User 엔티티 및 레포지토리 생성`
+- `fix: 토큰 재발급 로직 NPE 수정`
 
----
-
-## 💬 커밋 컨벤션
-
-`[타입] 작업 내용 `
-
-| Type | 설명 |
-|------|------|
-| feat | 새로운 기능 |
-| fix  | 버그 수정 |
-| refactor | 리팩토링 |
-| test | 테스트 코드 |
-| docs | 문서 수정 |
-| chore | 빌드/설정 |
-| style | 코드 스타일 변경 |
-| ci   | CI/CD 수정 |
-| perf | 성능 개선 |
-| remove | 불필요한 코드/파일 삭제 |
-
-
---- 
 
 
 
