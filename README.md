@@ -110,16 +110,16 @@ src/main/java/com/example/app
 
 ### 요약
 - **Branch**: `develop`에서 작업 브랜치 생성 → 작업 후 `develop`으로 PR
-    - `main`: 배포 브랜치(PR로만 병합)
-    - `hotfix/*`: 운영 긴급 수정( `main` → `develop` 반영 필수)
-  
+  - `main`: 배포 브랜치(PR로만 병합)
+  - `hotfix/*`: 운영 긴급 수정(`main` → `develop` 반영 필수)
+
 - **Branch naming**: `type/work-desc/#issue-number`
-    - 예) `feat/login/#12`, `docs/conventions/#19`
-  
+  - 예) `feat/login/#12`, `docs/conventions/#19`
+
 - **Commit**: `type: subject` (type는 소문자)
-    - 예) `feat: ...`, `docs: ...`
-  
+  - 예) `feat: ...`, `docs: ...`
+
 - **PR / Issue 제목**: `[Type] 작업 요약`
-    - 예) `[Feat] ...`, `[Docs] ...`
-  
+  - 예) `[Feat] ...`, `[Docs] ...`
+
 - **이슈 자동 종료**: PR 본문에 `Closes #이슈번호`
