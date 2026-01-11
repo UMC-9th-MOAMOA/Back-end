@@ -3,16 +3,16 @@ package com.example.moamoa_backend.member.entity;
 import com.example.moamoa_backend.global.entity.BaseEntity;
 import com.example.moamoa_backend.member.enums.*;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
+@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Table(uniqueConstraints = {
         @UniqueConstraint(
                 name = "uk_member_provider_id", // 제약조건 이름

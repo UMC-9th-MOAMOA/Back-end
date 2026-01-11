@@ -1,5 +1,6 @@
 package com.example.moamoa_backend.global.config;
 
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
 import lombok.RequiredArgsConstructor;
@@ -24,9 +25,9 @@ public class RedisConfig {
 
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
-        return new LettuceConnectionFactory(host, port);
+        RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration(host, port);
+        return new LettuceConnectionFactory(redisStandaloneConfiguration);
     }
-
     /**
      * Object 전용 RedisTemplate
      * - 출석 정보 (LocalDate/LocalDateTime) 저장용

@@ -1,6 +1,5 @@
 package com.example.moamoa_backend.member.exception.code;
 
-import com.example.moamoa_backend.global.apiPayload.code.BaseErrorCode;
 import com.example.moamoa_backend.global.apiPayload.code.BaseSuccessCode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
