@@ -18,6 +18,7 @@
 - 축약어 지양(예외: `id`, `url`, `jwt`, `api`, `dto` 등)
 
 ### 1.1 동작별 접두어 권장
+
 | 목적 | 접두어 | 예시 |
 |---|---|---|
 | 조회(단건) | `get` | `getMission()`, `getMyProfile()` |
@@ -32,6 +33,7 @@
 ---
 
 ## 2. 계층별 네이밍 요약
+
 | 계층 | 네이밍 기준 | 예시 |
 |---|---|---|
 | Controller | REST 동작 + 대상 | `getTodayMissions()`, `refreshTodayMissions()` |
