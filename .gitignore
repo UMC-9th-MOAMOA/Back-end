@@ -45,10 +45,8 @@ ehthumbs.db
 Desktop.ini
 
 ### Environment Variables & Secrets (보안 중요) ###
-.env
 .env.local
-.env.*
-
+.env
 ### Spring Boot Logs (서버 로그 파일) ###
 logs/
 *.log
@@ -59,8 +57,7 @@ yarn-error.log*
 ### Local Configuration (로컬 전용 설정 파일) ###
 application-secret.yml
 application-private.yml
-application-prod.yml
-
+application-local.yml
 ### KeyStore & Certificates (인증서 파일) ###
 *.jks
 *.p12
