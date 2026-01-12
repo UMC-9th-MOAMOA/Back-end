@@ -1,0 +1,14 @@
+services:
+  app:
+    image: moamoa2026/moamoa-backend:latest
+    container_name: moamoa-app
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_URL: ${DB_URL}
+      DB_USER: ${DB_USER}
+      DB_PW: ${DB_PW}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT:-6379}
