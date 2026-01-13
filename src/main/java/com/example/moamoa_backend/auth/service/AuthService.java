@@ -189,8 +189,11 @@ public class AuthService {
     }
     private void saveTermsAgreements(Member member, List<AuthReqDto.TermDto> requestPolicies) {
         Map<Long, Boolean> termMap = requestPolicies.stream()
-                .distinct()
-                .collect(Collectors.toMap(AuthReqDto.TermDto::policyId, AuthReqDto.TermDto::agreed));
+                .collect(Collectors.toMap(
+                        AuthReqDto.TermDto::policyId,
+                        AuthReqDto.TermDto::agreed,
+                        (existing, replacement) -> replacement // 후순위 값 사용 +
+                ));
 
         if (termMap.isEmpty()) return;
 
