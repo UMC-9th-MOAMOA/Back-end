@@ -13,6 +13,14 @@ public enum AuthErrorCode implements BaseErrorCode {
             "AUTH400_1",
             "인증 번호가 일치하지 않습니다."),
 
+    REQUIRED_TERMS_NOT_AGREED(HttpStatus.BAD_REQUEST,
+            "AUTH400_2",
+            "필수 약관에 모두 동의해야 합니다."),
+
+    INVALID_POLICY_ID(HttpStatus.BAD_REQUEST,
+            "AUTH400_3",
+            "존재하지 않는 약관이 포함되어 있습니다."),
+
     TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED,
             "AUTH401_1",
             "인증 토큰이 만료되었습니다."),
@@ -27,7 +35,11 @@ public enum AuthErrorCode implements BaseErrorCode {
 
     ACCESS_DENIED(HttpStatus.FORBIDDEN,
             "AUTH403_1",
-            "접근 권한이 없습니다.");
+            "접근 권한이 없습니다."),
+
+    EMAIL_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR,
+            "AUTH500_1",
+            "이메일 전송 중 오류가 발생했습니다.");
 
     private final HttpStatus status;
     private final String code;

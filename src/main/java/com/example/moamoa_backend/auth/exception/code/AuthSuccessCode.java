@@ -27,7 +27,11 @@ public enum AuthSuccessCode implements BaseSuccessCode {
 
     EMAIL_VERIFY_SUCCESS(HttpStatus.OK,
             "AUTH200_5",
-            "이메일 인증에 성공했습니다.");
+            "이메일 인증에 성공했습니다."),
+
+    SIGNUP_SUCCESS(HttpStatus.CREATED,
+            "AUTH201_1",
+            "회원가입이 완료되었습니다.");
 
     private final HttpStatus status;
     private final String code;
