@@ -176,7 +176,7 @@ public class AuthService {
                 .collect(Collectors.toSet());
 
         // PolicyRepository에서 필수 약관 조회
-        List<Policy> requiredPolicies = policyRepository.findByIsMandatoryTrue();
+        List<Policy> requiredPolicies = policyRepository.findByIsMandatoryTrueAndIsActiveTrue();
 
         List<Long> missingTermIds = requiredPolicies.stream()
                 .map(Policy::getId)
