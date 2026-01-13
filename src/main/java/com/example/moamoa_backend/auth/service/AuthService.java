@@ -65,7 +65,7 @@ public class AuthService {
             javaMailSender.send(message);
         } catch (MessagingException e) {
             // 이메일 전송 실패 에러처리
-            log.error("Email send failed for {}: {}", email, e.getMessage());
+            log.error("Email send failed for {}: {}", maskEmail(email), e.getMessage());
             throw new AuthException(AuthErrorCode.EMAIL_SEND_FAILED);
         }
 
@@ -210,6 +210,20 @@ public class AuthService {
                 .toList();
 
         memberPolicyRepository.saveAll(memberPolicies);
+    }
+    private String maskEmail(String email) {
+        if (email == null || email.isBlank()) {
+            return email;
+        }
+
+        int atIndex = email.indexOf('@');
+        // @가 없거나, 아이디가 너무 짧은 경우(2글자 이하) 앞부분 전체 마스킹 처리 등 예외 대응
+        if (atIndex <= 2) {
+            return "***" + email.substring(atIndex);
+        }
+
+        // 앞 2글자만 보여주고 나머지는 *** 처리 (예: te***@naver.com)
+        return email.substring(0, 2) + "***" + email.substring(atIndex);
     }
 
 }
