@@ -37,4 +37,6 @@ public class Policy extends BaseEntity {
     @Column(nullable = false)
     private LocalDateTime effectiveAt;
 
+    @Column(nullable = false)
+    private boolean isActive = true;
 }

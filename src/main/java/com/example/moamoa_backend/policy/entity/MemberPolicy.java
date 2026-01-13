@@ -3,12 +3,14 @@ package com.example.moamoa_backend.policy.entity;
 import com.example.moamoa_backend.global.entity.BaseEntity;
 import com.example.moamoa_backend.member.entity.Member;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
+@Builder
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class MemberPolicy extends BaseEntity {
 
@@ -26,4 +28,7 @@ public class MemberPolicy extends BaseEntity {
 
     @Column(nullable = false)
     private boolean isAgreed;
+
+    @Column(nullable = false)
+    private LocalDateTime agreedAt;
 }
