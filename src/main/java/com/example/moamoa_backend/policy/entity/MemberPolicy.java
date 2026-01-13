@@ -29,6 +29,6 @@ public class MemberPolicy extends BaseEntity {
     @Column(nullable = false)
     private boolean isAgreed;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private LocalDateTime agreedAt;
 }

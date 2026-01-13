@@ -188,30 +188,49 @@ public class AuthService {
         }
     }
     private void saveTermsAgreements(Member member, List<AuthReqDto.TermDto> requestPolicies) {
-        Map<Long, Boolean> termMap = requestPolicies.stream()
-                .collect(Collectors.toMap(
-                        AuthReqDto.TermDto::policyId,
-                        AuthReqDto.TermDto::agreed,
-                        (existing, replacement) -> replacement // 후순위 값 사용 +
-                ));
 
-        if (termMap.isEmpty()) return;
+        // 1. 요청된 약관 ID 추출
+        Set<Long> requestedPolicyIds = requestPolicies.stream()
+                .map(AuthReqDto.TermDto::policyId)
+                .collect(Collectors.toSet());
 
-        List<Policy> policies = policyRepository.findAllById(termMap.keySet());
+        // 2. 현재 활성화된 모든 약관 조회
+        List<Policy> allActivePolicies = policyRepository.findAllByIsActiveTrue();
 
-        if (policies.size() != termMap.size()) {
+        // 3. 유효하지 않은 약관 ID 체크
+        Set<Long> validPolicyIds = allActivePolicies.stream()
+                .map(Policy::getId)
+                .collect(Collectors.toSet());
+
+        Set<Long> invalidPolicyIds = requestedPolicyIds.stream()
+                .filter(id -> !validPolicyIds.contains(id))
+                .collect(Collectors.toSet());
+
+        if (!invalidPolicyIds.isEmpty()) {
+            log.error("Invalid policy IDs received: {}", invalidPolicyIds);
             throw new AuthException(AuthErrorCode.INVALID_POLICY_ID);
         }
 
-        List<MemberPolicy> memberPolicies = policies.stream()
+        // 4. Map 변환
+        Map<Long, Boolean> requestTermMap = requestPolicies.stream()
+                .collect(Collectors.toMap(
+                        AuthReqDto.TermDto::policyId,
+                        AuthReqDto.TermDto::agreed,
+                        (existing, replacement) -> replacement
+                ));
+
+        // 5. 저장
+        List<MemberPolicy> memberPolicies = allActivePolicies.stream()
                 .map(policy -> MemberPolicy.builder()
                         .member(member)
                         .policy(policy)
-                        .isAgreed(termMap.get(policy.getId())) // 여기서 true/false가 그대로 저장됩니다.
-                        .agreedAt(LocalDateTime.now())
+                        .isAgreed(requestTermMap.getOrDefault(policy.getId(), false))
+                        .agreedAt(requestTermMap.getOrDefault(policy.getId(), false)
+                                ? LocalDateTime.now() : null)
                         .build())
                 .toList();
 
+        // 6. 일괄 저장
         memberPolicyRepository.saveAll(memberPolicies);
     }
     private String maskEmail(String email) {
