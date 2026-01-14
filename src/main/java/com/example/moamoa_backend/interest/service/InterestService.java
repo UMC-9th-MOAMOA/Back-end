@@ -1,7 +1,7 @@
 package com.example.moamoa_backend.interest.service;
 
-import com.example.moamoa_backend.interest.dto.InterestResponse;
-import com.example.moamoa_backend.interest.dto.SubInterestResponse;
+import com.example.moamoa_backend.interest.dto.InterestResponseDto;
+import com.example.moamoa_backend.interest.dto.SubInterestResponseDto;
 import com.example.moamoa_backend.interest.exception.InterestException;
 import com.example.moamoa_backend.interest.exception.code.InterestErrorCode;
 import com.example.moamoa_backend.interest.entity.SubInterest;
@@ -21,14 +21,14 @@ public class InterestService {
 	private final SubInterestRepository subInterestRepository;
 
 	@Transactional(readOnly = true)
-	public List<InterestResponse> getInterests() {
+	public List<InterestResponseDto> getInterests() {
 		return interestRepository.findAllByOrderByIdAsc().stream()
-			.map(i -> InterestResponse.from(i.getId(), i.getName()))
+			.map(i -> InterestResponseDto.from(i.getId(), i.getName()))
 			.toList();
 	}
 
 	@Transactional(readOnly = true)
-	public List<SubInterestResponse> getSubInterests(Long interestId) {
+	public List<SubInterestResponseDto> getSubInterests(Long interestId) {
 
 		List<SubInterest> subs =
 			subInterestRepository.findAllByInterest_IdOrderByIdAsc(interestId);
@@ -38,7 +38,7 @@ public class InterestService {
 		}
 
 		return subs.stream()
-			.map(s -> SubInterestResponse.from(s.getId(), s.getName()))
+			.map(s -> SubInterestResponseDto.from(s.getId(), s.getName()))
 			.toList();
 	}
 }
