@@ -23,7 +23,8 @@ public class SecurityConfig {
 
     private final String[] allowUris = {
             "/api/v1/auth/signup",
-            "/api/v1/auth/login"
+            "/api/v1/auth/login",
+            "/actuator/health/**"
     };
 
     @Bean
