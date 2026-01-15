@@ -85,6 +85,11 @@ dependencies {
      * 이메일 전송 (JavaMail / SMTP)
      * =============================== */
     implementation 'org.springframework.boot:spring-boot-starter-mail'
+    
+    /* ===============================
+     * Actuator (Health Check)
+     * =============================== */
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
 }
 
