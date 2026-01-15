@@ -86,6 +86,11 @@ dependencies {
      * =============================== */
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
+    /* ===============================
+     * Actuator (Health Check)
+     * =============================== */
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
 }
 
 tasks.named('test') {
