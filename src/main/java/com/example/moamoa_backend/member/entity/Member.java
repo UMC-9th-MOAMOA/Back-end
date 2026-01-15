@@ -17,6 +17,10 @@ import java.time.LocalDateTime;
         @UniqueConstraint(
                 name = "uk_member_provider_id", // 제약조건 이름
                 columnNames = {"provider", "providerId"} // 두 컬럼 조합 유일
+        ),
+        @UniqueConstraint(
+                name = "uk_member_email_provider",
+                columnNames = {"email", "provider"}
         )
 })
 public class Member extends BaseEntity {
@@ -25,7 +29,7 @@ public class Member extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false, length = 100)
+    @Column(nullable = true, length = 100)
     private String email;
 
     @Column(nullable = true)
