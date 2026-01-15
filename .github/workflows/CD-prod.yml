@@ -53,10 +53,10 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             set -e
-            cd ~/moamoa-prod
+            cd ~/app
 
             export APP_TAG="${GITHUB_SHA::7}"
-            docker compose -f docker-compose.prod.yml --env-file .env pull
-            docker compose -f docker-compose.prod.yml --env-file .env up -d
+            docker compose -f docker-compose.yml --env-file .env pull
+            docker compose -f docker-compose.yml --env-file .env up -d
 
             docker image prune -af || true
