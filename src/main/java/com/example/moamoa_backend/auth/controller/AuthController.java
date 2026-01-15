@@ -4,8 +4,10 @@ import com.example.moamoa_backend.auth.dto.req.AuthReqDto;
 import com.example.moamoa_backend.auth.exception.code.AuthSuccessCode;
 import com.example.moamoa_backend.auth.service.AuthService;
 import com.example.moamoa_backend.global.apiPayload.response.ApiResponse;
+import com.example.moamoa_backend.global.util.NetworkUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,8 +25,12 @@ public class AuthController {
     @Operation(summary = "이메일 인증번호 전송", description = "회원가입을 위해 이메일로 인증번호(6자리)를 전송합니다.")
     @SecurityRequirements(value = {})
     @PostMapping("/email/send-verification")
-    public ApiResponse<Void> sendEmailAuthCode(@RequestBody @Valid AuthReqDto.EmailSendDto request) {
-        authService.sendEmailAuthCode(request.email());
+    public ApiResponse<Void> sendEmailAuthCode(
+            @RequestBody @Valid AuthReqDto.EmailSendDto request,
+            HttpServletRequest httpServletRequest
+            ) {
+        String clientIp = NetworkUtil.getClientIp(httpServletRequest); //IP 추출
+        authService.sendEmailAuthCode(request.email(), clientIp);
         return ApiResponse.onSuccess(AuthSuccessCode.EMAIL_SEND_SUCCESS, null);
     }
 

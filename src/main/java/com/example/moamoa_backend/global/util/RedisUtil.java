@@ -19,6 +19,12 @@ public class RedisUtil {
         stringRedisTemplate.opsForValue().set(key, value, expireDuration);
     }
 
+    // 유효 시간 설정 (이미 존재하는 키에 만료 시간만 설정)
+    public void setExpire(String key, long durationSeconds) {
+        Duration expireDuration = Duration.ofSeconds(durationSeconds);
+        stringRedisTemplate.expire(key, expireDuration);
+    }
+
     // 데이터 조회
     public String getData(String key) {
         return stringRedisTemplate.opsForValue().get(key);
@@ -27,6 +33,11 @@ public class RedisUtil {
     // 데이터 삭제
     public void deleteData(String key) {
         stringRedisTemplate.delete(key);
+    }
+
+    // 값 1 증가, 증가된 값을 반환
+    public Long increment(String key) {
+        return stringRedisTemplate.opsForValue().increment(key);
     }
 
 }

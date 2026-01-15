@@ -21,6 +21,18 @@ public enum AuthErrorCode implements BaseErrorCode {
             "AUTH400_3",
             "존재하지 않는 약관이 포함되어 있습니다."),
 
+    VERIFICATION_CODE_EXPIRED(HttpStatus.BAD_REQUEST,
+            "AUTH400_4",
+            "인증 시간이 만료되었습니다. 다시 발송해주세요."),
+
+    VERIFICATION_ATTEMPTS_EXCEEDED(HttpStatus.BAD_REQUEST,
+            "AUTH400_5",
+            "인증 시도 횟수를 초과했습니다. 다시 발송해주세요."),
+
+    EMAIL_SEND_BLOCKED(HttpStatus.BAD_REQUEST,
+            "AUTH400_6",
+            "이메일 재전송은 30초 뒤에 가능합니다."),
+
     TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED,
             "AUTH401_1",
             "인증 토큰이 만료되었습니다."),
@@ -36,6 +48,10 @@ public enum AuthErrorCode implements BaseErrorCode {
     ACCESS_DENIED(HttpStatus.FORBIDDEN,
             "AUTH403_1",
             "접근 권한이 없습니다."),
+
+    IP_RATE_LIMIT_EXCEEDED(HttpStatus.TOO_MANY_REQUESTS,
+            "AUTH429_1",
+            "비정상적인 요청 감지로 1시간 동안 인증이 제한됩니다."),
 
     EMAIL_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR,
             "AUTH500_1",

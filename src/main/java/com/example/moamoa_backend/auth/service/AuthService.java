@@ -5,6 +5,7 @@ import com.example.moamoa_backend.auth.exception.AuthException;
 import com.example.moamoa_backend.auth.exception.code.AuthErrorCode;
 import com.example.moamoa_backend.global.util.RedisUtil;
 import com.example.moamoa_backend.member.entity.Member;
+import com.example.moamoa_backend.member.enums.Provider;
 import com.example.moamoa_backend.member.exception.MemberException;
 import com.example.moamoa_backend.member.exception.code.MemberErrorCode;
 import com.example.moamoa_backend.member.repository.MemberRepository;
@@ -41,19 +42,65 @@ public class AuthService {
     private final PolicyRepository policyRepository;
     private final MemberPolicyRepository memberPolicyRepository;
 
+    // 이메일과 보안코드 저장 관련 (예)AuthCode:moamoa@gmail.com : 123456
     private static final String AUTH_CODE_PREFIX = "AuthCode:";
-    private static final String VERIFIED_PREFIX = "Verified:";
+    private static final long AUTH_CODE_EXPIRE_SEC = 180L;
 
-    private static final long AUTH_CODE_EXPIRE_SEC = 180L; // 3분
-    private static final long VERIFIED_EXPIRE_SEC = 1200L; // 20분
+    // 이메일 인증 성공 플래그 저장 관련 (예)Verified:moamoa@gmail.com : TRUE
+    private static final String VERIFIED_PREFIX = "Verified:";
+    private static final long VERIFIED_EXPIRE_SEC = 300L;
+
+    // 이메일 1회 전송에 대해 n회 인증 실패시 관련 (예)AuthCodeFail:moamoa@gamil.com : 4
+    // MAX_AUTH_ATTEMPTS 도달시 파기
+    private static final String AUTH_CODE_FAIL_PREFIX = "AuthCodeFail:";
+    private static final int MAX_AUTH_ATTEMPTS = 5;
+
+    // 동일 이메일에 대한 요청 Cool-down 관련
+    // (예)EmailSendBlock:moamoa@gmail.com : BLOCKED
+    private static final String EMAIL_SEND_BLOCK_PREFIX = "EmailSendBlock:";
+    private static final long EMAIL_SEND_BLOCK_SEC = 30L;
+
+    // 동일 IP 단위 시간당 MAX REQUEST 도달 시 차단 관련
+    // (예)AuthIp:1.2.3.4 : 17
+    // (예)AuthIp:1.2.3.4:BAN : BLOCKED
+    private static final String AUTH_IP_PREFIX = "AuthIp:";
+    private static final int MAX_IP_REQUESTS = 20;
+    private static final long AUTH_IP_EXPIRE_SEC = 3600L;
+    private static final long AUTH_IP_BAN_SEC = 3600L;
 
     private static final int AUTH_CODE_LENGTH = 6; // 인증코드 6자리 설정
 
     // 이메일 인증번호 전송
-    public void sendEmailAuthCode(String email) {
+    public void sendEmailAuthCode(String email, String clientIp) {
         // 중복 가입 체크
-        if (memberRepository.existsByEmail(email)) {
+        if (memberRepository.existsByEmailAndProvider(email, Provider.LOCAL)) {
             throw new MemberException(MemberErrorCode.EMAIL_ALREADY_EXISTS);
+        }
+
+        // 30초 쿨다운 체크
+        if (redisUtil.getData(EMAIL_SEND_BLOCK_PREFIX + email) != null) {
+            throw new AuthException(AuthErrorCode.EMAIL_SEND_BLOCKED);
+        }
+
+        // IP BAN 체크
+        String ipKey = AUTH_IP_PREFIX + clientIp;
+        String banStatus = redisUtil.getData(ipKey + ":BAN");
+        if (banStatus != null) {
+            throw new AuthException(AuthErrorCode.IP_RATE_LIMIT_EXCEEDED);
+        }
+
+        // 현재 카운트 확인
+        String currentCountStr = redisUtil.getData(ipKey);
+        Long currentIpCount = (currentCountStr != null) ? Long.parseLong(currentCountStr) : 0;
+
+        // IP 시도횟수 초과했는지 체크
+        if (currentIpCount >= MAX_IP_REQUESTS) {
+            // BAN 처리
+            redisUtil.deleteData(ipKey);
+            redisUtil.setDataExpire(ipKey + ":BAN", "BLOCKED", AUTH_IP_BAN_SEC);
+
+            log.warn("IP banned for 1 hours: {}", clientIp);
+            throw new AuthException(AuthErrorCode.IP_RATE_LIMIT_EXCEEDED);
         }
 
         // 인증 번호 생성 (6자리)
@@ -69,22 +116,61 @@ public class AuthService {
             throw new AuthException(AuthErrorCode.EMAIL_SEND_FAILED);
         }
 
+        //카운트 증가 및 첫 요청이면 만료 시간 설정
+        Long newCount = redisUtil.increment(ipKey);
+        if (newCount != null && newCount == 1) {
+            redisUtil.setExpire(ipKey, AUTH_IP_EXPIRE_SEC);
+        }
+
         // Redis 저장 (이메일 정보 + 인증코드, 3분)
         redisUtil.setDataExpire(AUTH_CODE_PREFIX + email, authCode, AUTH_CODE_EXPIRE_SEC);
+
+        // 재전송 방지 플래그 저장 (30초 동안 유지)
+        redisUtil.setDataExpire(EMAIL_SEND_BLOCK_PREFIX + email, "BLOCKED", EMAIL_SEND_BLOCK_SEC);
+
+        // 기존 실패 횟수 초기화 (새 코드를 전송했기 떄문)
+        redisUtil.deleteData(AUTH_CODE_FAIL_PREFIX + email);
+
+
     }
 
     // 이메일 인증번호 검증
     public void verifyEmailAuthCode(String email, String code) {
-        String redisAuthCode = redisUtil.getData(AUTH_CODE_PREFIX + email);
+        String authCodeKey = AUTH_CODE_PREFIX + email;
+        String failCountKey = AUTH_CODE_FAIL_PREFIX + email;
+        String redisAuthCode = redisUtil.getData(authCodeKey);
 
-        // 검증 (데이터 없음 == 만료됨 or 코드 불일치)
-        if (redisAuthCode == null || !redisAuthCode.equals(code)) {
+        // 데이터 없음 -> 잘못된 코드
+        if (redisAuthCode == null) {
+            throw new AuthException(AuthErrorCode.VERIFICATION_CODE_EXPIRED);
+        }
+
+        // 인증번호가 불일치하는 경우 (실패)
+        if(!redisAuthCode.equals(code)) {
+            Long currentFailCount = redisUtil.increment(failCountKey); // 카운트 1 증가
+
+            // 카운트가 처음 생성되었다면, 만료 시간(3분) 설정
+            if (currentFailCount != null && currentFailCount == 1) {
+                redisUtil.setExpire(failCountKey, AUTH_CODE_EXPIRE_SEC);
+            }
+
+            // 최대 횟수 초과 체크
+            if (currentFailCount >= MAX_AUTH_ATTEMPTS) {
+                redisUtil.deleteData(authCodeKey);  // 인증번호 파기
+                redisUtil.deleteData(failCountKey); // 카운트 정리
+                throw new AuthException(AuthErrorCode.VERIFICATION_ATTEMPTS_EXCEEDED); // 입력횟수 초과 에러
+            }
+
+            // 단순 불일치 에러
             throw new AuthException(AuthErrorCode.VERIFICATION_CODE_INVALID);
         }
 
+
         // 성공 처리: 인증 코드 삭제 & '인증됨' 플래그 저장 (20분)
-        redisUtil.deleteData(AUTH_CODE_PREFIX + email);
+        redisUtil.deleteData(authCodeKey);  //인증번호 삭제
+        redisUtil.deleteData(failCountKey); //실패 카운트 삭제
         redisUtil.setDataExpire(VERIFIED_PREFIX + email, "TRUE", VERIFIED_EXPIRE_SEC);
+
     }
 
     // 인증여부 확인 (회원가입 요청시 메일인증 여부 확인)
@@ -112,7 +198,7 @@ public class AuthService {
         }
 
         // 이메일 중복 체크 (Double Check: 동시성 이슈 및 방어 로직)
-        if (memberRepository.existsByEmail(request.email())) {
+        if (memberRepository.existsByEmailAndProvider(request.email(), Provider.LOCAL)) {
             throw new MemberException(MemberErrorCode.EMAIL_ALREADY_EXISTS);
         }
 
