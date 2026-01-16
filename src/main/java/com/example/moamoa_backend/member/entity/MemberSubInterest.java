@@ -31,4 +31,11 @@ public class MemberSubInterest extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sub_interest_id", nullable = false)
     private SubInterest subInterest;
+
+    public static MemberSubInterest of(Member member, SubInterest subInterest) {
+        MemberSubInterest entity = new MemberSubInterest();
+        entity.member = member;
+        entity.subInterest = subInterest;
+        return entity;
+    }
 }
