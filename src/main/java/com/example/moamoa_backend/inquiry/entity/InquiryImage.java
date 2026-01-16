@@ -2,13 +2,14 @@ package com.example.moamoa_backend.inquiry.entity;
 
 import com.example.moamoa_backend.global.entity.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
+@Setter
 @Entity
 @Getter
+@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class InquiryImage extends BaseEntity {
 
     @Id

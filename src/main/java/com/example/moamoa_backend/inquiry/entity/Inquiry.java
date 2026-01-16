@@ -5,16 +5,19 @@ import com.example.moamoa_backend.inquiry.enums.InquiryCategory;
 import com.example.moamoa_backend.inquiry.enums.InquiryStatus;
 import com.example.moamoa_backend.member.entity.Member;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Builder
+@Setter
+@Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Inquiry extends BaseEntity {
 
     @Id
