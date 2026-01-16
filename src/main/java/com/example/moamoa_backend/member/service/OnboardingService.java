@@ -29,19 +29,28 @@ public class OnboardingService {
 
 	/**
 	 * 온보딩 수정 API
+	 * - 엔드포인트는 하나로 유지하고, scope로 "무엇을 수정할지"만 분기한다.
+	 *
+	 * scope 정책:
+	 * - ALL: selections(필수) + dailyMissionGoal(선택/null 허용)
+	 * - INTERESTS: selections(필수)
+	 * - GOAL: dailyMissionGoal(필수, 0~5)
+	 *
+	 * 응답은 항상 최신 상태(ALL)로 내려줘서 프론트 동기화에 유리하게 구성
 	 */
 	@Transactional
 	public OnboardingResponseDto patchOnboarding(Long memberId, OnboardingUpdateScope scope, OnboardingPatchRequestDto req) {
+		// 인증 도입 전 임시 memberId 방식: 존재하지 않으면 404
 		Member member = memberRepository.findById(memberId)
 			.orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
 		return switch (scope) {
 			case ALL -> {
-				requireSelections(req.selections());
-				validateGoalRangeIfPresent(req.dailyMissionGoal());
+				requireSelections(req.selections());              // 관심사 최소 1개 이상 필수
+				validateGoalRangeIfPresent(req.dailyMissionGoal()); // goal은 null 허용, 값이 있으면 범위만 검증
 
-				updateMemberInterestsSmartSync(member, req.selections());
-				member.updateDailyGoal(req.dailyMissionGoal()); // nullable 허용
+				updateMemberInterestsSmartSync(member, req.selections()); // 관심사 Smart Sync 반영
+				member.updateDailyGoal(req.dailyMissionGoal());           // goal 저장(null 가능)
 
 				yield getMyOnboarding(memberId, OnboardingUpdateScope.ALL);
 			}
@@ -51,17 +60,18 @@ public class OnboardingService {
 				yield getMyOnboarding(memberId, OnboardingUpdateScope.ALL);
 			}
 			case GOAL -> {
-				requireGoal(req.dailyMissionGoal());
-				validateGoalRange(req.dailyMissionGoal());
+				requireGoal(req.dailyMissionGoal());      // GOAL scope에서는 null 불가
+				validateGoalRange(req.dailyMissionGoal()); // 0~5 범위 검증
 				member.updateDailyGoal(req.dailyMissionGoal());
 				yield getMyOnboarding(memberId, OnboardingUpdateScope.ALL);
 			}
-			default -> throw new MemberException(MemberErrorCode.INVALID_SCOPE);
 		};
 	}
 
 	/**
 	 * 온보딩 조회 API
+	 * - scope에 따라 필요한 데이터만 내려줄 수 있도록 분기
+	 * - OnboardingResponseDto는 NON_NULL 설정이므로 null 필드는 응답에서 빠진다.
 	 */
 	@Transactional(readOnly = true)
 	public OnboardingResponseDto getMyOnboarding(Long memberId, OnboardingUpdateScope scope) {
@@ -72,9 +82,12 @@ public class OnboardingService {
 			case ALL -> OnboardingResponseDto.of(loadSelections(memberId), member.getDailyGoal());
 			case INTERESTS -> OnboardingResponseDto.of(loadSelections(memberId), null);
 			case GOAL -> OnboardingResponseDto.of(null, member.getDailyGoal());
-			default -> throw new MemberException(MemberErrorCode.INVALID_SCOPE);
 		};
 	}
+
+	// ---------------------------
+	// Validation (scope별 필수값 체크)
+	// ---------------------------
 
 	private void requireSelections(List<OnboardingPatchRequestDto.Selection> selections) {
 		if (selections == null || selections.isEmpty()) {
@@ -94,16 +107,27 @@ public class OnboardingService {
 		}
 	}
 
+	/**
+	 * ALL scope에서는 goal이 null일 수 있으므로, 값이 있을 때만 범위 검증
+	 */
 	private void validateGoalRangeIfPresent(Integer goal) {
 		if (goal != null) validateGoalRange(goal);
 	}
 
 	/**
-	 * Replace(최종 리스트 전송) + Smart Sync(차이만 반영)
+	 * 관심사 반영 로직 (핵심)
+	 *
+	 * 프론트 계약: "최종 상태"를 통째로 보낸다 (Replace)
+	 * 서버 역할: DB의 기존 상태와 비교해서 "차이만" 삭제/추가해 DB를 최종 상태로 맞춘다 (Smart Sync)
+	 *
+	 * 예시:
+	 * - 기존 DB: [10, 11, 25]
+	 * - 요청 값: [10, 30]
+	 * => 삭제: [11, 25], 추가: [30]
 	 */
 	private void updateMemberInterestsSmartSync(Member member, List<OnboardingPatchRequestDto.Selection> selections) {
 
-		// 1) 요청 subInterestId 집계(중복 제거)
+		// 1) 요청된 subInterestId 전체를 집계(Set으로 중복 제거)
 		Set<Long> requestedSubIds = selections.stream()
 			.flatMap(s -> Optional.ofNullable(s.subInterestIds()).orElseGet(List::of).stream())
 			.filter(Objects::nonNull)
@@ -113,14 +137,18 @@ public class OnboardingService {
 			throw new InterestException(InterestErrorCode.ONBOARDING_SELECTION_REQUIRED);
 		}
 
-		// 2) 존재 검증 + (subId -> interestId) 매핑 확보
+		// 2) DB에서 (interestId, subId)만 조회하여
+		//    - 존재 검증(pairs.size 비교)
+		//    - 소속 검증(요청 interestId vs DB interestId)
 		List<SubInterestRepository.InterestSubPair> pairs =
 			subInterestRepository.findInterestSubPairsBySubIds(requestedSubIds);
 
+		// 요청한 subIds 중 DB에 없는 값이 있으면 조회 개수가 줄어든다
 		if (pairs.size() != requestedSubIds.size()) {
 			throw new InterestException(InterestErrorCode.SUB_INTEREST_NOT_FOUND);
 		}
 
+		// subId -> interestId 매핑 구성(검증 시 Map lookup으로 처리)
 		Map<Long, Long> subIdToInterestId = pairs.stream()
 			.collect(Collectors.toMap(
 				SubInterestRepository.InterestSubPair::getSubInterestId,
@@ -128,6 +156,9 @@ public class OnboardingService {
 			));
 
 		// 3) 요청 구조 검증 + 소속 검증
+		//    - selection에 interestId가 있어야 함
+		//    - subInterestIds가 비어 있으면 안 됨
+		//    - 각 subId가 실제로 해당 interestId 소속인지 확인
 		for (OnboardingPatchRequestDto.Selection sel : selections) {
 			if (sel.interestId() == null || sel.subInterestIds() == null || sel.subInterestIds().isEmpty()) {
 				throw new InterestException(InterestErrorCode.ONBOARDING_SELECTION_REQUIRED);
@@ -140,16 +171,17 @@ public class OnboardingService {
 			}
 		}
 
-		// 4) Smart Sync 계산
+		// 4) Smart Sync 계산: 기존 vs 요청 비교
+		// existing = DB 상태, requested = 요청 최종 상태
 		Set<Long> existingSubIds = new HashSet<>(
 			memberSubInterestRepository.findSubInterestIdsByMemberId(member.getId())
 		);
 
-		//삭제 대상
+		// 삭제 대상 = existing - requested
 		Set<Long> toDelete = new HashSet<>(existingSubIds);
 		toDelete.removeAll(requestedSubIds);
 
-		//추가 대상
+		// 추가 대상 = requested - existing
 		Set<Long> toAdd = new HashSet<>(requestedSubIds);
 		toAdd.removeAll(existingSubIds);
 
@@ -159,6 +191,8 @@ public class OnboardingService {
 		}
 
 		if (!toAdd.isEmpty()) {
+			// getReferenceById: 엔티티 전체를 즉시 조회하지 않고 FK 참조 프록시로 매핑 생성
+			// (이미 존재 검증을 완료했기 때문에 안전하게 사용 가능)
 			List<MemberSubInterest> mappings = toAdd.stream()
 				.map(subId -> MemberSubInterest.of(member, subInterestRepository.getReferenceById(subId)))
 				.toList();
@@ -168,6 +202,8 @@ public class OnboardingService {
 
 	/**
 	 * 응답 selections 만들기
+	 * - (interestId, subId) pair로 가져온 뒤 interestId 기준으로 그룹핑하여
+	 *   selections: [{interestId, [subIds...]}, ...] 형태로 구성
 	 */
 	private List<OnboardingResponseDto.Selection> loadSelections(Long memberId) {
 		List<MemberSubInterestRepository.InterestSubPair> pairs =
