@@ -49,8 +49,8 @@ public class OnboardingService {
 				requireSelections(req.selections());              // 관심사 최소 1개 이상 필수
 				validateGoalRangeIfPresent(req.dailyMissionGoal()); // goal은 null 허용, 값이 있으면 범위만 검증
 
-				updateMemberInterestsSmartSync(member, req.selections()); // 관심사 Smart Sync 반영
 				member.updateDailyGoal(req.dailyMissionGoal());           // goal 저장(null 가능)
+				updateMemberInterestsSmartSync(member, req.selections()); // 관심사 Smart Sync 반영
 
 				yield getMyOnboarding(memberId, OnboardingUpdateScope.ALL);
 			}
@@ -133,7 +133,7 @@ public class OnboardingService {
 			.filter(Objects::nonNull)
 			.collect(Collectors.toSet());
 
-		if (requestedSubIds.isEmpty()) {
+		if (selections.stream().anyMatch(Objects::isNull)) {
 			throw new InterestException(InterestErrorCode.ONBOARDING_SELECTION_REQUIRED);
 		}
 
