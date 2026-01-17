@@ -14,7 +14,6 @@ import java.util.List;
 @Entity
 @Builder
 @Setter
-@Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -51,10 +50,12 @@ public class Inquiry extends BaseEntity {
 
     // 질문 이미지
     @OneToMany(mappedBy = "inquiry", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<InquiryImage> inquiryImages = new ArrayList<>();
 
     // ⭐ 답변 이미지
     @OneToMany(mappedBy = "inquiry", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<AnswerImage> answerImages = new ArrayList<>();
 
     // ⭐ 문의 카테고리
