@@ -1,8 +1,15 @@
 package com.example.moamoa_backend.inquiry.repository;
 
+import com.example.moamoa_backend.inquiry.converter.InquiryDetailConverter;
+import com.example.moamoa_backend.inquiry.dto.InquiryDetailResDto;
 import com.example.moamoa_backend.inquiry.dto.InquiryQueryReqDto;
 import com.example.moamoa_backend.inquiry.dto.InquiryQueryResDto;
+import com.example.moamoa_backend.inquiry.entity.Inquiry;
+import com.example.moamoa_backend.inquiry.entity.QAnswerImage;
 import com.example.moamoa_backend.inquiry.entity.QInquiry;
+import com.example.moamoa_backend.inquiry.entity.QInquiryImage;
+import com.example.moamoa_backend.inquiry.exception.InquiryException;
+import com.example.moamoa_backend.inquiry.exception.code.InquiryErrorCode;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.querydsl.core.types.Projections;
@@ -88,5 +95,44 @@ public class InquiryRepositoryImpl implements InquiryRepositoryCustom{
         } catch (DateTimeParseException e) {
             return null; // 파싱 실패면 커서 무시
         }
+    }
+
+    @Override
+    public InquiryDetailResDto.MyInquiryDetail findMyInquiryDetail(Long memberId, Long inquiryId) {
+        QInquiry inquiry = QInquiry.inquiry;
+        QInquiryImage inquiryImage = QInquiryImage.inquiryImage;
+        QAnswerImage answerImage = QAnswerImage.answerImage;
+
+        // 1) 문의 본문 (내 문의인지까지 검증)
+        Inquiry found = queryFactory
+                .selectFrom(inquiry)
+                .where(
+                        inquiry.id.eq(inquiryId),
+                        inquiry.member.id.eq(memberId)
+                )
+                .fetchOne();
+
+        if (found == null) {
+            // "내 문의가 아니거나 존재하지 않음"
+            throw new InquiryException(InquiryErrorCode.INQUIRY_NOT_FOUND);
+        }
+
+        // 2) 문의 이미지 URL 리스트
+        List<String> inquiryImageUrls = queryFactory
+                .select(inquiryImage.imageUrl) // 컬럼명에 맞게 바꿔줘 (ex. url, imageUrl)
+                .from(inquiryImage)
+                .where(inquiryImage.inquiry.id.eq(inquiryId))
+                .orderBy(inquiryImage.id.asc())
+                .fetch();
+
+        // 3) 답변 이미지 URL 리스트
+        List<String> answerImageUrls = queryFactory
+                .select(answerImage.imageUrl) // 컬럼명에 맞게 바꿔줘
+                .from(answerImage)
+                .where(answerImage.inquiry.id.eq(inquiryId))
+                .orderBy(answerImage.id.asc())
+                .fetch();
+
+        return InquiryDetailConverter.toMyInquiryDetail(found, inquiryImageUrls, answerImageUrls);
     }
 }

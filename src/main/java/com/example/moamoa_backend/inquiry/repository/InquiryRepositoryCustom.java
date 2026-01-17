@@ -1,5 +1,6 @@
 package com.example.moamoa_backend.inquiry.repository;
 
+import com.example.moamoa_backend.inquiry.dto.InquiryDetailResDto;
 import com.example.moamoa_backend.inquiry.dto.InquiryQueryReqDto;
 import com.example.moamoa_backend.inquiry.dto.InquiryQueryResDto;
 
@@ -10,4 +11,5 @@ public interface InquiryRepositoryCustom {
             Long memberId,
             InquiryQueryReqDto.MyInquiryList cond
     );
+    InquiryDetailResDto.MyInquiryDetail findMyInquiryDetail(Long memberId, Long inquiryId);
 }

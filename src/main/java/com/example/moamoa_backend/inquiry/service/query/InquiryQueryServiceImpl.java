@@ -1,9 +1,11 @@
 package com.example.moamoa_backend.inquiry.service.query;
 
 import com.example.moamoa_backend.inquiry.converter.InquiryQueryConverter;
+import com.example.moamoa_backend.inquiry.dto.InquiryDetailResDto;
 import com.example.moamoa_backend.inquiry.dto.InquiryQueryReqDto;
 import com.example.moamoa_backend.inquiry.dto.InquiryQueryResDto;
 import com.example.moamoa_backend.inquiry.repository.InquiryRepository;
+import com.example.moamoa_backend.inquiry.repository.InquiryRepositoryCustom;
 import com.example.moamoa_backend.member.exception.MemberException;
 import com.example.moamoa_backend.member.exception.code.MemberErrorCode;
 import com.example.moamoa_backend.member.repository.MemberRepository;
@@ -54,5 +56,16 @@ public class InquiryQueryServiceImpl implements com.example.moamoa_backend.inqui
         String trimmed = content.trim();
         if (trimmed.length() <= maxLen) return trimmed;
         return trimmed.substring(0, maxLen) + "...";
+    }
+
+    @Override
+    public InquiryDetailResDto.MyInquiryDetail getMyInquiryDetail(Long memberId, Long inquiryId) {
+
+        // ✅ memberId 존재 검증 (원하면 빼도 되지만 지금 정책상 넣는 게 좋음)
+        if (!memberRepository.existsById(memberId)) {
+            throw new MemberException(MemberErrorCode.MEMBER_NOT_FOUND);
+        }
+
+        return inquiryRepository.findMyInquiryDetail(memberId, inquiryId);
     }
 }

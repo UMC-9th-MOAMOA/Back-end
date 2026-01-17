@@ -2,10 +2,7 @@ package com.example.moamoa_backend.inquiry.controller;
 
 import com.example.moamoa_backend.global.apiPayload.code.GeneralSuccessCode;
 import com.example.moamoa_backend.global.apiPayload.response.ApiResponse;
-import com.example.moamoa_backend.inquiry.dto.InquiryRequestDTO;
-import com.example.moamoa_backend.inquiry.dto.InquiryResponseDTO;
-import com.example.moamoa_backend.inquiry.dto.InquiryQueryReqDto;
-import com.example.moamoa_backend.inquiry.dto.InquiryQueryResDto;
+import com.example.moamoa_backend.inquiry.dto.*;
 import com.example.moamoa_backend.inquiry.enums.InquiryCategory;
 import com.example.moamoa_backend.inquiry.service.command.InquiryCommandService;
 import com.example.moamoa_backend.inquiry.service.query.InquiryQueryService;
@@ -69,6 +66,18 @@ public class InquiryController {
 
         InquiryQueryResDto.MyInquiryList result =
                 inquiryQueryService.getMyInquiries(memberId, cond);
+
+        return ApiResponse.onSuccess(GeneralSuccessCode.OK, result);
+    }
+
+    @Operation(summary = "나의 문의 상세 조회", description = "회원이 본인이 작성한 1:1 문의 상세(문의/답변/이미지)를 조회합니다.")
+    @GetMapping("/members/mesupport/inquiries/{inquiryId}")
+    public ApiResponse<InquiryDetailResDto.MyInquiryDetail> getMyInquiryDetail(
+            @RequestParam Long memberId,
+            @PathVariable Long inquiryId
+    ) {
+        InquiryDetailResDto.MyInquiryDetail result =
+                inquiryQueryService.getMyInquiryDetail(memberId, inquiryId);
 
         return ApiResponse.onSuccess(GeneralSuccessCode.OK, result);
     }
