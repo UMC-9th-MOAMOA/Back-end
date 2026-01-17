@@ -1,11 +1,14 @@
 package com.example.moamoa_backend.inquiry.controller;
 
-
 import com.example.moamoa_backend.global.apiPayload.code.GeneralSuccessCode;
 import com.example.moamoa_backend.global.apiPayload.response.ApiResponse;
 import com.example.moamoa_backend.inquiry.dto.InquiryRequestDTO;
 import com.example.moamoa_backend.inquiry.dto.InquiryResponseDTO;
+import com.example.moamoa_backend.inquiry.dto.InquiryQueryReqDto;
+import com.example.moamoa_backend.inquiry.dto.InquiryQueryResDto;
+import com.example.moamoa_backend.inquiry.enums.InquiryCategory;
 import com.example.moamoa_backend.inquiry.service.command.InquiryCommandService;
+import com.example.moamoa_backend.inquiry.service.query.InquiryQueryService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 public class InquiryController {
 
     private final InquiryCommandService inquiryCommandService;
+    private final InquiryQueryService inquiryQueryService;
 
     /**
      * 1:1 문의 신청
@@ -35,5 +39,37 @@ public class InquiryController {
                 inquiryCommandService.create(memberId, request);
 
         return ApiResponse.onSuccess(GeneralSuccessCode.CREATED, result);
+    }
+
+    /**
+     * 나의 문의 목록 조회 (QueryDSL + 커서 페이징)
+     */
+    @Operation(
+            summary = "나의 문의 목록 조회",
+            description = "기간(1/3/6/12개월), 카테고리, 답변상태 조건으로 나의 문의 목록을 조회합니다. (무한스크롤 커서 페이징)"
+    )
+    @GetMapping("/members/mesupport/inquiries")
+    public ApiResponse<InquiryQueryResDto.MyInquiryList> getMyInquiries(
+            @RequestParam Long memberId,
+            @RequestParam InquiryQueryReqDto.Period period,                         // P1M, P3M, P6M, P1Y
+            @RequestParam(defaultValue = "ALL") InquiryQueryReqDto.AnswerStatus answerStatus, // ALL, COMPLETED, PENDING
+            @RequestParam(required = false) InquiryCategory category,
+            @RequestParam(required = false) Integer size,
+            @RequestParam(required = false) String cursorCreatedAt, // ISO-8601: 2026-01-17T12:34:56
+            @RequestParam(required = false) Long cursorId
+    ) {
+        InquiryQueryReqDto.MyInquiryList cond = new InquiryQueryReqDto.MyInquiryList(
+                period,
+                category,
+                answerStatus,
+                size,
+                cursorCreatedAt,
+                cursorId
+        );
+
+        InquiryQueryResDto.MyInquiryList result =
+                inquiryQueryService.getMyInquiries(memberId, cond);
+
+        return ApiResponse.onSuccess(GeneralSuccessCode.OK, result);
     }
 }
