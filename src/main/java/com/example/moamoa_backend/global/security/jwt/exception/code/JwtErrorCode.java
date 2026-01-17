@@ -31,7 +31,11 @@ public enum JwtErrorCode implements BaseErrorCode {
 
     TOKEN_INVALID_TYPE(HttpStatus.UNAUTHORIZED,
             "JWT400_6",
-            "토큰 타입이 올바르지 않습니다.");
+            "토큰 타입이 올바르지 않습니다."),
+
+    SECRET_KEY_INVALID(HttpStatus.INTERNAL_SERVER_ERROR,
+            "JWT500_1",
+                    "JWT 시크릿 키는 최소 32바이트(256비트) 이상이어야 합니다.");
 
     private final HttpStatus status;
     private final String code;

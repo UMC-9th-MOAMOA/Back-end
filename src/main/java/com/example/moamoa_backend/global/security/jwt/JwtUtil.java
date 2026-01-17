@@ -42,8 +42,14 @@ public class JwtUtil {
             @Value("${jwt.access-token-validity}") long accessTokenValidity,
             @Value("${jwt.refresh-token-validity}") long refreshTokenValidity
     ) {
+        // 비밀키 최소길이 검증
+        byte[] keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
+        if (keyBytes.length < 32) {
+            log.error("JWT Secret Key length error: required >= 32 bytes, actual = {}", keyBytes.length);
+            throw new JwtException(JwtErrorCode.SECRET_KEY_INVALID);
+        }
         // 비밀키를 HMAC-SHA 알고리즘에 맞게 변환
-        this.secretKey = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+        this.secretKey = Keys.hmacShaKeyFor(keyBytes);
         this.accessTokenValidity = accessTokenValidity;
         this.refreshTokenValidity = refreshTokenValidity;
     }
