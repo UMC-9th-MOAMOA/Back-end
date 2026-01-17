@@ -9,7 +9,8 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 public enum InquiryErrorCode implements BaseErrorCode {
 
-    INQUIRY_NOT_FOUND(HttpStatus.NOT_FOUND,"INQUIRY_404_01", "존재하지 않는 문의입니다.");
+    INQUIRY_NOT_FOUND(HttpStatus.NOT_FOUND,"INQUIRY_404_01", "존재하지 않는 문의입니다."),
+    INQUIRY_ALREADY_ANSWERED(HttpStatus.CONFLICT,"INQUIRY_409_01", "이미 답변이 등록된 문의입니다.");
 
     private final HttpStatus status;
     private final String code;

@@ -81,4 +81,20 @@ public class InquiryController {
 
         return ApiResponse.onSuccess(GeneralSuccessCode.OK, result);
     }
+
+
+    @Operation(
+            summary = "문의 답변 등록",
+            description = "고객센터(관리자/담당자)가 문의에 답변을 등록하고 답변 이미지를 함께 저장합니다."
+    )
+    @PostMapping("/admin/support/inquiries/{inquiryId}/answer")
+    public ApiResponse<InquiryAnswerResponseDto.CreateResult> answerInquiry(
+            @PathVariable Long inquiryId,
+            @Valid @RequestBody InquiryAnswerRequestDto.CreateAnswer request
+    ) {
+        InquiryAnswerResponseDto.CreateResult result =
+                inquiryCommandService.answer(inquiryId, request);
+
+        return ApiResponse.onSuccess(GeneralSuccessCode.CREATED, result);
+    }
 }
