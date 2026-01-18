@@ -80,4 +80,21 @@ public class AuthReqDto {
             @NotNull
             Boolean agreed
     ) {}
+
+    // 로그인 요청
+    public record LoginDto(
+            @NotBlank(message = "이메일은 필수 입력 값입니다.")
+            @Email(message = "이메일 형식이 올바르지 않습니다.")
+            String email,
+
+            @NotBlank(message = "비밀번호는 필수 입력 값입니다.")
+            String password
+    ){}
+
+    // 토큰 재발급 요청
+    public record ReissueDto(
+            @NotBlank(message = "Refresh Token은 필수 입력 값입니다.")
+            String refreshToken
+    ){}
+
 }
