@@ -64,7 +64,7 @@ public class InquiryCommandServiceImpl implements InquiryCommandService{
 
         List<String> urls = request.answerImageUrls();
         if (urls != null && !urls.isEmpty()) {
-            int sortOrder = 0;
+            int sortOrder = 1;
             for (String url : urls) {
                 AnswerImage img = AnswerImage.builder()
                         .imageUrl(url)

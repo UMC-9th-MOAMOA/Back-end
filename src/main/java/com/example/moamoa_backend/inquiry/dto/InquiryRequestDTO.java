@@ -12,6 +12,6 @@ public class InquiryRequestDTO {
             @NotNull InquiryCategory category,
             @NotBlank @Size(max = 20) String title,
             @NotBlank @Size(max = 2000) String content,
-            @Size(max = 5) List<@Size(max = 1000) String> imageUrls
+            @Size(max = 5) List<@NotBlank @Size(max = 1000) String> imageUrls
     ) {}
 }

@@ -119,7 +119,7 @@ public class InquiryRepositoryImpl implements InquiryRepositoryCustom{
 
         // 2) 문의 이미지 URL 리스트
         List<String> inquiryImageUrls = queryFactory
-                .select(inquiryImage.imageUrl) // 컬럼명에 맞게 바꿔줘 (ex. url, imageUrl)
+                .select(inquiryImage.imageUrl)
                 .from(inquiryImage)
                 .where(inquiryImage.inquiry.id.eq(inquiryId))
                 .orderBy(inquiryImage.id.asc())
@@ -127,7 +127,7 @@ public class InquiryRepositoryImpl implements InquiryRepositoryCustom{
 
         // 3) 답변 이미지 URL 리스트
         List<String> answerImageUrls = queryFactory
-                .select(answerImage.imageUrl) // 컬럼명에 맞게 바꿔줘
+                .select(answerImage.imageUrl)
                 .from(answerImage)
                 .where(answerImage.inquiry.id.eq(inquiryId))
                 .orderBy(answerImage.id.asc())

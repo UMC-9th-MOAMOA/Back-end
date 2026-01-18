@@ -9,6 +9,7 @@ import com.example.moamoa_backend.inquiry.service.query.InquiryQueryService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -87,6 +88,7 @@ public class InquiryController {
             summary = "문의 답변 등록",
             description = "고객센터(관리자/담당자)가 문의에 답변을 등록하고 답변 이미지를 함께 저장합니다."
     )
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/admin/support/inquiries/{inquiryId}/answer")
     public ApiResponse<InquiryAnswerResponseDto.CreateResult> answerInquiry(
             @PathVariable Long inquiryId,

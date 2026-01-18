@@ -12,11 +12,12 @@ public class InquiryQueryConverter {
             List<InquiryQueryResDto.MyInquiryItem> items,
             boolean hasNext
     ) {
+        boolean safeHasNext = hasNext && !items.isEmpty();
         InquiryQueryResDto.Cursor nextCursor = null;
-        if (hasNext && !items.isEmpty()) {
+        if (safeHasNext) {
             var last = items.get(items.size() - 1);
             nextCursor = new InquiryQueryResDto.Cursor(last.createdAt(), last.inquiryId());
         }
-        return new InquiryQueryResDto.MyInquiryList(items, hasNext, nextCursor);
+        return new InquiryQueryResDto.MyInquiryList(items, safeHasNext, nextCursor);
     }
 }
