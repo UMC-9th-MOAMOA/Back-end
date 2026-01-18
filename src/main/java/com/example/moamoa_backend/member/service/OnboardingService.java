@@ -52,18 +52,19 @@ public class OnboardingService {
 				member.updateDailyGoal(req.dailyMissionGoal());           // goal 저장(null 가능)
 				updateMemberInterestsSmartSync(member, req.selections()); // 관심사 Smart Sync 반영
 
-				yield getMyOnboarding(memberId, OnboardingUpdateScope.ALL);
+				// 최신 ALL 상태로 응답 (member 재조회 없이)
+				yield OnboardingResponseDto.of(loadSelections(memberId), member.getDailyGoal());
 			}
 			case INTERESTS -> {
 				requireSelections(req.selections());
 				updateMemberInterestsSmartSync(member, req.selections());
-				yield getMyOnboarding(memberId, OnboardingUpdateScope.ALL);
+				yield OnboardingResponseDto.of(loadSelections(memberId), member.getDailyGoal());
 			}
 			case GOAL -> {
 				requireGoal(req.dailyMissionGoal());      // GOAL scope에서는 null 불가
 				validateGoalRange(req.dailyMissionGoal()); // 0~5 범위 검증
 				member.updateDailyGoal(req.dailyMissionGoal());
-				yield getMyOnboarding(memberId, OnboardingUpdateScope.ALL);
+				yield OnboardingResponseDto.of(loadSelections(memberId), member.getDailyGoal());
 			}
 		};
 	}
@@ -127,17 +128,32 @@ public class OnboardingService {
 	 */
 	private void updateMemberInterestsSmartSync(Member member, List<OnboardingPatchRequestDto.Selection> selections) {
 
-		// 1) 요청된 subInterestId 전체를 집계(Set으로 중복 제거)
-		Set<Long> requestedSubIds = selections.stream()
-			.flatMap(s -> Optional.ofNullable(s.subInterestIds()).orElseGet(List::of).stream())
-			.filter(Objects::nonNull)
-			.collect(Collectors.toSet());
 
-		if (selections.stream().anyMatch(Objects::isNull)) {
+		// 0) NPE 방지 + 기본 형태 검증 (stream 전에 null 요소 검증)
+		if (selections == null || selections.isEmpty() || selections.stream().anyMatch(Objects::isNull)) {
 			throw new InterestException(InterestErrorCode.ONBOARDING_SELECTION_REQUIRED);
 		}
 
-		// 2) DB에서 (interestId, subId)만 조회하여
+		// 1) selection 구조 검증 + null subId 방지
+		for (OnboardingPatchRequestDto.Selection sel : selections) {
+			if (sel.interestId() == null || sel.subInterestIds() == null || sel.subInterestIds().isEmpty()) {
+				throw new InterestException(InterestErrorCode.ONBOARDING_SELECTION_REQUIRED);
+			}
+			if (sel.subInterestIds().stream().anyMatch(Objects::isNull)) {
+				throw new InterestException(InterestErrorCode.ONBOARDING_SELECTION_REQUIRED);
+			}
+		}
+
+		// 2) 요청된 subInterestId 전체 집계(Set으로 중복 제거)
+		Set<Long> requestedSubIds = selections.stream()
+			.flatMap(sel -> sel.subInterestIds().stream())
+			.collect(Collectors.toSet());
+
+		if (requestedSubIds.isEmpty()) {
+			throw new InterestException(InterestErrorCode.ONBOARDING_SELECTION_REQUIRED);
+		}
+
+		// 3) DB에서 (interestId, subId)만 조회하여
 		//    - 존재 검증(pairs.size 비교)
 		//    - 소속 검증(요청 interestId vs DB interestId)
 		List<SubInterestRepository.InterestSubPair> pairs =
@@ -155,14 +171,8 @@ public class OnboardingService {
 				SubInterestRepository.InterestSubPair::getInterestId
 			));
 
-		// 3) 요청 구조 검증 + 소속 검증
-		//    - selection에 interestId가 있어야 함
-		//    - subInterestIds가 비어 있으면 안 됨
-		//    - 각 subId가 실제로 해당 interestId 소속인지 확인
+		// 4) 소속 검증: 각 subId가 실제로 해당 interestId 소속인지 확인
 		for (OnboardingPatchRequestDto.Selection sel : selections) {
-			if (sel.interestId() == null || sel.subInterestIds() == null || sel.subInterestIds().isEmpty()) {
-				throw new InterestException(InterestErrorCode.ONBOARDING_SELECTION_REQUIRED);
-			}
 			for (Long subId : sel.subInterestIds()) {
 				Long actualInterestId = subIdToInterestId.get(subId);
 				if (!Objects.equals(sel.interestId(), actualInterestId)) {
@@ -171,7 +181,7 @@ public class OnboardingService {
 			}
 		}
 
-		// 4) Smart Sync 계산: 기존 vs 요청 비교
+		// 5) Smart Sync 계산: 기존 vs 요청 비교
 		// existing = DB 상태, requested = 요청 최종 상태
 		Set<Long> existingSubIds = new HashSet<>(
 			memberSubInterestRepository.findSubInterestIdsByMemberId(member.getId())
@@ -185,14 +195,13 @@ public class OnboardingService {
 		Set<Long> toAdd = new HashSet<>(requestedSubIds);
 		toAdd.removeAll(existingSubIds);
 
-		// 5) DB 반영(차이만)
+		// 6) DB 반영(차이만)
 		if (!toDelete.isEmpty()) {
 			memberSubInterestRepository.deleteByMemberIdAndSubInterestIdIn(member.getId(), toDelete);
 		}
 
 		if (!toAdd.isEmpty()) {
-			// getReferenceById: 엔티티 전체를 즉시 조회하지 않고 FK 참조 프록시로 매핑 생성
-			// (이미 존재 검증을 완료했기 때문에 안전하게 사용 가능)
+			// 이미 존재 검증 완료(pairs.size 비교) 했으므로 getReferenceById 사용 가능
 			List<MemberSubInterest> mappings = toAdd.stream()
 				.map(subId -> MemberSubInterest.of(member, subInterestRepository.getReferenceById(subId)))
 				.toList();

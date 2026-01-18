@@ -1,5 +1,7 @@
 package com.example.moamoa_backend.member.controller;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,9 +41,11 @@ public class OnboardingController {
 	)
 	@GetMapping("/onboarding")
 	public ApiResponse<OnboardingResponseDto> getOnboarding(
-		@RequestHeader("X-MEMBER-ID") Long memberId, // TODO: 인증 적용 후 @AuthenticationPrincipal로 대체
+		@AuthenticationPrincipal UserDetails userDetails,
 		@RequestParam(defaultValue = "ALL") OnboardingUpdateScope scope
 	) {
+		Long memberId = Long.parseLong(userDetails.getUsername());
+
 		return ApiResponse.onSuccess(
 			MemberSuccessCode.MEMBER_GET_ONBOARDING,
 			onboardingService.getMyOnboarding(memberId, scope)
@@ -62,10 +66,12 @@ public class OnboardingController {
 	)
 	@PatchMapping("/onboarding")
 	public ApiResponse<OnboardingResponseDto> patchOnboarding(
-		@RequestHeader("X-MEMBER-ID") Long memberId, // TODO: 인증 적용 후 @AuthenticationPrincipal로 대체
+		@AuthenticationPrincipal UserDetails userDetails,
 		@RequestParam OnboardingUpdateScope scope,
 		@Valid @RequestBody OnboardingPatchRequestDto request
 	) {
+		Long memberId = Long.parseLong(userDetails.getUsername());
+
 		return ApiResponse.onSuccess(
 			MemberSuccessCode.MEMBER_UPDATE_ONBOARDING,
 			onboardingService.patchOnboarding(memberId, scope, request)
