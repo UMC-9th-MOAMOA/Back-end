@@ -404,8 +404,8 @@ public class AuthService {
         String refreshToken = jwtUtil.createRefreshToken(memberId);
 
         // Redis 저장 (Key: "RT:{id}", Value: token, Duration: 14일)
-        // 요청하신 인자 순서: key, value, 만료시간(ms)
-        redisUtil.setDataExpire("RT:" + memberId, refreshToken, jwtUtil.getRefreshTokenValidity());
+        // 인자 순서: key, value, 만료시간(ms)
+        redisUtil.setDataExpire("RT:" + memberId, refreshToken, jwtUtil.getRefreshTokenValidity()/1000);
 
         return AuthResDto.TokenDto.builder()
                 .grantType("Bearer")
