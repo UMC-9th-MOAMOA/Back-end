@@ -42,6 +42,11 @@ spring:
       host: ${REDIS_HOST:localhost}
       port: 6379
 
+jwt:
+  secret-key: ${JWT_SECRET_KEY}
+  access-token-validity: 3600000
+  refresh-token-validity: 1209600000
+
 management:
   endpoints:
     web:

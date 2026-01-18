@@ -33,16 +33,8 @@ public enum AuthErrorCode implements BaseErrorCode {
             "AUTH400_6",
             "이메일 재전송은 30초 뒤에 가능합니다."),
 
-    TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED,
-            "AUTH401_1",
-            "인증 토큰이 만료되었습니다."),
-
-    TOKEN_INVALID(HttpStatus.UNAUTHORIZED,
-            "AUTH401_2",
-            "유효하지 않은 토큰입니다."),
-
     LOGIN_FAILED(HttpStatus.UNAUTHORIZED,
-            "AUTH401_3",
+            "AUTH401_1",
             "이메일 또는 비밀번호가 일치하지 않습니다."),
 
     ACCESS_DENIED(HttpStatus.FORBIDDEN,
