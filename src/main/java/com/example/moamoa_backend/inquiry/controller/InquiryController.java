@@ -8,6 +8,7 @@ import com.example.moamoa_backend.inquiry.service.command.InquiryCommandService;
 import com.example.moamoa_backend.inquiry.service.query.InquiryQueryService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -48,8 +49,8 @@ public class InquiryController {
     )
     @GetMapping("/members/mesupport/inquiries")
     public ApiResponse<InquiryQueryResDto.MyInquiryList> getMyInquiries(
-            @RequestParam Long memberId,
-            @RequestParam InquiryQueryReqDto.Period period,                         // P1M, P3M, P6M, P1Y
+            @RequestParam @NotNull Long memberId,
+            @RequestParam @NotNull InquiryQueryReqDto.Period period,                         // P1M, P3M, P6M, P1Y
             @RequestParam(defaultValue = "ALL") InquiryQueryReqDto.AnswerStatus answerStatus, // ALL, COMPLETED, PENDING
             @RequestParam(required = false) InquiryCategory category,
             @RequestParam(required = false) Integer size,
