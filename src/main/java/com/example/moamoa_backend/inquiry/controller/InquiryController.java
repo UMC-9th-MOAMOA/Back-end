@@ -11,8 +11,10 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+@Validated
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1")
@@ -31,7 +33,7 @@ public class InquiryController {
     )
     @PostMapping("/support/inquiries")
     public ApiResponse<InquiryResponseDTO.CreateResult> createInquiry(
-            @RequestParam Long memberId,
+            @RequestParam @NotNull Long memberId,
             @Valid @RequestBody InquiryRequestDTO.Create request
     ) {
         InquiryResponseDTO.CreateResult result =
@@ -75,8 +77,8 @@ public class InquiryController {
     @Operation(summary = "나의 문의 상세 조회", description = "회원이 본인이 작성한 1:1 문의 상세(문의/답변/이미지)를 조회합니다.")
     @GetMapping("/members/me/support/inquiries/{inquiryId}")
     public ApiResponse<InquiryDetailResDto.MyInquiryDetail> getMyInquiryDetail(
-            @RequestParam Long memberId,
-            @PathVariable Long inquiryId
+            @RequestParam @NotNull Long memberId,
+            @PathVariable @NotNull Long inquiryId
     ) {
         InquiryDetailResDto.MyInquiryDetail result =
                 inquiryQueryService.getMyInquiryDetail(memberId, inquiryId);
