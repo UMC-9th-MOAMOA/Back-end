@@ -5,7 +5,9 @@ import com.example.moamoa_backend.global.apiPayload.code.GeneralErrorCode;
 import com.example.moamoa_backend.global.apiPayload.exception.GeneralException;
 import com.example.moamoa_backend.global.apiPayload.response.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -35,6 +37,22 @@ public class GeneralExceptionAdvice {
         return ResponseEntity
                 .status(errorCode.getStatus())
                 .body(ApiResponse.onFailure(errorCode, null));
+    }
+
+    //Valid 검증 실패 시 발생하는 예외 처리
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        String errorMessage = e.getBindingResult().getAllErrors().get(0).getDefaultMessage();
+
+        ApiResponse<Void> apiResponse = new ApiResponse<>(
+                false,
+                GeneralErrorCode.VALIDATION_ERROR.getCode(),
+                errorMessage,
+                null
+        );
+        return ResponseEntity
+                .status(GeneralErrorCode.VALIDATION_ERROR.getStatus())
+                .body(apiResponse);
     }
 }
 

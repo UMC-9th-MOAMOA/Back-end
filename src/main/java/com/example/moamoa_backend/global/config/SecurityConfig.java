@@ -31,7 +31,8 @@ public class SecurityConfig {
             "/api/v1/auth/login",
             "/api/v1/auth/email/send-verification",
             "/api/v1/auth/email/verify",
-            "/actuator/health/**"
+            "/actuator/health/**",
+            "/api/v1/missions/admin"
     };
 
     @Bean

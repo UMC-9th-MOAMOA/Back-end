@@ -1,0 +1,36 @@
+package com.example.moamoa_backend.mission.controller;
+
+
+import com.example.moamoa_backend.global.apiPayload.code.GeneralSuccessCode;
+import com.example.moamoa_backend.global.apiPayload.response.ApiResponse;
+import com.example.moamoa_backend.mission.dto.request.MissionRequestDto;
+import com.example.moamoa_backend.mission.dto.response.MissionResponseDto;
+import com.example.moamoa_backend.mission.service.command.MissionCommandService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api/v1/missions")
+@Tag(name="Mission API", description = "미션 관련 API")
+public class MissionController {
+    private final MissionCommandService missionCommandService;
+
+    @PostMapping("/admin")
+    @Operation(summary = "미션 등록 API(관리자용)", description = "영상 정보와 퀴즈를 입력하면 도토리와 소요시간이 자동 계산되어 등록됩니다.")
+    public ApiResponse<MissionResponseDto.CreateResult> createMission(
+            @RequestBody @Valid MissionRequestDto.Create request
+            ){
+        MissionResponseDto.CreateResult result = missionCommandService.createMission(request);
+
+        return ApiResponse.onSuccess(GeneralSuccessCode.CREATED,result);
+    }
+}
+
+

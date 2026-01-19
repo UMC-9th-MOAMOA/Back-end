@@ -1,7 +1,8 @@
-package com.example.moamoa_backend.member.entity;
+package com.example.moamoa_backend.member.entity.mapping;
 
 import com.example.moamoa_backend.global.entity.BaseEntity;
 import com.example.moamoa_backend.interest.entity.SubInterest;
+import com.example.moamoa_backend.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
