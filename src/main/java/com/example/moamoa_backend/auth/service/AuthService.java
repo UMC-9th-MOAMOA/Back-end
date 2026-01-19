@@ -1,11 +1,17 @@
 package com.example.moamoa_backend.auth.service;
 
 import com.example.moamoa_backend.auth.dto.req.AuthReqDto;
+import com.example.moamoa_backend.auth.dto.req.AuthResDto;
 import com.example.moamoa_backend.auth.exception.AuthException;
 import com.example.moamoa_backend.auth.exception.code.AuthErrorCode;
+import com.example.moamoa_backend.global.apiPayload.response.ApiResponse;
+import com.example.moamoa_backend.global.security.jwt.JwtUtil;
+import com.example.moamoa_backend.global.security.jwt.exception.JwtException;
+import com.example.moamoa_backend.global.security.jwt.exception.code.JwtErrorCode;
 import com.example.moamoa_backend.global.util.RedisUtil;
 import com.example.moamoa_backend.member.entity.Member;
 import com.example.moamoa_backend.member.enums.Provider;
+import com.example.moamoa_backend.member.enums.Role;
 import com.example.moamoa_backend.member.exception.MemberException;
 import com.example.moamoa_backend.member.exception.code.MemberErrorCode;
 import com.example.moamoa_backend.member.repository.MemberRepository;
@@ -41,6 +47,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final PolicyRepository policyRepository;
     private final MemberPolicyRepository memberPolicyRepository;
+    private final JwtUtil jwtUtil;
 
     // 이메일과 보안코드 저장 관련 (예)AuthCode:moamoa@gmail.com : 123456
     private static final String AUTH_CODE_PREFIX = "AuthCode:";
@@ -220,6 +227,63 @@ public class AuthService {
         return savedMember.getId();
     }
 
+    /**
+     * 로그인 (Local)
+     */
+    @Transactional
+    public AuthResDto.TokenDto login(AuthReqDto.LoginDto request) {
+        // 1. 이메일로 회원 조회
+        Member member = memberRepository.findByEmailAndProvider(request.email(),Provider.LOCAL)
+                .orElseThrow(() -> new AuthException(AuthErrorCode.LOGIN_FAILED));
+
+        // 2. 비밀번호 검증
+        if (!passwordEncoder.matches(request.password(), member.getPassword())) {
+            throw new AuthException(AuthErrorCode.LOGIN_FAILED);
+        }
+
+        // 3. 토큰 발급 및 Redis 저장
+        return generateTokens(member.getId(), member.getRole());
+    }
+
+    /**
+     * 토큰 재발급 (RTR 적용)
+     */
+    @Transactional
+    public AuthResDto.TokenDto reissue(AuthReqDto.ReissueDto request) {
+        String requestRefreshToken = request.refreshToken();
+
+        // 1. Refresh Token 유효성 검증
+        jwtUtil.validateToken(requestRefreshToken);
+
+        // 2. 토큰 정보 추출
+        Long memberId = jwtUtil.getMemberId(requestRefreshToken);
+        String redisKey = "RT:" + memberId;
+        String storedRefreshToken = redisUtil.getData(redisKey);
+
+        // 3. 탈취 감지 및 유효성 검사
+        // Redis에 토큰이 없거나, 요청 온 토큰과 다르면 탈취로 간주
+        if (storedRefreshToken == null || !storedRefreshToken.equals(requestRefreshToken)) {
+            redisUtil.deleteData(redisKey); // 저장된 토큰 삭제 (로그인 풀림 처리)
+            throw new JwtException(JwtErrorCode.TOKEN_INVALID);
+        }
+
+        // 4. 회원 정보 조회 (Role 등 최신 정보 갱신을 위해)
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new AuthException(AuthErrorCode.LOGIN_FAILED));
+
+        // 5. 새 토큰 발급 (RTR)
+        return generateTokens(member.getId(), member.getRole());
+    }
+
+    /**
+     * 로그아웃
+     */
+    @Transactional
+    public void logout(Long memberId) {
+        // Redis에서 Refresh Token 삭제
+        redisUtil.deleteData("RT:" + memberId);
+    }
+
     // -- Helper Methods --
 
     // 메일 인증코드 생성
@@ -332,6 +396,23 @@ public class AuthService {
 
         // 앞 2글자만 보여주고 나머지는 *** 처리 (예: te***@naver.com)
         return email.substring(0, 2) + "***" + email.substring(atIndex);
+    }
+
+    private AuthResDto.TokenDto generateTokens(Long memberId, Role role) {
+        // Access/Refresh 토큰 생성
+        String accessToken = jwtUtil.createAccessToken(memberId, String.valueOf(role));
+        String refreshToken = jwtUtil.createRefreshToken(memberId);
+
+        // Redis 저장 (Key: "RT:{id}", Value: token, Duration: 14일)
+        // 인자 순서: key, value, 만료시간(ms)
+        redisUtil.setDataExpire("RT:" + memberId, refreshToken, jwtUtil.getRefreshTokenValidity()/1000);
+
+        return AuthResDto.TokenDto.builder()
+                .grantType("Bearer")
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .accessTokenExpiresIn(jwtUtil.getAccessTokenValidity())
+                .build();
     }
 
 }

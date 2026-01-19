@@ -2,6 +2,7 @@ package com.example.moamoa_backend.global.config;
 
 import com.example.moamoa_backend.global.security.jwt.JwtAuthFilter;
 import com.example.moamoa_backend.global.security.jwt.JwtAuthenticationEntryPoint;
+import com.example.moamoa_backend.member.enums.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,13 +27,20 @@ public class SecurityConfig {
     private final JwtAuthFilter jwtAuthFilter;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
+    // 로그인 필요X - 모두 접근 가능
     private final String[] allowUris = {
             "/api/v1/auth/signup",
             "/api/v1/auth/login",
+            "/api/v1/auth/reissue",
             "/api/v1/auth/email/send-verification",
             "/api/v1/auth/email/verify",
             "/actuator/health/**",
             "/api/v1/missions/admin"
+    };
+
+    // 관리자만 접근 가능
+    private final String[] adminUris = {
+
     };
 
     @Bean
@@ -54,13 +62,19 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
                 // URL별 권한 설정
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-resources/**").permitAll() //swagger 관련 경로
-                        .requestMatchers(allowUris).permitAll() //추가로 명시하는 경로
+                .authorizeHttpRequests(auth -> {
+                    // Swagger 및 공용 경로
+                    auth.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-resources/**").permitAll();
+                    auth.requestMatchers(allowUris).permitAll();
 
-                        // 그 외 모든 요청은 인증 필요
-                        .anyRequest().authenticated()
-                )
+                    // 관리자 전용 경로
+                    if (adminUris.length > 0) {
+                        auth.requestMatchers(adminUris).hasAuthority(Role.ROLE_ADMIN.name());
+                    }
+
+                    // 나머지 모든 요청
+                    auth.anyRequest().authenticated();
+                })
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
 
                 .exceptionHandling(exception -> exception
