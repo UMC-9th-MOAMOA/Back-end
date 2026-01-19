@@ -47,7 +47,7 @@ public class InquiryCommandServiceImpl implements InquiryCommandService {
         List<String> uploadedUrls = new ArrayList<>();
         if (images != null && !images.isEmpty()) {
             if (images.size() > 5) {
-                throw new IllegalArgumentException("이미지는 최대 5개까지 업로드할 수 있습니다.");
+                throw new InquiryException(InquiryErrorCode.TOO_MANY_IMAGES);
             }
 
             for (MultipartFile file : images) {
@@ -88,6 +88,9 @@ public class InquiryCommandServiceImpl implements InquiryCommandService {
         // 1) 답변 이미지 파일 -> S3 업로드 -> AnswerImage 저장
         List<String> uploadedUrls = new ArrayList<>();
         if (images != null && !images.isEmpty()) {
+             if (images.size() > 5) {
+                 throw new InquiryException(InquiryErrorCode.TOO_MANY_ANSWER_IMAGES);
+             }
             int sortOrder = 1;
 
             for (MultipartFile file : images) {

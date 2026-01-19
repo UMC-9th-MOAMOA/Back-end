@@ -22,17 +22,30 @@ public class S3UploadService {
     @Value("${aws.s3.bucket}")
     private String bucket;
 
+    // 예: https://moamoa-s3-prod-bucket.s3.ap-northeast-2.amazonaws.com/public
     @Value("${aws.s3.public-base-url}")
     private String publicBaseUrl;
 
+    /**
+     * @param dir public 아래 상대 경로 (예: "user/123", "inquiries", "inquiries/answers")
+     *            "public/" prefix는 자동으로 붙임
+     */
     public String upload(MultipartFile file, String dir) throws IOException {
         if (file == null || file.isEmpty()) return null;
 
-        String original = file.getOriginalFilename() == null ? "file" : file.getOriginalFilename();
-        String safeName = URLEncoder.encode(original, StandardCharsets.UTF_8)
-                .replaceAll("\\+", "%20");
+        String original = file.getOriginalFilename();
+        if (original == null || original.isBlank()) original = "file";
 
-        String key = dir + "/" + UUID.randomUUID() + "_" + safeName;
+        // 파일명 안전화
+        String safeName = URLEncoder.encode(original, StandardCharsets.UTF_8)
+                .replace("+", "%20");
+
+        // dir 정규화
+        String normalizedDir = (dir == null || dir.isBlank()) ? "misc" : dir.strip();
+        normalizedDir = normalizedDir.replaceAll("^/+", "").replaceAll("/+$", "");
+
+        // ✅ public prefix 강제 (버킷 정책 public/* 와 일치)
+        String key = "public/" + normalizedDir + "/" + UUID.randomUUID() + "_" + safeName;
 
         PutObjectRequest request = PutObjectRequest.builder()
                 .bucket(bucket)
@@ -40,12 +53,13 @@ public class S3UploadService {
                 .contentType(file.getContentType())
                 .build();
 
-        s3Client.putObject(
-                request,
+        s3Client.putObject(request,
                 RequestBody.fromInputStream(file.getInputStream(), file.getSize())
         );
 
-        // ✅ 여기서 URL 조립
-        return publicBaseUrl + "/" + key;
+        // ✅ baseUrl도 안전하게 (뒤 슬래시 제거)
+        String base = publicBaseUrl.replaceAll("/+$", "");
+
+        return base + "/" + key;
     }
 }
