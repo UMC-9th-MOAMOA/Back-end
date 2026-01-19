@@ -2,6 +2,7 @@ package com.example.moamoa_backend.global.config;
 
 import com.example.moamoa_backend.global.security.jwt.JwtAuthFilter;
 import com.example.moamoa_backend.global.security.jwt.JwtAuthenticationEntryPoint;
+import com.example.moamoa_backend.member.enums.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,6 +27,7 @@ public class SecurityConfig {
     private final JwtAuthFilter jwtAuthFilter;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
+    // 로그인 필요X - 모두 접근 가능
     private final String[] allowUris = {
             "/api/v1/auth/signup",
             "/api/v1/auth/login",
@@ -33,6 +35,11 @@ public class SecurityConfig {
             "/api/v1/auth/email/send-verification",
             "/api/v1/auth/email/verify",
             "/actuator/health/**"
+    };
+
+    // 관리자만 접근 가능
+    private final String[] adminUris = {
+
     };
 
     @Bean
@@ -56,10 +63,11 @@ public class SecurityConfig {
                 // URL별 권한 설정
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-resources/**").permitAll() //swagger 관련 경로
-                        .requestMatchers(allowUris).permitAll() //추가로 명시하는 경로
+                        .requestMatchers(allowUris).permitAll() // 로그인 없이 접근 가능한 경로
 
-                        // 그 외 모든 요청은 인증 필요
-                        .anyRequest().authenticated()
+                        .requestMatchers(adminUris).hasAuthority(Role.ROLE_ADMIN.name()) // 관리자만 접근 가능한 경로
+
+                        .anyRequest().authenticated() // 그 외 모든 요청은 인증 필요
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
 
