@@ -33,4 +33,13 @@ public class Attendance extends BaseEntity {
     @Column(nullable = false)
     private LocalDate attendanceDate;
 
+    private Attendance(Member member, LocalDate attendanceDate) {
+        this.member = member;
+        this.attendanceDate = attendanceDate;
+    }
+
+    public static Attendance create(Member member, LocalDate date) {
+        return new Attendance(member, date);
+    }
+
 }
