@@ -1,6 +1,7 @@
 package com.example.moamoa_backend.auth.controller;
 
 import com.example.moamoa_backend.auth.dto.req.AuthReqDto;
+import com.example.moamoa_backend.auth.dto.req.AuthResDto;
 import com.example.moamoa_backend.auth.exception.code.AuthSuccessCode;
 import com.example.moamoa_backend.auth.service.AuthService;
 import com.example.moamoa_backend.global.apiPayload.response.ApiResponse;
@@ -10,6 +11,8 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -48,5 +51,31 @@ public class AuthController {
     public ApiResponse<Void> signup(@RequestBody @Valid AuthReqDto.SignupDto request) {
         authService.signup(request);
         return ApiResponse.onSuccess(AuthSuccessCode.SIGNUP_SUCCESS, null);
+    }
+
+    @Operation(summary = "일반 로그인 API", description = "이메일과 비밀번호로 로그인하여 Access/Refresh Token을 발급받습니다.")
+    @SecurityRequirements(value = {})
+    @PostMapping("/login")
+    public ApiResponse<AuthResDto.TokenDto> login(@RequestBody @Valid AuthReqDto.LoginDto request) {
+        AuthResDto.TokenDto result = authService.login(request);
+        return ApiResponse.onSuccess(AuthSuccessCode.LOGIN_SUCCESS, result);
+    }
+
+    @Operation(summary = "토큰 재발급 API", description = "Refresh Token을 이용하여 Access Token과 Refresh Token을 재발급(RTR)받습니다.")
+    @SecurityRequirements(value = {})
+    @PostMapping("/reissue")
+    public ApiResponse<AuthResDto.TokenDto> reissue(@RequestBody @Valid AuthReqDto.ReissueDto request) {
+        AuthResDto.TokenDto result = authService.reissue(request);
+        return ApiResponse.onSuccess(AuthSuccessCode.REISSUE_SUCCESS, result);
+    }
+
+    @PostMapping("/logout")
+    @Operation(summary = "로그아웃 API", description = "Redis에서 해당 사용자의 Refresh Token을 삭제합니다. (Header에 Access Token 필요)")
+    public ApiResponse<String> logout(@AuthenticationPrincipal UserDetails userDetails) {
+        // SecurityContext에서 memberId 추출
+        Long memberId = Long.parseLong(userDetails.getUsername());
+
+        authService.logout(memberId);
+        return ApiResponse.onSuccess(AuthSuccessCode.LOGOUT_SUCCESS, null);
     }
 }
