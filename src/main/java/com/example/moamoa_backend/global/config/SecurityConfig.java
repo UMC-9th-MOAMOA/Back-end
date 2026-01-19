@@ -61,14 +61,19 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
                 // URL별 권한 설정
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-resources/**").permitAll() //swagger 관련 경로
-                        .requestMatchers(allowUris).permitAll() // 로그인 없이 접근 가능한 경로
+                .authorizeHttpRequests(auth -> {
+                    // Swagger 및 공용 경로
+                    auth.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-resources/**").permitAll();
+                    auth.requestMatchers(allowUris).permitAll();
 
-                        .requestMatchers(adminUris).hasAuthority(Role.ROLE_ADMIN.name()) // 관리자만 접근 가능한 경로
+                    // 관리자 전용 경로
+                    if (adminUris.length > 0) {
+                        auth.requestMatchers(adminUris).hasAuthority(Role.ROLE_ADMIN.name());
+                    }
 
-                        .anyRequest().authenticated() // 그 외 모든 요청은 인증 필요
-                )
+                    // 나머지 모든 요청
+                    auth.anyRequest().authenticated();
+                })
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
 
                 .exceptionHandling(exception -> exception
