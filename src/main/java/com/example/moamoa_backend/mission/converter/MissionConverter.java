@@ -24,7 +24,7 @@ public class MissionConverter {
         return MissionResponseDto.CreateResult.builder()
                 .missionId(mission.getId())
                 .totalReward(mission.getReward())
-                .totalDutation(mission.getDurationMinutes())
+                .totalDuration(mission.getDurationMinutes())
                 .createAt(mission.getCreatedAt())
                 .build();
     }

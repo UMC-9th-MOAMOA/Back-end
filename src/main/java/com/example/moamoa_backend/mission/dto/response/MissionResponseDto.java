@@ -10,7 +10,7 @@ public class MissionResponseDto {
     public record CreateResult(
        Long missionId,
        Integer totalReward,
-       Integer totalDutation,
+       Integer totalDuration,
        LocalDateTime createAt
     ){}
 }
