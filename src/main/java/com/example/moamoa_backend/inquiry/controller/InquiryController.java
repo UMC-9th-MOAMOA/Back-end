@@ -11,6 +11,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,17 +27,19 @@ public class InquiryController {
 
     /**
      * 1:1 문의 신청
-     * (현재는 JWT 없이 memberId 직접 전달)
+     * - JWT 인증 기반 (memberId는 토큰 subject에서 추출)
      */
     @Operation(
             summary = "1:1 문의 신청",
-            description = "회원이 고객센터에 1:1 문의를 등록합니다."
+            description = "회원이 고객센터에 1:1 문의를 등록합니다. (JWT 필요)"
     )
     @PostMapping("/support/inquiries")
     public ApiResponse<InquiryResponseDTO.CreateResult> createInquiry(
-            @RequestParam @NotNull Long memberId,
+            @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestBody InquiryRequestDTO.Create request
     ) {
+        Long memberId = extractMemberId(userDetails);
+
         InquiryResponseDTO.CreateResult result =
                 inquiryCommandService.create(memberId, request);
 
@@ -51,14 +55,16 @@ public class InquiryController {
     )
     @GetMapping("/members/me/support/inquiries")
     public ApiResponse<InquiryQueryResDto.MyInquiryList> getMyInquiries(
-            @RequestParam @NotNull Long memberId,
-            @RequestParam @NotNull InquiryQueryReqDto.Period period,                         // P1M, P3M, P6M, P1Y
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam @NotNull InquiryQueryReqDto.Period period,                          // P1M, P3M, P6M, P1Y
             @RequestParam(defaultValue = "ALL") InquiryQueryReqDto.AnswerStatus answerStatus, // ALL, COMPLETED, PENDING
             @RequestParam(required = false) InquiryCategory category,
             @RequestParam(required = false) Integer size,
             @RequestParam(required = false) String cursorCreatedAt, // ISO-8601: 2026-01-17T12:34:56
             @RequestParam(required = false) Long cursorId
     ) {
+        Long memberId = extractMemberId(userDetails);
+
         InquiryQueryReqDto.MyInquiryList cond = new InquiryQueryReqDto.MyInquiryList(
                 period,
                 category,
@@ -77,15 +83,16 @@ public class InquiryController {
     @Operation(summary = "나의 문의 상세 조회", description = "회원이 본인이 작성한 1:1 문의 상세(문의/답변/이미지)를 조회합니다.")
     @GetMapping("/members/me/support/inquiries/{inquiryId}")
     public ApiResponse<InquiryDetailResDto.MyInquiryDetail> getMyInquiryDetail(
-            @RequestParam @NotNull Long memberId,
+            @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable @NotNull Long inquiryId
     ) {
+        Long memberId = extractMemberId(userDetails);
+
         InquiryDetailResDto.MyInquiryDetail result =
                 inquiryQueryService.getMyInquiryDetail(memberId, inquiryId);
 
         return ApiResponse.onSuccess(GeneralSuccessCode.OK, result);
     }
-
 
     @Operation(
             summary = "문의 답변 등록",
@@ -101,5 +108,16 @@ public class InquiryController {
                 inquiryCommandService.answer(inquiryId, request);
 
         return ApiResponse.onSuccess(GeneralSuccessCode.CREATED, result);
+    }
+
+    /**
+     * Global JwtUtil#getAuthentication()에서 principal(UserDetails)의 username에 memberId를 넣고 있으므로
+     * 동일 규칙으로 memberId를 뽑아쓴다.
+     */
+    private Long extractMemberId(UserDetails userDetails) {
+        if (userDetails == null || userDetails.getUsername() == null) {
+            throw new IllegalStateException("인증 정보가 없습니다.");
+        }
+        return Long.valueOf(userDetails.getUsername());
     }
 }
