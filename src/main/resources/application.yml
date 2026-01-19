@@ -55,3 +55,9 @@ management:
   endpoint:
     health:
       show-details: never
+
+aws:
+  region: ap-northeast-2
+  s3:
+    bucket: moamoa-s3-prod-bucket
+    public-base-url: https://moamoa-s3-prod-bucket.s3.ap-northeast-2.amazonaws.com
