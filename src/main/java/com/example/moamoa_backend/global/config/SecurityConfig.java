@@ -90,8 +90,8 @@ public class SecurityConfig {
         // 프론트엔드 주소 허용 (localhost:3000 등)
         configuration.setAllowedOrigins(Arrays.asList(
                 "http://localhost:3000",       // 로컬 테스트용
-                "http://3.38.228.147:3000",    // EC2 배포 (포트 포함)
-                "http://3.38.228.147"          // EC2 배포 (포트 생략/Nginx 사용 시)
+                "https://moamoa.io.kr",
+                "https://www.moamoa.io.kr"
         ));
 
         // 허용할 HTTP 메서드
