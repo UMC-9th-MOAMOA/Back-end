@@ -35,12 +35,12 @@ public class SecurityConfig {
             "/api/v1/auth/email/send-verification",
             "/api/v1/auth/email/verify",
             "/actuator/health/**",
-            "/api/v1/missions/admin"
+
     };
 
     // 관리자만 접근 가능
     private final String[] adminUris = {
-
+            "/api/v1/missions/admin"
     };
 
     @Bean
