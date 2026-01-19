@@ -14,7 +14,7 @@ public class InquiryConverter {
 
     private InquiryConverter() {}
 
-    public static Inquiry toEntity(Member member, InquiryRequestDTO.Create request) {
+    public static Inquiry toEntity(Member member, InquiryRequestDTO.Create request, List<String> imageUrls) {
 
         Inquiry inquiry = Inquiry.builder()
                 .member(member)
@@ -27,23 +27,22 @@ public class InquiryConverter {
                 .answeredAt(null)
                 .build();
 
-        List<String> urls = request.imageUrls();
-        if (urls != null && !urls.isEmpty()) {
+        if (imageUrls != null && !imageUrls.isEmpty()) {
             List<InquiryImage> images = new ArrayList<>();
 
-            for (int i = 0; i < urls.size(); i++) {
+            for (int i = 0; i < imageUrls.size(); i++) {
+                String url = imageUrls.get(i);
+                if (url == null || url.isBlank()) continue;
+
                 InquiryImage img = InquiryImage.builder()
-                        .imageUrl(urls.get(i))
+                        .imageUrl(url)
                         .sortOrder(i + 1)
                         .build();
 
-                // ✅ FK 주인에 inquiry 세팅 (setter 사용)
                 img.setInquiry(inquiry);
-
                 images.add(img);
             }
 
-            // ✅ 역방향 컬렉션도 채워두면 조회 시 편함
             inquiry.getInquiryImages().addAll(images);
         }
 
@@ -53,5 +52,4 @@ public class InquiryConverter {
     public static InquiryResponseDTO.CreateResult toCreateResult(Inquiry inquiry) {
         return new InquiryResponseDTO.CreateResult(inquiry.getId(), inquiry.getCreatedAt());
     }
-
 }

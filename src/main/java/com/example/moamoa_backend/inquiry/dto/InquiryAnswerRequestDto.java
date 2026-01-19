@@ -8,9 +8,6 @@ import java.util.List;
 public class InquiryAnswerRequestDto {
     public record CreateAnswer(
             @NotBlank @Size(max = 2000)
-            String answer,
-
-            // 답변 이미지 URL 리스트
-            List<String> answerImageUrls
+            String answer
     ) {}
 }
