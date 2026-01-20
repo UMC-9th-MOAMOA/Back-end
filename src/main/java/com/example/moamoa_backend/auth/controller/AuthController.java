@@ -8,6 +8,7 @@ import com.example.moamoa_backend.auth.service.AuthService;
 import com.example.moamoa_backend.global.apiPayload.response.ApiResponse;
 import com.example.moamoa_backend.global.util.NetworkUtil;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -82,6 +83,7 @@ public class AuthController {
     @SecurityRequirements(value = {})
     @PostMapping("/refresh")
     public ApiResponse<AuthResDto.TokenDto> refresh(
+            @Parameter(hidden = true)
             @CookieValue(name = "refreshToken", required = true) String refreshToken,
             HttpServletResponse response
     ) {
