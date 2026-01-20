@@ -91,7 +91,8 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(Arrays.asList(
                 "http://localhost:3000",       // 로컬 테스트용
                 "https://moamoa.io.kr",
-                "https://www.moamoa.io.kr"
+                "https://www.moamoa.io.kr",
+                "https://moamoamoa.netlify.app"
         ));
 
         // 허용할 HTTP 메서드
