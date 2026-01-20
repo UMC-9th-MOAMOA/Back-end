@@ -1,11 +1,13 @@
 package com.example.moamoa_backend.mission.converter;
 
 import com.example.moamoa_backend.keyword.entity.Keyword;
+import com.example.moamoa_backend.member.entity.Member;
 import com.example.moamoa_backend.member.entity.mapping.MemberMission;
 import com.example.moamoa_backend.mission.dto.request.MissionRequestDto;
 import com.example.moamoa_backend.mission.dto.response.MissionResponseDto;
 import com.example.moamoa_backend.mission.entity.Mission;
 import com.example.moamoa_backend.mission.entity.mapping.MissionSubInterest;
+import com.example.moamoa_backend.mission.enums.MissionStatus;
 import com.example.moamoa_backend.mission.exception.MissionException;
 import com.example.moamoa_backend.mission.exception.code.MissionErrorCode;
 import com.example.moamoa_backend.quiz.entity.Quiz;
@@ -90,6 +92,17 @@ public class MissionConverter {
                 .isContentWatched(isWatched)
                 .attemptCount(attemptCount)
                 .rewardAt(rewardAt)
+                .build();
+    }
+
+    //영상 시청 완료 상태의 MemberMission 엔티티 생성
+    public MemberMission toMemberMission(Member member, Mission mission){
+        return MemberMission.builder()
+                .member(member)
+                .mission(mission)
+                .missionStatus(MissionStatus.NONE)
+                .attemptCount(0)
+                .isContentWatched(true)
                 .build();
     }
 

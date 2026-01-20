@@ -7,4 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 public interface MissionCommandService {
     @Transactional
     MissionResponseDto.CreateResult createMission(MissionRequestDto.Create request);
+
+    @Transactional
+    void updateMissionWatchStatus(Long memberId, Long missionId);
 }

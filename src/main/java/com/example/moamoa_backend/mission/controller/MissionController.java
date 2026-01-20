@@ -45,6 +45,18 @@ public class MissionController {
 
         return ApiResponse.onSuccess(GeneralSuccessCode.OK, result);
     }
+
+    @PostMapping("/{missionId}/watch")
+    @Operation(summary = "미션 영상 시청 완료 API", description = "영상을 끝까지 시청했을 때 호출합니다.")
+    public ApiResponse<String> updateWatchStatus(
+            @PathVariable Long missionId,
+            @AuthenticationPrincipal UserDetails userDetails
+    ){
+        Long memberId = Long.parseLong(userDetails.getUsername());
+        missionCommandService.updateMissionWatchStatus(memberId,missionId);
+
+        return ApiResponse.onSuccess(GeneralSuccessCode.OK,null);
+    }
 }
 
 

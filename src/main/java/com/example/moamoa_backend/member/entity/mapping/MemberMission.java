@@ -50,4 +50,8 @@ public class MemberMission extends BaseEntity {
         this.rewardAt = LocalDateTime.now();
     }
 
+    public void changeIsContentWatched(boolean isContentWatched) {
+        this.isContentWatched = isContentWatched;
+    }
+
 }

@@ -4,6 +4,12 @@ import com.example.moamoa_backend.interest.entity.SubInterest;
 import com.example.moamoa_backend.interest.repository.SubInterestRepository;
 import com.example.moamoa_backend.keyword.entity.Keyword;
 import com.example.moamoa_backend.keyword.repository.KeywordRepository;
+import com.example.moamoa_backend.member.entity.Member;
+import com.example.moamoa_backend.member.entity.mapping.MemberMission;
+import com.example.moamoa_backend.member.exception.MemberException;
+import com.example.moamoa_backend.member.exception.code.MemberErrorCode;
+import com.example.moamoa_backend.member.repository.MemberMissionRepository;
+import com.example.moamoa_backend.member.repository.MemberRepository;
 import com.example.moamoa_backend.mission.converter.MissionConverter;
 import com.example.moamoa_backend.mission.dto.request.MissionRequestDto;
 import com.example.moamoa_backend.mission.dto.response.MissionResponseDto;
@@ -29,6 +35,8 @@ public class MissionCommandServiceImpl implements MissionCommandService{
     private final SubInterestRepository subInterestRepository;
     private final MissionSubInterestRepository missionSubInterestRepository;
     private final MissionConverter  missionConverter;
+    private final MemberMissionRepository memberMissionRepository;
+    private final MemberRepository memberRepository;
 
     @Transactional
     @Override
@@ -65,5 +73,23 @@ public class MissionCommandServiceImpl implements MissionCommandService{
         }
 
         return missionConverter.toCreateResult(newMission);
+    }
+
+    @Transactional
+    @Override
+    public void updateMissionWatchStatus(Long memberId, Long missionId){
+        Mission mission = missionRepository.findById(missionId).orElseThrow(()-> new MissionException(MissionErrorCode.MISSION_NOT_FOUND));
+
+        MemberMission memberMission = memberMissionRepository.findByMemberIdAndMissionId(memberId,missionId).orElse(null);
+
+        if(memberMission==null){
+            Member member = memberRepository.findById(memberId).orElseThrow(()-> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+            memberMission = missionConverter.toMemberMission(member,mission);
+            memberMissionRepository.save(memberMission);
+        }
+        else{
+            memberMission.changeIsContentWatched(true);
+        }
     }
 }
