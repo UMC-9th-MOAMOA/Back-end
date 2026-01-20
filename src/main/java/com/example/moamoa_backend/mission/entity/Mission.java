@@ -1,6 +1,8 @@
 package com.example.moamoa_backend.mission.entity;
 
 import com.example.moamoa_backend.global.entity.BaseEntity;
+import com.example.moamoa_backend.mission.entity.mapping.MissionKeyword;
+import com.example.moamoa_backend.mission.entity.mapping.MissionSubInterest;
 import com.example.moamoa_backend.quiz.entity.Quiz;
 import jakarta.persistence.*;
 import lombok.*;
@@ -41,6 +43,11 @@ public class Mission extends BaseEntity {
     @OneToMany(mappedBy = "mission", cascade = CascadeType.ALL)
     private List<Quiz> quizzes = new ArrayList<>();
 
+    @Builder.Default
+    @OneToMany(mappedBy = "mission", cascade = CascadeType.ALL)
+    private List<MissionKeyword> missionKeywords = new ArrayList<>();
 
-
+    @Builder.Default
+    @OneToMany(mappedBy = "mission", cascade = CascadeType.ALL)
+    private List<MissionSubInterest> missionSubInterests = new ArrayList<>();
 }

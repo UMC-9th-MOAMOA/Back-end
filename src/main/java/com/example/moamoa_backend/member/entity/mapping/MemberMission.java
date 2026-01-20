@@ -37,6 +37,10 @@ public class MemberMission extends BaseEntity {
 
     private LocalDateTime rewardAt;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean isContentWatched = false;
+
     public void changeMissionStatus(MissionStatus missionStatus) {
         this.missionStatus = missionStatus;
     }

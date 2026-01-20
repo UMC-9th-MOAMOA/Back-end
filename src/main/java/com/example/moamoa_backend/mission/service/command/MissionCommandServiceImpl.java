@@ -10,8 +10,8 @@ import com.example.moamoa_backend.mission.dto.response.MissionResponseDto;
 import com.example.moamoa_backend.mission.entity.Mission;
 import com.example.moamoa_backend.mission.exception.MissionException;
 import com.example.moamoa_backend.mission.exception.code.MissionErrorCode;
-import com.example.moamoa_backend.mission.mapping.MissionKeyword;
-import com.example.moamoa_backend.mission.mapping.MissionSubInterest;
+import com.example.moamoa_backend.mission.entity.mapping.MissionKeyword;
+import com.example.moamoa_backend.mission.entity.mapping.MissionSubInterest;
 import com.example.moamoa_backend.mission.repository.MissionKeywordRepository;
 import com.example.moamoa_backend.mission.repository.MissionRepository;
 import com.example.moamoa_backend.mission.repository.MissionSubInterestRepository;
@@ -61,6 +61,7 @@ public class MissionCommandServiceImpl implements MissionCommandService{
                     .subInterest(subInterest)
                     .build();
             missionSubInterestRepository.save(missionSubInterest);
+            newMission.getMissionSubInterests().add(missionSubInterest);
         }
 
         return missionConverter.toCreateResult(newMission);

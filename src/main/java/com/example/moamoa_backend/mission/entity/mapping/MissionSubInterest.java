@@ -1,4 +1,4 @@
-package com.example.moamoa_backend.mission.mapping;
+package com.example.moamoa_backend.mission.entity.mapping;
 
 import com.example.moamoa_backend.global.entity.BaseEntity;
 import com.example.moamoa_backend.interest.entity.SubInterest;

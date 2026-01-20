@@ -3,6 +3,7 @@ package com.example.moamoa_backend.mission.dto.response;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class MissionResponseDto {
 
@@ -12,5 +13,30 @@ public class MissionResponseDto {
        Integer totalReward,
        Integer totalDuration,
        LocalDateTime createAt
+    ){}
+
+    @Builder
+    public record MissionDetail(
+        Long missionId,
+        String title,
+        String description,
+        String interest,
+        String videoUrl,
+        int durationMinutes,
+        int totalReward,
+        List<String> keyword,
+        List<QuizDetail> quizzes,
+        boolean isContentWatched,
+        int attemptCount,
+        LocalDateTime rewardAt
+
+    ){}
+
+    @Builder
+    public record QuizDetail(
+        Long quizId,
+        String type,
+        String question,
+        List<String> option //["O","X"] or [] or ["객관식1","객관식2"]
     ){}
 }

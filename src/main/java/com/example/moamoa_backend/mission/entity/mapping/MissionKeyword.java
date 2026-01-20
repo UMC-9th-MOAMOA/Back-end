@@ -1,4 +1,4 @@
-package com.example.moamoa_backend.mission.mapping;
+package com.example.moamoa_backend.mission.entity.mapping;
 
 import com.example.moamoa_backend.keyword.entity.Keyword;
 import com.example.moamoa_backend.mission.entity.Mission;
