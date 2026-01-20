@@ -31,7 +31,7 @@ public class SecurityConfig {
     private final String[] allowUris = {
             "/api/v1/auth/signup",
             "/api/v1/auth/login",
-            "/api/v1/auth/reissue",
+            "/api/v1/auth/refresh",
             "/api/v1/auth/email/send-verification",
             "/api/v1/auth/email/verify",
             "/actuator/health/**"
