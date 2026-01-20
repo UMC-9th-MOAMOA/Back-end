@@ -41,6 +41,10 @@ public enum AuthErrorCode implements BaseErrorCode {
             "AUTH401_1",
             "이메일 또는 비밀번호가 일치하지 않습니다."),
 
+    AUTHENTICATION_REQUIRED(HttpStatus.UNAUTHORIZED,
+            "AUTH401_2",
+            "로그인이 필요합니다."),
+
     ACCESS_DENIED(HttpStatus.FORBIDDEN,
             "AUTH403_1",
             "접근 권한이 없습니다."),
