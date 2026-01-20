@@ -33,6 +33,10 @@ public enum AuthErrorCode implements BaseErrorCode {
             "AUTH400_6",
             "이메일 재전송은 30초 뒤에 가능합니다."),
 
+    REFRESH_TOKEN_MISSING(HttpStatus.BAD_REQUEST,
+            "AUTH400_7",
+            "Refresh Token 쿠키가 요청에 포함되지 않았습니다."),
+
     LOGIN_FAILED(HttpStatus.UNAUTHORIZED,
             "AUTH401_1",
             "이메일 또는 비밀번호가 일치하지 않습니다."),
@@ -48,6 +52,7 @@ public enum AuthErrorCode implements BaseErrorCode {
     EMAIL_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR,
             "AUTH500_1",
             "이메일 전송 중 오류가 발생했습니다.");
+
 
     private final HttpStatus status;
     private final String code;
