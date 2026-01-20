@@ -23,7 +23,17 @@ public enum MemberErrorCode implements BaseErrorCode {
 
     MEMBER_WITHDRAWN(HttpStatus.FORBIDDEN,
             "MEMBER403_2",
-            "탈퇴한 회원입니다.");
+            "탈퇴한 회원입니다."),
+
+    /**
+     * scope 파라미터가 허용된 값(ALL/INTERESTS/GOAL)이 아닐 때 사용하는 에러 코드.
+     * - 일반적으로는 컨트롤러의 Enum 바인딩 단계에서 400이 발생하지만,
+     *   팀 정책상 명시적으로 동일한 에러코드로 내려주고 싶을 때 사용 가능
+     */
+    INVALID_SCOPE(HttpStatus.BAD_REQUEST,
+        "MEMBER400_1",
+        "scope 값이 올바르지 않습니다.");
+
 
     private final HttpStatus status;
     private final String code;
