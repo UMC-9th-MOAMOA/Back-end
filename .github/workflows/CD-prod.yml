@@ -45,18 +45,48 @@ jobs:
           docker push "${IMAGE}:latest"
           docker push "${IMAGE}:${SHA_TAG}"
 
-      - name: Deploy on EC2 (docker compose pull/up)
+      - name: Deploy on EC2 (docker compose pull/up + healthcheck)
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            set -e
+            set -euo pipefail
             cd ~/app
 
-            export APP_TAG="${GITHUB_SHA::7}"
+            APP_TAG="${{ github.sha }}"
+            APP_TAG="${APP_TAG:0:7}"
+            export APP_TAG
+
             docker compose -f docker-compose.yml --env-file .env pull
             docker compose -f docker-compose.yml --env-file .env up -d
 
+            echo "Waiting for actuator health..."
+            ok=false
+
+            for i in $(seq 1 30); do
+              code=$(curl -s -o /tmp/health.json -w "%{http_code}" \
+                --connect-timeout 2 --max-time 5 \
+                http://localhost:8080/actuator/health || true)
+
+              if [ "$code" = "200" ] && grep -q '"status":"UP"' /tmp/health.json; then
+                echo "Health OK: $(cat /tmp/health.json)"
+                ok=true
+                break
+              fi
+
+              echo "Not ready yet (code=$code) retry $i/30... body=$(cat /tmp/health.json 2>/dev/null || true)"
+              sleep 2
+            done
+
+            if [ "$ok" != "true" ]; then
+              echo "Health check FAILED. Showing logs..."
+              docker compose -f docker-compose.yml logs --tail=200 || true
+              # 컨테이너명 고정이면 이것도 추가로
+              docker logs --tail 200 moamoa-app || true
+              exit 1
+            fi
+
             docker image prune -af || true
+      
