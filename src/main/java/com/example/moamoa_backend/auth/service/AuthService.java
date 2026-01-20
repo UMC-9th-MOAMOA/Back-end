@@ -231,7 +231,7 @@ public class AuthService {
      * 로그인 (Local)
      */
     @Transactional
-    public AuthResDto.TokenDto login(AuthReqDto.LoginDto request) {
+    public AuthResDto.GeneratedTokenDto login(AuthReqDto.LoginDto request) {
         // 1. 이메일로 회원 조회
         Member member = memberRepository.findByEmailAndProvider(request.email(),Provider.LOCAL)
                 .orElseThrow(() -> new AuthException(AuthErrorCode.LOGIN_FAILED));
@@ -249,7 +249,7 @@ public class AuthService {
      * 토큰 재발급 (RTR 적용)
      */
     @Transactional
-    public AuthResDto.TokenDto reissue(AuthReqDto.ReissueDto request) {
+    public AuthResDto.GeneratedTokenDto refresh(AuthReqDto.ReissueDto request) {
         String requestRefreshToken = request.refreshToken();
 
         // 1. Refresh Token 유효성 검증
@@ -398,7 +398,7 @@ public class AuthService {
         return email.substring(0, 2) + "***" + email.substring(atIndex);
     }
 
-    private AuthResDto.TokenDto generateTokens(Long memberId, Role role) {
+    private AuthResDto.GeneratedTokenDto generateTokens(Long memberId, Role role) {
         // Access/Refresh 토큰 생성
         String accessToken = jwtUtil.createAccessToken(memberId, String.valueOf(role));
         String refreshToken = jwtUtil.createRefreshToken(memberId);
@@ -407,7 +407,7 @@ public class AuthService {
         // 인자 순서: key, value, 만료시간(ms)
         redisUtil.setDataExpire("RT:" + memberId, refreshToken, jwtUtil.getRefreshTokenValidity()/1000);
 
-        return AuthResDto.TokenDto.builder()
+        return AuthResDto.GeneratedTokenDto.builder()
                 .grantType("Bearer")
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)

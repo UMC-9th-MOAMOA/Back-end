@@ -1,5 +1,6 @@
 package com.example.moamoa_backend.auth.controller;
 
+import com.example.moamoa_backend.auth.converter.AuthConverter;
 import com.example.moamoa_backend.auth.dto.req.AuthReqDto;
 import com.example.moamoa_backend.auth.dto.req.AuthResDto;
 import com.example.moamoa_backend.auth.exception.code.AuthSuccessCode;
@@ -9,14 +10,14 @@ import com.example.moamoa_backend.global.util.NetworkUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -56,26 +57,68 @@ public class AuthController {
     @Operation(summary = "일반 로그인 API", description = "이메일과 비밀번호로 로그인하여 Access/Refresh Token을 발급받습니다.")
     @SecurityRequirements(value = {})
     @PostMapping("/login")
-    public ApiResponse<AuthResDto.TokenDto> login(@RequestBody @Valid AuthReqDto.LoginDto request) {
-        AuthResDto.TokenDto result = authService.login(request);
-        return ApiResponse.onSuccess(AuthSuccessCode.LOGIN_SUCCESS, result);
+    public ApiResponse<AuthResDto.TokenDto> login(@RequestBody @Valid AuthReqDto.LoginDto request, HttpServletResponse response) {
+        AuthResDto.GeneratedTokenDto generatedTokenDto = authService.login(request);
+
+        // 2. Refresh Token을 꺼내서 쿠키로 굽기
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", generatedTokenDto.refreshToken())
+                .path("/")
+                .sameSite("None")  // CSRF 방지 및 배포 환경 고려
+                .httpOnly(true)    // ⭐️ 자바스크립트 접근 불가 (보안 핵심)
+                .secure(true)      // HTTPS 환경에서만 전송
+                .maxAge(14 * 24 * 60 * 60) // 14일 (Redis 만료시간과 맞춤)
+                .build();
+
+        // 응답 헤더에 쿠키 추가
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
+        return ApiResponse.onSuccess(AuthSuccessCode.LOGIN_SUCCESS, AuthConverter.toTokenDto(generatedTokenDto));
     }
 
     @Operation(summary = "토큰 재발급 API", description = "Refresh Token을 이용하여 Access Token과 Refresh Token을 재발급(RTR)받습니다.")
     @SecurityRequirements(value = {})
-    @PostMapping("/reissue")
-    public ApiResponse<AuthResDto.TokenDto> reissue(@RequestBody @Valid AuthReqDto.ReissueDto request) {
-        AuthResDto.TokenDto result = authService.reissue(request);
-        return ApiResponse.onSuccess(AuthSuccessCode.REISSUE_SUCCESS, result);
+    @PostMapping("/refresh")
+    public ApiResponse<AuthResDto.TokenDto> refresh(@CookieValue(name = "refreshToken", required = true) String refreshToken, HttpServletResponse response) {
+
+        // Cookie에서 refreshToken 꺼내서 dto 생성
+        AuthReqDto.ReissueDto request = new AuthReqDto.ReissueDto(refreshToken);
+
+        // dto 이용해서 refresh logic 수행
+        AuthResDto.GeneratedTokenDto generatedTokenDto = authService.refresh(request);
+
+        // Refresh Token을 꺼내서 쿠키로 굽기
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", generatedTokenDto.refreshToken())
+                .path("/")
+                .sameSite("None")  // CSRF 방지 및 배포 환경 고려
+                .httpOnly(true)    // ⭐️ 자바스크립트 접근 불가 (보안 핵심)
+                .secure(true)      // HTTPS 환경에서만 전송
+                .maxAge(14 * 24 * 60 * 60) // 14일 (Redis 만료시간과 맞춤)
+                .build();
+
+        // 응답 헤더에 쿠키 추가
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
+        return ApiResponse.onSuccess(AuthSuccessCode.REISSUE_SUCCESS, AuthConverter.toTokenDto(generatedTokenDto));
     }
 
     @PostMapping("/logout")
     @Operation(summary = "로그아웃 API", description = "Redis에서 해당 사용자의 Refresh Token을 삭제합니다. (Header에 Access Token 필요)")
-    public ApiResponse<String> logout(@AuthenticationPrincipal UserDetails userDetails) {
+    public ApiResponse<String> logout(@AuthenticationPrincipal UserDetails userDetails,HttpServletResponse response) {
         // SecurityContext에서 memberId 추출
         Long memberId = Long.parseLong(userDetails.getUsername());
 
         authService.logout(memberId);
+
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", "") // 값을 비움
+                .path("/")
+                .sameSite("None")
+                .httpOnly(true)
+                .secure(true)
+                .maxAge(0) // 👈 핵심: 유효시간 0초 = 즉시 삭제
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
         return ApiResponse.onSuccess(AuthSuccessCode.LOGOUT_SUCCESS, null);
     }
 }
