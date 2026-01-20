@@ -57,16 +57,19 @@ public class AuthController {
     @Operation(summary = "일반 로그인 API", description = "이메일과 비밀번호로 로그인하여 Access/Refresh Token을 발급받습니다.")
     @SecurityRequirements(value = {})
     @PostMapping("/login")
-    public ApiResponse<AuthResDto.TokenDto> login(@RequestBody @Valid AuthReqDto.LoginDto request, HttpServletResponse response) {
+    public ApiResponse<AuthResDto.TokenDto> login(
+            @RequestBody @Valid AuthReqDto.LoginDto request,
+            HttpServletResponse response
+    ) {
         AuthResDto.GeneratedTokenDto generatedTokenDto = authService.login(request);
 
-        // 2. Refresh Token을 꺼내서 쿠키로 굽기
+        // Refresh Token 정보로 쿠키 생성
         ResponseCookie cookie = ResponseCookie.from("refreshToken", generatedTokenDto.refreshToken())
                 .path("/")
                 .sameSite("None")  // CSRF 방지 및 배포 환경 고려
-                .httpOnly(true)    // ⭐️ 자바스크립트 접근 불가 (보안 핵심)
+                .httpOnly(true)    // 자바스크립트 접근 불가 (보안 핵심)
                 .secure(true)      // HTTPS 환경에서만 전송
-                .maxAge(14 * 24 * 60 * 60) // 14일 (Redis 만료시간과 맞춤)
+                .maxAge(14 * 24 * 60 * 60) // 14일 (Redis 만료시간과 동일)
                 .build();
 
         // 응답 헤더에 쿠키 추가
@@ -78,21 +81,24 @@ public class AuthController {
     @Operation(summary = "토큰 재발급 API", description = "Refresh Token을 이용하여 Access Token과 Refresh Token을 재발급(RTR)받습니다.")
     @SecurityRequirements(value = {})
     @PostMapping("/refresh")
-    public ApiResponse<AuthResDto.TokenDto> refresh(@CookieValue(name = "refreshToken", required = true) String refreshToken, HttpServletResponse response) {
+    public ApiResponse<AuthResDto.TokenDto> refresh(
+            @CookieValue(name = "refreshToken", required = true) String refreshToken,
+            HttpServletResponse response
+    ) {
 
-        // Cookie에서 refreshToken 꺼내서 dto 생성
+        // Cookie에서 refreshToken 정보 이용해서 request dto 생성
         AuthReqDto.ReissueDto request = new AuthReqDto.ReissueDto(refreshToken);
 
         // dto 이용해서 refresh logic 수행
         AuthResDto.GeneratedTokenDto generatedTokenDto = authService.refresh(request);
 
-        // Refresh Token을 꺼내서 쿠키로 굽기
+        // Refresh Token 정보로 쿠키 생성
         ResponseCookie cookie = ResponseCookie.from("refreshToken", generatedTokenDto.refreshToken())
                 .path("/")
                 .sameSite("None")  // CSRF 방지 및 배포 환경 고려
-                .httpOnly(true)    // ⭐️ 자바스크립트 접근 불가 (보안 핵심)
+                .httpOnly(true)    // 자바스크립트 접근 불가 (보안 핵심)
                 .secure(true)      // HTTPS 환경에서만 전송
-                .maxAge(14 * 24 * 60 * 60) // 14일 (Redis 만료시간과 맞춤)
+                .maxAge(14 * 24 * 60 * 60) // 14일 (Redis 만료시간과 동일)
                 .build();
 
         // 응답 헤더에 쿠키 추가
@@ -104,17 +110,19 @@ public class AuthController {
     @PostMapping("/logout")
     @Operation(summary = "로그아웃 API", description = "Redis에서 해당 사용자의 Refresh Token을 삭제합니다. (Header에 Access Token 필요)")
     public ApiResponse<String> logout(@AuthenticationPrincipal UserDetails userDetails,HttpServletResponse response) {
+
         // SecurityContext에서 memberId 추출
         Long memberId = Long.parseLong(userDetails.getUsername());
 
         authService.logout(memberId);
 
-        ResponseCookie cookie = ResponseCookie.from("refreshToken", "") // 값을 비움
+        // 쿠키 값을 비워서 전달 (=삭제)
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", "")
                 .path("/")
                 .sameSite("None")
                 .httpOnly(true)
                 .secure(true)
-                .maxAge(0) // 👈 핵심: 유효시간 0초 = 즉시 삭제
+                .maxAge(0) // 즉시삭제
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
