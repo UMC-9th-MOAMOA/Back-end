@@ -134,7 +134,7 @@ public class GeneralExceptionAdvice {
         } else {
             log.warn("Request body parse error", e);
         }
-        errors.put("body", "Invalid request body");
+        errors.put("body", "요청 본문을 읽을 수 없습니다");
 
         return ResponseEntity
             .status(GeneralErrorCode.MESSAGE_NOT_READABLE.getStatus())
