@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -44,4 +45,13 @@ public class MissionQueryServiceImpl implements MissionQueryService{
 
         return missionConverter.toKeywordList(keywordList);
     }
+
+    @Override
+    public MissionResponseDto.KeywordListResult getRelatedKeywords(String keyword){
+        List<Keyword> keywordList = keyword.isBlank() ?
+                Collections.emptyList() :
+                keywordRepository.findTop5ByNameContaining(keyword);
+        return missionConverter.toKeywordList(keywordList);
+    }
+
 }

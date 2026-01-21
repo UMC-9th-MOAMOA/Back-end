@@ -6,4 +6,6 @@ public interface MissionQueryService {
     MissionResponseDto.MissionDetail getMissionDetail(Long memberId, Long missionId);
 
     MissionResponseDto.KeywordListResult getRecommendedKeywords();
+
+    MissionResponseDto.KeywordListResult getRelatedKeywords(String keyword);
 }

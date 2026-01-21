@@ -86,6 +86,15 @@ public class MissionController {
         MissionResponseDto.KeywordListResult result = missionQueryService.getRecommendedKeywords();
         return ApiResponse.onSuccess(GeneralSuccessCode.OK,result);
     }
+
+    @GetMapping("/keywords/related")
+    @Operation(summary = "연관 검색어(태그) 조회", description = "사용자가 입력한 검색어가 포함된 키워드(태그)를 최대 5개까지 추천해줍니다.")
+    public ApiResponse<MissionResponseDto.KeywordListResult> getRelatedKeywords(
+            @RequestParam String keyword
+    ) {
+        MissionResponseDto.KeywordListResult result = missionQueryService.getRelatedKeywords(keyword);
+        return ApiResponse.onSuccess(GeneralSuccessCode.OK, result);
+    }
 }
 
 
