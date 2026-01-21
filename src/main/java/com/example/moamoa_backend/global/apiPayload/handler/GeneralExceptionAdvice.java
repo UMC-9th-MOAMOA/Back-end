@@ -128,8 +128,13 @@ public class GeneralExceptionAdvice {
 
         Map<String, String> errors = new LinkedHashMap<>();
         Throwable cause = e.getMostSpecificCause();
-        String message = cause != null ? cause.getMessage() : e.getMessage();
-        errors.put("body", message != null ? message : "Invalid request body");
+        String detailMessage = cause != null ? cause.getMessage() : e.getMessage();
+        if (detailMessage != null) {
+            log.warn("Request body parse error: {}", detailMessage, e);
+        } else {
+            log.warn("Request body parse error", e);
+        }
+        errors.put("body", "Invalid request body");
 
         return ResponseEntity
             .status(GeneralErrorCode.MESSAGE_NOT_READABLE.getStatus())
