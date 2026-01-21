@@ -1,5 +1,6 @@
 package com.example.moamoa_backend.keyword.entity;
 
+import com.example.moamoa_backend.keyword.enums.KeywordType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -16,4 +17,8 @@ public class Keyword {
 
     @Column(nullable = false,unique = true)
     private String name;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private KeywordType keywordType;
 }

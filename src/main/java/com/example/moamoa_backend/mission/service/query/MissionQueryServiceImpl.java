@@ -1,5 +1,7 @@
 package com.example.moamoa_backend.mission.service.query;
 
+import com.example.moamoa_backend.keyword.entity.Keyword;
+import com.example.moamoa_backend.keyword.repository.KeywordRepository;
 import com.example.moamoa_backend.member.entity.mapping.MemberMission;
 import com.example.moamoa_backend.member.repository.MemberMissionRepository;
 import com.example.moamoa_backend.mission.converter.MissionConverter;
@@ -12,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -20,6 +24,7 @@ public class MissionQueryServiceImpl implements MissionQueryService{
     private final MissionConverter missionConverter;
     private final MissionRepository missionRepository;
     private final MemberMissionRepository memberMissionRepository;
+    private final KeywordRepository keywordRepository;
 
     @Override
     public MissionResponseDto.MissionDetail getMissionDetail(Long memberId, Long missionId){
@@ -30,5 +35,13 @@ public class MissionQueryServiceImpl implements MissionQueryService{
         return missionConverter.toMissionDetail(mission,memberMission);
 
 
+    }
+
+    @Override
+    public MissionResponseDto.KeywordListResult getRecommendedKeywords() {
+
+        List<Keyword> keywordList = keywordRepository.findAll();
+
+        return missionConverter.toKeywordList(keywordList);
     }
 }

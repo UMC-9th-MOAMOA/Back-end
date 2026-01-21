@@ -39,4 +39,30 @@ public class MissionResponseDto {
         String question,
         List<String> option //["O","X"] or [] or ["객관식1","객관식2"]
     ){}
+
+    @Builder
+    public record StatusResult(
+       Long missionId,
+       String status,
+       int attemptCount
+    ){}
+
+    @Builder
+    public record WatchResult(
+       Long missionId,
+       boolean isContentWatched,
+       String status
+    ){}
+
+    @Builder
+    public record KeywordListResult(
+            List<KeywordDto> keywords
+    ){}
+
+    @Builder
+    public record KeywordDto(
+        Long keywordId,
+        String name,
+        String type
+    ){}
 }

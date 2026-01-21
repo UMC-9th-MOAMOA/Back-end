@@ -8,6 +8,10 @@ public interface MissionCommandService {
     @Transactional
     MissionResponseDto.CreateResult createMission(MissionRequestDto.Create request);
 
+
     @Transactional
-    void updateMissionWatchStatus(Long memberId, Long missionId);
+    MissionResponseDto.WatchResult updateMissionWatchStatus(Long memberId, Long missionId);
+
+    @Transactional
+    MissionResponseDto.StatusResult updateMissionStatus(Long memberId, Long missionId, MissionRequestDto.PatchStatus request);
 }

@@ -48,14 +48,43 @@ public class MissionController {
 
     @PostMapping("/{missionId}/watch")
     @Operation(summary = "미션 영상 시청 완료 API", description = "영상을 끝까지 시청했을 때 호출합니다.")
-    public ApiResponse<String> updateWatchStatus(
+    public ApiResponse<MissionResponseDto.WatchResult> updateWatchStatus(
             @PathVariable Long missionId,
             @AuthenticationPrincipal UserDetails userDetails
     ){
         Long memberId = Long.parseLong(userDetails.getUsername());
-        missionCommandService.updateMissionWatchStatus(memberId,missionId);
+        MissionResponseDto.WatchResult result = missionCommandService.updateMissionWatchStatus(memberId,missionId);
 
-        return ApiResponse.onSuccess(GeneralSuccessCode.OK,null);
+        return ApiResponse.onSuccess(GeneralSuccessCode.OK,result);
+    }
+
+    @PatchMapping("/{missionId}/status")
+    @Operation(
+            summary = "미션 상태 변경 (도전하기/찜/포기)",
+            description = "미션의 상태를 변경합니다. 요청하는 `status` 값에 따라 동작이 다릅니다.\n\n" +
+                    "1. **NONE (도전/찜 취소)**:\n" +
+                    "   - 기본적으로 **시도 횟수가 +1 증가**합니다 (입장료 선불).\n" +
+                    "   - 단, **현재 상태가 'SCRAP(찜)'인 경우**에는 **찜 취소**로 간주하여 **횟수가 증가하지 않습니다.**\n\n" +
+                    "2. **SCRAP (찜하기)**: 찜 리스트로 이동합니다.\n" +
+                    "3. **FAIL (포기)**: 재도전 리스트로 이동합니다."
+            )
+    public ApiResponse<MissionResponseDto.StatusResult> updateStatus(
+            @PathVariable Long missionId,
+            @RequestBody MissionRequestDto.PatchStatus request,
+            @AuthenticationPrincipal UserDetails userDetails
+    ){
+        Long memberId = Long.parseLong(userDetails.getUsername());
+        MissionResponseDto.StatusResult result = missionCommandService.updateMissionStatus(memberId,missionId,request);
+
+        return  ApiResponse.onSuccess(GeneralSuccessCode.OK,result);
+
+    }
+
+    @GetMapping("/keywords")
+    @Operation(summary = "추천 키워드 목록 조회", description = "탐색에서 하단에 노출할 키워드들을 반환합니다.")
+    public ApiResponse<MissionResponseDto.KeywordListResult> getRecommendKeyword(){
+        MissionResponseDto.KeywordListResult result = missionQueryService.getRecommendedKeywords();
+        return ApiResponse.onSuccess(GeneralSuccessCode.OK,result);
     }
 }
 

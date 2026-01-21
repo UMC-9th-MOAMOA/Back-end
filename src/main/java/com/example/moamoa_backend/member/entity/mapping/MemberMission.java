@@ -54,4 +54,8 @@ public class MemberMission extends BaseEntity {
         this.isContentWatched = isContentWatched;
     }
 
+    public void addAttemptCount(){
+        this.attemptCount +=1;
+    }
+
 }

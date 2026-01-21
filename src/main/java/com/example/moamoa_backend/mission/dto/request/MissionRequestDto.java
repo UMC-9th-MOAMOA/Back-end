@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import java.util.List;
 
 public class MissionRequestDto {
+
     public record Create(
             @NotBlank(message="제목은 필수입니다.")
             String title,
@@ -15,15 +16,26 @@ public class MissionRequestDto {
             String videoUrl,
             @NotNull(message = "영상 길이를 입력해주세요.(초단위로)")
             Integer videoLength,
-            List<String> keywords,
+            List<KeywordCreate> keywords,
             String category,
             List<CreateQuiz> quizzes
     ){}
-
+    public record KeywordCreate(
+            String name, //생성형 AI
+            String type
+    ){}
     public record CreateQuiz(
-            @NotBlank String question,
-            @NotNull QuizType type,
-            @NotBlank String answer,
+            @NotBlank(message = "퀴즈 질문은 필수입니다.")
+            String question,
+            @NotNull(message ="퀴즈 타입은 필수입니다.")
+            QuizType type,
+            @NotBlank(message = "퀴즈 답은 필수입니다.")
+            String answer,
             List<String> options
             ){}
+
+    public record PatchStatus(
+            @NotBlank(message = "상태값은 필수입니다.")
+            String status
+    ){}
 }

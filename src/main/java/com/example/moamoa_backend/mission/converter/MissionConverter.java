@@ -106,6 +106,58 @@ public class MissionConverter {
                 .build();
     }
 
+    //상태 변경 API용 메서드
+    public MemberMission toMemberMission(Member member, Mission mission, MissionStatus missionStatus){
+
+        //SCRAP이 아니면 무조건 도전(시도횟수 +1)로 간주
+        int cnt = 0;
+        if(missionStatus != MissionStatus.SCRAP){
+            cnt = 1;
+        }
+
+        return MemberMission.builder()
+                .member(member)
+                .mission(mission)
+                .missionStatus(missionStatus)
+                .attemptCount(cnt)
+                .isContentWatched(false)
+                .build();
+    }
+
+    public MissionResponseDto.StatusResult toStatusResult(MemberMission memberMission) {
+        return MissionResponseDto.StatusResult.builder()
+                .missionId(memberMission.getMission().getId())
+                .status(memberMission.getMissionStatus().name())
+                .attemptCount(memberMission.getAttemptCount())
+                .build();
+    }
+
+    public MissionResponseDto.WatchResult toWatchResult(MemberMission memberMission) {
+        return MissionResponseDto.WatchResult.builder()
+                .missionId(memberMission.getMission().getId())
+                .isContentWatched(memberMission.isContentWatched())
+                .status(memberMission.getMissionStatus().name())
+                .build();
+    }
+
+    public MissionResponseDto.KeywordDto toKeywordDto(Keyword keyword){
+        return MissionResponseDto.KeywordDto.builder()
+                .keywordId(keyword.getId())
+                .name(keyword.getName())
+                .type(keyword.getKeywordType().name())
+                .build();
+    }
+
+    public MissionResponseDto.KeywordListResult toKeywordList(List<Keyword> keywords){
+        List<MissionResponseDto.KeywordDto> keywordDtos = keywords.stream()
+                .map(this::toKeywordDto)
+                .toList();
+
+        return MissionResponseDto.KeywordListResult.builder()
+                .keywords(keywordDtos)
+                .build();
+    }
+
     private MissionResponseDto.QuizDetail toQuizDetail(Quiz quiz){
         List<String> options = Collections.emptyList();
 
