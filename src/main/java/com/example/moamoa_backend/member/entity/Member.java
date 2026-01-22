@@ -62,10 +62,6 @@ public class Member extends BaseEntity {
     @Column(nullable = true)
     private Integer weeklyGoal;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = true)
-    private SpareTime spareTime;
-
     @Column(nullable = true)
     private String phoneNumber;
 
@@ -75,4 +71,10 @@ public class Member extends BaseEntity {
 
     @Column(nullable = false)
     private LocalDate birthday;
+
+    public void updateDailyGoal(Integer dailyGoal) {
+        this.dailyGoal = dailyGoal;
+        this.weeklyGoal = (dailyGoal == null) ? null : dailyGoal * 7;
+    }
+
 }

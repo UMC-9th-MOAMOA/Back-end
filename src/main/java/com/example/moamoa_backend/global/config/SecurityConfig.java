@@ -31,7 +31,7 @@ public class SecurityConfig {
     private final String[] allowUris = {
             "/api/v1/auth/signup",
             "/api/v1/auth/login",
-            "/api/v1/auth/reissue",
+            "/api/v1/auth/refresh",
             "/api/v1/auth/email/send-verification",
             "/api/v1/auth/email/verify",
             "/actuator/health/**",
@@ -40,7 +40,8 @@ public class SecurityConfig {
 
     // 관리자만 접근 가능
     private final String[] adminUris = {
-            "/api/v1/missions/admin"
+            "/api/v1/missions/admin",
+            "/api/v1/admin/**"
     };
 
     @Bean
@@ -92,7 +93,9 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(Arrays.asList(
                 "http://localhost:3000",       // 로컬 테스트용
                 "https://moamoa.io.kr",
-                "https://www.moamoa.io.kr"
+                "https://www.moamoa.io.kr",
+                "https://moamoamoa.netlify.app",
+                "https://api.moamoa.io.kr"
         ));
 
         // 허용할 HTTP 메서드

@@ -27,7 +27,15 @@ public enum MemberSuccessCode implements BaseSuccessCode {
 
     MEMBER_WITHDRAW(HttpStatus.OK,
             "MEMBER200_4",
-            "회원 탈퇴가 완료되었습니다.");
+            "회원 탈퇴가 완료되었습니다."),
+
+    MEMBER_GET_ONBOARDING(HttpStatus.OK,
+        "MEMBER200_5",
+        "온보딩 조회에 성공했습니다."),
+
+    MEMBER_UPDATE_ONBOARDING(HttpStatus.OK,
+        "MEMBER200_6",
+        "온보딩 수정에 성공했습니다.");
 
     private final HttpStatus status;
     private final String code;
