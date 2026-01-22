@@ -415,4 +415,35 @@ public class AuthService {
                 .build();
     }
 
+    /**
+     * 임시 코드(OAuthCode)를 검증하고 AccessToken을 반환
+     * 소셜 로그인에서 accessToken 최초 발급 시 사용
+     */
+    @Transactional
+    public AuthResDto.TokenDto exchangeAuthCode(String code) {
+        // 1. Redis Key 생성
+        String redisKey = "OAUTH_CODE:" + code;
+
+        // 2. Redis 조회
+        String accessToken = redisUtil.getData(redisKey);
+
+        // 3. 검증
+        if (accessToken == null) {
+            throw new AuthException(AuthErrorCode.INVALID_OAUTH_CODE);
+        }
+
+        // 4. 일회용 코드 파기
+        redisUtil.deleteData(redisKey);
+
+        AuthResDto.TokenDto tokenDto = AuthResDto.TokenDto.builder()
+                .grantType("Bearer")
+                .accessToken(accessToken)
+                .accessTokenExpiresIn(jwtUtil.getAccessTokenValidity())
+                .build();
+
+
+        // 5. 토큰 반환
+        return tokenDto;
+    }
+
 }

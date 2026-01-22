@@ -22,6 +22,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * OAuth2 인증 성공 시 실행되는 핸들러 (Authorization Server -> Client)
@@ -81,8 +82,16 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         // Access Token -> 리다이렉트 URL 쿼리 파라미터에 담아 프론트엔드로 전달
         response.addCookie(createCookie("refreshToken", refreshToken, refreshTokenExpireSeconds));
 
+        // 6 임시 코드 생성
+        String authCode = UUID.randomUUID().toString();
+
+        // 7 Redis에 임시 코드 저장 (Key: authCode, Value: accessToken)
+        // 유효시간은 30초 (프론트가 받자마자 바로 교환 요청할 것이므로)
+        redisUtil.setDataExpire("OAUTH_CODE:" + authCode, accessToken, 30);
+
+        // 8 리다이렉트 URL 생성 (accessToken 대신 authCode 전달)
         String targetUrl = UriComponentsBuilder.fromUriString(frontUrl + "/oauth/callback")
-                .queryParam("accessToken", accessToken)
+                .queryParam("code", authCode)
                 .build().toUriString();
 
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
