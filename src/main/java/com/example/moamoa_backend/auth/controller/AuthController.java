@@ -139,8 +139,9 @@ public class AuthController {
      * - 프론트엔드: 리다이렉트 URL의 'code' 파라미터를 Body에 담아 호출
      * - 백엔드: Redis 검증 후 Access Token 반환
      */
-    @PostMapping("/oauth2/token")
     @Operation(summary = "소셜로그인 초기 토큰 발급 API", description = "소셜 로그인 이후 redirect URL의 code 파라미터를 이용해 accessToken을 발급받습니다.")
+    @SecurityRequirements(value = {})
+    @PostMapping("/oauth2/token")
     public ApiResponse<AuthResDto.TokenDto> getAccessToken(@RequestBody @Valid AuthReqDto.OAuthLoginReqDto request) {
 
         // 서비스 호출 (Redis 조회 및 토큰 교환) 및 결과 return
