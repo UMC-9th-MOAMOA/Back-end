@@ -143,16 +143,8 @@ public class AuthController {
     @Operation(summary = "소셜로그인 초기 토큰 발급 API", description = "소셜 로그인 이후 redirect URL의 code 파라미터를 이용해 accessToken을 발급받습니다.")
     public ApiResponse<AuthResDto.TokenDto> getAccessToken(@RequestBody @Valid AuthReqDto.OAuthLoginReqDto request) {
 
-        String code = request.code();
-
-        // 1. 파라미터 검증
-        if (code == null || code.trim().isEmpty()) {
-            throw new AuthException(AuthErrorCode.EMPTY_OAUTH_CODE);
-        }
-
-        // 2. 서비스 호출 (Redis 조회 및 토큰 교환) 및 결과 return
-        return ApiResponse.onSuccess(AuthSuccessCode.LOGIN_SUCCESS, authService.exchangeAuthCode(code));
-
+        // 서비스 호출 (Redis 조회 및 토큰 교환) 및 결과 return
+        return ApiResponse.onSuccess(AuthSuccessCode.LOGIN_SUCCESS, authService.exchangeAuthCode(request.code()));
 
     }
 }

@@ -37,16 +37,16 @@ public enum AuthErrorCode implements BaseErrorCode {
             "AUTH400_7",
             "Refresh Token 쿠키가 요청에 포함되지 않았습니다."),
 
-    EMPTY_OAUTH_CODE(HttpStatus.BAD_REQUEST,
-            "AUTH400_8",
-            "OAuth 인증 코드가 입력되지 않았습니다."),
-
     LOGIN_FAILED(HttpStatus.UNAUTHORIZED,
             "AUTH401_1",
             "이메일 또는 비밀번호가 일치하지 않습니다."),
 
-    INVALID_OAUTH_CODE(HttpStatus.UNAUTHORIZED,
+    AUTHENTICATION_REQUIRED(HttpStatus.UNAUTHORIZED,
             "AUTH401_2",
+            "로그인이 필요합니다."),
+
+    INVALID_OAUTH_CODE(HttpStatus.UNAUTHORIZED,
+            "AUTH401_3",
             "유효하지 않거나 만료된 소셜 로그인 코드입니다."),
 
     ACCESS_DENIED(HttpStatus.FORBIDDEN,
