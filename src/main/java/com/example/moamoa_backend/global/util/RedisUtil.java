@@ -35,6 +35,11 @@ public class RedisUtil {
         stringRedisTemplate.delete(key);
     }
 
+    // 데이터 조회 + 삭제 (atomic)
+    public String getAndDeleteData(String key) {
+        return stringRedisTemplate.opsForValue().getAndDelete(key);
+    }
+
     // 값 1 증가, 증가된 값을 반환
     public Long increment(String key) {
         return stringRedisTemplate.opsForValue().increment(key);
