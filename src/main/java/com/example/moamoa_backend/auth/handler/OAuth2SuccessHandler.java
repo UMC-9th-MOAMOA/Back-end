@@ -9,12 +9,13 @@ import com.example.moamoa_backend.member.enums.Provider;
 import com.example.moamoa_backend.member.exception.MemberException;
 import com.example.moamoa_backend.member.exception.code.MemberErrorCode;
 import com.example.moamoa_backend.member.repository.MemberRepository;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -92,7 +93,8 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         // 5. 토큰 전달 및 리다이렉트 처리
         // Refresh Token -> 보안 강화를 위해 HttpOnly 쿠키에 담아 전달
         // Access Token -> 바로 전달하지 않고, 아래에서 임시 코드로 변환하여 전달
-        response.addCookie(createCookie("refreshToken", refreshToken, refreshTokenExpireSeconds));
+        ResponseCookie cookie = (createCookie("refreshToken", refreshToken, refreshTokenExpireSeconds));
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
         // 6 임시 코드 생성
         String authCode = UUID.randomUUID().toString();
@@ -115,12 +117,14 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
      * - 주의: setSecure(true)는 HTTPS 환경에서만 쿠키가 전송됨 (로컬 테스트 시 주의 필요)
      * - 추가: 기존 구현한 토큰 생성 로직과 동일하기 때문에 이후 refactor 필요! (중보코드)
      */
-    private Cookie createCookie(String key, String value, long maxAgeSeconds) {
-        Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge((int) maxAgeSeconds);
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        return cookie;
+    private ResponseCookie createCookie(String key, String value, long maxAgeSeconds) {
+        return ResponseCookie.from(key, value)
+                .path("/")
+                .sameSite("None")
+                .httpOnly(true)
+                .secure(true)
+                .maxAge(maxAgeSeconds)
+                .build();
+
     }
 }
