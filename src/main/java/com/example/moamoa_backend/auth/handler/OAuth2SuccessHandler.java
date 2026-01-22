@@ -1,5 +1,7 @@
 package com.example.moamoa_backend.auth.handler;
 
+import com.example.moamoa_backend.auth.exception.AuthException;
+import com.example.moamoa_backend.auth.exception.code.AuthErrorCode;
 import com.example.moamoa_backend.global.security.jwt.JwtUtil;
 import com.example.moamoa_backend.global.util.RedisUtil;
 import com.example.moamoa_backend.member.entity.Member;
@@ -55,9 +57,19 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         OAuth2AuthenticationToken authToken = (OAuth2AuthenticationToken) authentication;
         String registrationId = authToken.getAuthorizedClientRegistrationId();
-        Provider provider = Provider.valueOf(registrationId.toUpperCase());
+        Provider provider;
+        try {
+            provider = Provider.valueOf(registrationId.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            // 지원하지 않는 소셜 로그인일 경우 에러 처리
+            throw new AuthException(AuthErrorCode.UNSUPPORTED_OAUTH_PROVIDER); // 또는 적절한 에러
+        }
 
         String email = (String) attributes.get("email");
+        if (email == null || email.isBlank()) {
+            // 이메일 동의를 하지 않았거나, 제공하지 않는 경우
+            throw new AuthException(AuthErrorCode.EMAIL_NOT_PROVIDED); // 에러 코드 필요 시 추가 (또는 LOGIN_FAILED)
+        }
 
         // 2. 내부 회원 정보 조회 (JWT Payload 생성 목적)
         // Service 계층에서 이미 가입/업데이트 처리가 완료되었으므로, 여기서는 식별자(ID)와 권한(Role) 획득이 주 목적
@@ -79,7 +91,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         // 5. 토큰 전달 및 리다이렉트 처리
         // Refresh Token -> 보안 강화를 위해 HttpOnly 쿠키에 담아 전달
-        // Access Token -> 리다이렉트 URL 쿼리 파라미터에 담아 프론트엔드로 전달
+        // Access Token -> 바로 전달하지 않고, 아래에서 임시 코드로 변환하여 전달
         response.addCookie(createCookie("refreshToken", refreshToken, refreshTokenExpireSeconds));
 
         // 6 임시 코드 생성

@@ -37,6 +37,14 @@ public enum AuthErrorCode implements BaseErrorCode {
             "AUTH400_7",
             "Refresh Token 쿠키가 요청에 포함되지 않았습니다."),
 
+    UNSUPPORTED_OAUTH_PROVIDER(HttpStatus.BAD_REQUEST,
+            "AUTH400_8",
+            "지원하지 않는 소셜 로그인 플랫폼입니다."),
+
+    EMAIL_NOT_PROVIDED(HttpStatus.BAD_REQUEST,
+            "AUTH400_9",
+            "소셜 로그인 시 이메일 제공에 동의해야 서비스를 이용할 수 있습니다."),
+
     LOGIN_FAILED(HttpStatus.UNAUTHORIZED,
             "AUTH401_1",
             "이메일 또는 비밀번호가 일치하지 않습니다."),
