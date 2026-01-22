@@ -44,9 +44,13 @@ public enum AuthErrorCode implements BaseErrorCode {
     LOGIN_FAILED(HttpStatus.UNAUTHORIZED,
             "AUTH401_1",
             "이메일 또는 비밀번호가 일치하지 않습니다."),
-
-    INVALID_OAUTH_CODE(HttpStatus.UNAUTHORIZED,
+  
+    AUTHENTICATION_REQUIRED(HttpStatus.UNAUTHORIZED,
             "AUTH401_2",
+            "로그인이 필요합니다."),
+  
+   INVALID_OAUTH_CODE(HttpStatus.UNAUTHORIZED,
+            "AUTH401_3",
             "유효하지 않거나 만료된 소셜 로그인 코드입니다."),
 
     ACCESS_DENIED(HttpStatus.FORBIDDEN,
