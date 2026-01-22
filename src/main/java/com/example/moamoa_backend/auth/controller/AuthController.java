@@ -3,6 +3,8 @@ package com.example.moamoa_backend.auth.controller;
 import com.example.moamoa_backend.auth.converter.AuthConverter;
 import com.example.moamoa_backend.auth.dto.req.AuthReqDto;
 import com.example.moamoa_backend.auth.dto.req.AuthResDto;
+import com.example.moamoa_backend.auth.exception.AuthException;
+import com.example.moamoa_backend.auth.exception.code.AuthErrorCode;
 import com.example.moamoa_backend.auth.exception.code.AuthSuccessCode;
 import com.example.moamoa_backend.auth.service.AuthService;
 import com.example.moamoa_backend.global.apiPayload.response.ApiResponse;
@@ -130,5 +132,27 @@ public class AuthController {
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
         return ApiResponse.onSuccess(AuthSuccessCode.LOGOUT_SUCCESS, null);
+    }
+
+    /**
+     * [소셜 로그인 2단계] 임시 티켓(Code)을 Access Token으로 교환
+     * - 프론트엔드: 리다이렉트 URL의 'code' 파라미터를 Body에 담아 호출
+     * - 백엔드: Redis 검증 후 Access Token 반환
+     */
+    @PostMapping("/oauth2/token")
+    @Operation(summary = "소셜로그인 초기 토큰 발급 API", description = "소셜 로그인 이후 redirect URL의 code 파라미터를 이용해 accessToken을 발급받습니다.")
+    public ApiResponse<AuthResDto.TokenDto> getAccessToken(@RequestBody @Valid AuthReqDto.OAuthLoginReqDto request) {
+
+        String code = request.code();
+
+        // 1. 파라미터 검증
+        if (code == null || code.trim().isEmpty()) {
+            throw new AuthException(AuthErrorCode.EMPTY_OAUTH_CODE);
+        }
+
+        // 2. 서비스 호출 (Redis 조회 및 토큰 교환) 및 결과 return
+        return ApiResponse.onSuccess(AuthSuccessCode.LOGIN_SUCCESS, authService.exchangeAuthCode(code));
+
+
     }
 }

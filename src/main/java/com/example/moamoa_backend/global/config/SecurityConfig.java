@@ -38,6 +38,7 @@ public class SecurityConfig {
             "/api/v1/auth/email/send-verification",
             "/api/v1/auth/email/verify",
             "/api/v1/auth/google",
+            "/api/v1/auth/oauth2/token",
             "/actuator/health/**"
     };
 
