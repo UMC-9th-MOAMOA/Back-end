@@ -1,18 +1,17 @@
 package com.example.moamoa_backend.attendance.controller;
 
 import com.example.moamoa_backend.attendance.dto.AttendanceResponseDto;
+import com.example.moamoa_backend.attendance.dto.AttendanceWeekResponseDto;
 import com.example.moamoa_backend.attendance.exception.code.AttendanceSuccessCode;
 import com.example.moamoa_backend.attendance.service.command.AttendanceCommandService;
+import com.example.moamoa_backend.attendance.service.query.AttendanceQueryService;
 import com.example.moamoa_backend.global.apiPayload.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Attendance", description = "출석 관련 API")
 @RestController
@@ -20,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/attendance")
 public class AttendanceController {
     private final AttendanceCommandService attendanceCommandService;
-
+    private final AttendanceQueryService attendanceQueryService;
     @Operation(
             summary = "출석 체크",
             description = """
@@ -40,6 +39,24 @@ public class AttendanceController {
         return ApiResponse.onSuccess(
                 AttendanceSuccessCode.ATTENDANCE_CHECK_IN_SUCCESS,
                 result
+        );
+    }
+
+    // ✅ 새로 추가: 연속 출석 일수 조회 (다른 화면용)
+    @Operation(
+            summary = "연속 출석 일수 조회",
+            description = "팝업 외 다른 화면에서 연속 출석 일수(streak)만 필요할 때 사용하는 API입니다."
+    )
+    @GetMapping("/week")
+    public ApiResponse<AttendanceWeekResponseDto.Response> getWeekStreak(
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        Long memberId = Long.parseLong(userDetails.getUsername());
+        int streak = attendanceQueryService.getCurrentStreak(memberId);
+
+        return ApiResponse.onSuccess(
+                AttendanceSuccessCode.ATTENDANCE_WEEK_STREAK_SUCCESS,
+                new AttendanceWeekResponseDto.Response(streak)
         );
     }
 }

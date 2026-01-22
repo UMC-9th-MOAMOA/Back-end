@@ -13,8 +13,12 @@ public enum AttendanceSuccessCode implements BaseSuccessCode {
             HttpStatus.OK,
             "ATTENDANCE_200",
             "출석 체크에 성공했습니다."
+    ),
+    ATTENDANCE_WEEK_STREAK_SUCCESS(
+            HttpStatus.OK,
+        "ATTENDANCE_200_002",
+                "연속 출석 일수 조회에 성공했습니다."
     );
-
     private final HttpStatus status;
     private final String code;
     private final String message;
