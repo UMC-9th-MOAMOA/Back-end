@@ -23,4 +23,17 @@ public class Wallet extends BaseEntity {
     @Column(nullable = false)
     private Integer point;
 
+    private Wallet(Member member, Integer point) {
+        this.member = member;
+        this.point = point;
+    }
+
+    public static Wallet create(Member member) {
+        return new Wallet(member, 0);
+    }
+
+    public void addPoint(int amount) {
+        if (amount <= 0) throw new IllegalArgumentException("amount must be positive");
+        this.point += amount;
+    }
 }
