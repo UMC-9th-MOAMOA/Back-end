@@ -151,6 +151,10 @@ public class ItemShopService {
 	 */
 	@Transactional
 	public AvatarEquipmentResponseDto equip(Long memberId, Long itemId) {
+
+		memberRepository.findByIdForUpdate(memberId)
+			.orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+
 		MemberItem target = memberItemRepository.findByMemberIdAndItemId(memberId, itemId)
 			.orElseThrow(() -> new ItemException(ItemErrorCode.ITEM_NOT_OWNED));
 

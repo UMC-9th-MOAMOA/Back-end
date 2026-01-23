@@ -3,12 +3,16 @@ package com.example.moamoa_backend.member.repository;
 import com.example.moamoa_backend.member.entity.Member;
 import com.example.moamoa_backend.member.enums.Provider;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+
+import jakarta.persistence.LockModeType;
 
 @Repository
 public interface MemberRepository extends JpaRepository<Member,Long> {
@@ -18,6 +22,10 @@ public interface MemberRepository extends JpaRepository<Member,Long> {
     Optional<Member> findByEmailAndProvider(String email, Provider provider);
 
     Optional<Member> findByProviderAndProviderId(Provider provider, String providerId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select m from Member m where m.id = :memberId")
+    Optional<Member> findByIdForUpdate(@Param("memberId") Long memberId);
 
     @Query("""
         select m
