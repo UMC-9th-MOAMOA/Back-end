@@ -1,7 +1,25 @@
 server:
   port: 8080
 
+app:
+  front-url: ${FRONT_URL:http://localhost:3000}
+
 spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+
+            scope:
+              - profile
+              - email
+
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+
+            client-name: Google
   mail:
     host: smtp.gmail.com
     port: 587

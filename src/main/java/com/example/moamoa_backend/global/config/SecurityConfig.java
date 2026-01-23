@@ -1,5 +1,7 @@
 package com.example.moamoa_backend.global.config;
 
+import com.example.moamoa_backend.auth.handler.OAuth2SuccessHandler;
+import com.example.moamoa_backend.auth.service.CustomOAuth2UserService;
 import com.example.moamoa_backend.global.security.jwt.JwtAuthFilter;
 import com.example.moamoa_backend.global.security.jwt.JwtAuthenticationEntryPoint;
 import com.example.moamoa_backend.member.enums.Role;
@@ -26,7 +28,8 @@ public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
-
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
     // 로그인 필요X - 모두 접근 가능
     private final String[] allowUris = {
             "/api/v1/auth/signup",
@@ -34,6 +37,8 @@ public class SecurityConfig {
             "/api/v1/auth/refresh",
             "/api/v1/auth/email/send-verification",
             "/api/v1/auth/email/verify",
+            "/api/v1/auth/google",
+            "/api/v1/auth/oauth2/token",
             "/actuator/health/**"
     };
 
@@ -77,7 +82,19 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
 
                 .exceptionHandling(exception -> exception
-                .authenticationEntryPoint(jwtAuthenticationEntryPoint));
+                .authenticationEntryPoint(jwtAuthenticationEntryPoint))
+
+                //
+                .oauth2Login(oauth2 -> oauth2
+
+                        .authorizationEndpoint(endpoint -> endpoint
+                                .baseUri("/api/v1/auth/social")
+                        )
+                        .userInfoEndpoint(endpoint -> endpoint
+                                .userService(customOAuth2UserService)
+                        )
+                        .successHandler(oAuth2SuccessHandler)
+                );
 
 
         return http.build();

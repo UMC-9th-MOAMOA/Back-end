@@ -97,4 +97,10 @@ public class AuthReqDto {
             String refreshToken
     ){}
 
+    // 소셜 로그인 시 accessToken 요청
+    public record OAuthLoginReqDto(
+            @NotBlank (message = "인증 코드는 필수입니다.")
+            String code
+    ){}
+
 }

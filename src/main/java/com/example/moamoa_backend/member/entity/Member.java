@@ -66,10 +66,10 @@ public class Member extends BaseEntity {
     private String phoneNumber;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Gender gender;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private LocalDate birthday;
 
     public void updateDailyGoal(Integer dailyGoal) {
