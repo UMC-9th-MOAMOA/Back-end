@@ -66,12 +66,6 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             throw new AuthException(AuthErrorCode.UNSUPPORTED_OAUTH_PROVIDER); // 또는 적절한 에러
         }
 
-        String email = (String) attributes.get("email");
-        if (email == null || email.isBlank()) {
-            // 이메일 동의를 하지 않았거나, 제공하지 않는 경우
-            throw new AuthException(AuthErrorCode.EMAIL_NOT_PROVIDED); // 에러 코드 필요 시 추가 (또는 LOGIN_FAILED)
-        }
-
         String providerId = (String) attributes.get("providerId");
 
         // 2. 내부 회원 정보 조회 (JWT Payload 생성 목적)
