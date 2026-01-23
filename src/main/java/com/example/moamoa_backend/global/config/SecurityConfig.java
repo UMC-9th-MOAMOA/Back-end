@@ -1,6 +1,7 @@
 package com.example.moamoa_backend.global.config;
 
 import com.example.moamoa_backend.auth.handler.OAuth2SuccessHandler;
+import com.example.moamoa_backend.auth.repository.HttpCookieOAuth2AuthorizationRequestRepository;
 import com.example.moamoa_backend.auth.service.CustomOAuth2UserService;
 import com.example.moamoa_backend.global.security.jwt.JwtAuthFilter;
 import com.example.moamoa_backend.global.security.jwt.JwtAuthenticationEntryPoint;
@@ -30,6 +31,8 @@ public class SecurityConfig {
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
+    private final HttpCookieOAuth2AuthorizationRequestRepository cookieAuthorizationRequestRepository;
+
     // 로그인 필요X - 모두 접근 가능
     private final String[] allowUris = {
             "/api/v1/auth/signup", // 회원가입
@@ -90,6 +93,7 @@ public class SecurityConfig {
 
                         .authorizationEndpoint(endpoint -> endpoint
                                 .baseUri("/api/v1/auth/social")
+                                .authorizationRequestRepository(cookieAuthorizationRequestRepository)
                         )
                         .userInfoEndpoint(endpoint -> endpoint
                                 .userService(customOAuth2UserService)
