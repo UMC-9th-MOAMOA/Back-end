@@ -52,7 +52,12 @@ public class HttpCookieOAuth2AuthorizationRequestRepository
             HttpServletRequest request,
             HttpServletResponse response) {
 
-        return this.loadAuthorizationRequest(request);
+        OAuth2AuthorizationRequest authorizationRequest = this.loadAuthorizationRequest(request);
+        if (authorizationRequest != null) {
+            this.removeAuthorizationRequestCookies(request, response);
+        }
+
+        return authorizationRequest;
     }
 
     public void removeAuthorizationRequestCookies(
