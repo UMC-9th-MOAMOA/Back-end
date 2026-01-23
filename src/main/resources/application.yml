@@ -1,5 +1,6 @@
 server:
   port: 8080
+  forward-headers-strategy: framework
 
 app:
   front-url: ${FRONT_URL:http://localhost:3000}

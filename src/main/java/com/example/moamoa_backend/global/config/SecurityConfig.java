@@ -32,13 +32,14 @@ public class SecurityConfig {
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
     // 로그인 필요X - 모두 접근 가능
     private final String[] allowUris = {
-            "/api/v1/auth/signup",
-            "/api/v1/auth/login",
-            "/api/v1/auth/refresh",
-            "/api/v1/auth/email/send-verification",
-            "/api/v1/auth/email/verify",
-            "/api/v1/auth/google",
-            "/api/v1/auth/oauth2/token",
+            "/api/v1/auth/signup", // 회원가입
+            "/api/v1/auth/login", //로그인
+            "/api/v1/auth/refresh", // 재발급
+            "/api/v1/auth/email/send-verification", // 이메일 전송
+            "/api/v1/auth/email/verify", // 이메일 인증
+            "/api/v1/auth/oauth2/token", // 소셜 로그인 후 토큰 발급
+            "/api/v1/auth/social/**", // 소셜 로그인 요청
+            "/login/**", //소셜 로그인 이후 돌아옴
             "/actuator/health/**"
     };
 
