@@ -72,9 +72,11 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             throw new AuthException(AuthErrorCode.EMAIL_NOT_PROVIDED); // 에러 코드 필요 시 추가 (또는 LOGIN_FAILED)
         }
 
+        String providerId = (String) attributes.get("providerId");
+
         // 2. 내부 회원 정보 조회 (JWT Payload 생성 목적)
         // Service 계층에서 이미 가입/업데이트 처리가 완료되었으므로, 여기서는 식별자(ID)와 권한(Role) 획득이 주 목적
-        Member member = memberRepository.findByEmailAndProvider(email, provider)
+        Member member = memberRepository.findByProviderAndProviderId(provider, providerId)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
         // 3. JWT 토큰 발급

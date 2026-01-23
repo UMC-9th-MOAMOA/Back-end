@@ -14,13 +14,12 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Table(uniqueConstraints = {
+        // [하나의 소셜 로그인 계정으로 하나의 서비스 계정 보장]
+        // 소셜 로그인 계정은 email이 null일 수 있기 때문에 email 관련된 제약조건을 추가할 수 없음
+        // 이에 따라 LOCAL 계정의 providerId에는 email을 넣어서 해당 문제 해결
         @UniqueConstraint(
-                name = "uk_member_provider_id", // 제약조건 이름
-                columnNames = {"provider", "providerId"} // 두 컬럼 조합 유일
-        ),
-        @UniqueConstraint(
-                name = "uk_member_email_provider",
-                columnNames = {"email", "provider"}
+                name = "uk_member_provider_id",
+                columnNames = {"provider", "providerId"}
         )
 })
 public class Member extends BaseEntity {

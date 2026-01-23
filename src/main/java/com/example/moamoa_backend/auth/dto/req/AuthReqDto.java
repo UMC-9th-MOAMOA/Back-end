@@ -67,6 +67,7 @@ public class AuthReqDto {
                     .gender(gender)
                     .role(Role.ROLE_USER)
                     .provider(Provider.LOCAL)
+                    .providerId(email)
                     .status(MemberStatus.ACTIVE)
                     .build();
         }
