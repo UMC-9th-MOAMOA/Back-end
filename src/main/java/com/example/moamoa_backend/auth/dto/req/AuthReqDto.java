@@ -14,6 +14,9 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.util.List;
 
+/**
+ * 인증 관련 Request DTO
+ */
 public class AuthReqDto {
 
     // 이메일 전송 요청

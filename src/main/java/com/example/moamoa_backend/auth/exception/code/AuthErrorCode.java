@@ -22,14 +22,17 @@ public enum AuthErrorCode implements BaseErrorCode {
             "AUTH400_3",
             "존재하지 않는 약관이 포함되어 있습니다."),
 
+    // 이메일 검증 성공 이후 회원가입까지 오래걸릴 경우
     VERIFICATION_CODE_EXPIRED(HttpStatus.BAD_REQUEST,
             "AUTH400_4",
             "인증 시간이 만료되었습니다. 다시 발송해주세요."),
 
+    // 이메일 인증번호 검증 최대 횟수 제한
     VERIFICATION_ATTEMPTS_EXCEEDED(HttpStatus.BAD_REQUEST,
             "AUTH400_5",
             "인증 시도 횟수를 초과했습니다. 다시 발송해주세요."),
 
+    // 하나의 이메일에 검증메일 cool-down
     EMAIL_SEND_BLOCKED(HttpStatus.BAD_REQUEST,
             "AUTH400_6",
             "이메일 재전송은 30초 뒤에 가능합니다."),
@@ -41,10 +44,6 @@ public enum AuthErrorCode implements BaseErrorCode {
     UNSUPPORTED_OAUTH_PROVIDER(HttpStatus.BAD_REQUEST,
             "AUTH400_8",
             "지원하지 않는 소셜 로그인 플랫폼입니다."),
-
-    EMAIL_NOT_PROVIDED(HttpStatus.BAD_REQUEST,
-            "AUTH400_9",
-            "소셜 로그인 시 이메일 제공에 동의해야 서비스를 이용할 수 있습니다."),
 
     INVALID_RECOVER_REQUEST(HttpStatus.BAD_REQUEST,
             "AUTH400_10",
@@ -59,6 +58,7 @@ public enum AuthErrorCode implements BaseErrorCode {
             "AUTH401_2",
             "로그인이 필요합니다."),
 
+    // 소셜 로그인 redirect 코드로 최초 토큰발급 상황
     INVALID_OAUTH_CODE(HttpStatus.UNAUTHORIZED,
             "AUTH401_3",
             "유효하지 않거나 만료된 소셜 로그인 코드입니다."),
