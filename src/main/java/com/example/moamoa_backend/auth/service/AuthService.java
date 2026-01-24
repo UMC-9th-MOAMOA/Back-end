@@ -1,10 +1,9 @@
 package com.example.moamoa_backend.auth.service;
 
 import com.example.moamoa_backend.auth.dto.req.AuthReqDto;
-import com.example.moamoa_backend.auth.dto.req.AuthResDto;
+import com.example.moamoa_backend.auth.dto.res.AuthResDto;
 import com.example.moamoa_backend.auth.exception.AuthException;
 import com.example.moamoa_backend.auth.exception.code.AuthErrorCode;
-import com.example.moamoa_backend.global.apiPayload.response.ApiResponse;
 import com.example.moamoa_backend.global.security.jwt.JwtUtil;
 import com.example.moamoa_backend.global.security.jwt.exception.JwtException;
 import com.example.moamoa_backend.global.security.jwt.exception.code.JwtErrorCode;
@@ -80,7 +79,7 @@ public class AuthService {
     // 이메일 인증번호 전송
     public void sendEmailAuthCode(String email, String clientIp) {
         // 중복 가입 체크
-        if (memberRepository.existsByEmailAndProvider(email, Provider.LOCAL)) {
+        if (memberRepository.findByProviderAndProviderId(Provider.LOCAL, email).isPresent()) {
             throw new MemberException(MemberErrorCode.EMAIL_ALREADY_EXISTS);
         }
 
@@ -205,7 +204,7 @@ public class AuthService {
         }
 
         // 이메일 중복 체크 (Double Check: 동시성 이슈 및 방어 로직)
-        if (memberRepository.existsByEmailAndProvider(request.email(), Provider.LOCAL)) {
+        if (memberRepository.findByProviderAndProviderId(Provider.LOCAL, request.email()).isPresent()) {
             throw new MemberException(MemberErrorCode.EMAIL_ALREADY_EXISTS);
         }
 
@@ -233,7 +232,7 @@ public class AuthService {
     @Transactional
     public AuthResDto.GeneratedTokenDto login(AuthReqDto.LoginDto request) {
         // 1. 이메일로 회원 조회
-        Member member = memberRepository.findByEmailAndProvider(request.email(),Provider.LOCAL)
+        Member member = memberRepository.findByProviderAndProviderId(Provider.LOCAL, request.email())
                 .orElseThrow(() -> new AuthException(AuthErrorCode.LOGIN_FAILED));
 
         // 2. 비밀번호 검증

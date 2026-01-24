@@ -1,6 +1,6 @@
 package com.example.moamoa_backend.auth.converter;
 
-import com.example.moamoa_backend.auth.dto.req.AuthResDto;
+import com.example.moamoa_backend.auth.dto.res.AuthResDto;
 
 public class AuthConverter {
 

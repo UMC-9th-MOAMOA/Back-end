@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 소셜 로그인 후처리를 담당하는 Service
@@ -52,11 +54,15 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         // 4. 사용자 영속화 (신규 가입 or 기존 회원 조회)
         Member member = saveOrUpdate(attributes);
 
-        // 5. Principal 반환 (SecurityContext 저장용)
+        // 5. attributes에 providerId 추가 (OAuth2SuccessHandler에서 사용하기 위해)
+        Map<String, Object> modifiedAttributes = new HashMap<>(attributes.getAttributes());
+        modifiedAttributes.put("providerId", attributes.getProviderId());
+
+        // 6. Principal 반환 (SecurityContext 저장용)
         // Role 정보와 함께 반환하여 이후 권한 제어(Authorize)에 사용됨
         return new DefaultOAuth2User(
                 Collections.singleton(new SimpleGrantedAuthority(member.getRole().name())),
-                attributes.getAttributes(),
+                modifiedAttributes,
                 attributes.getNameAttributeKey()
         );
     }
@@ -67,7 +73,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
      * - 신규 회원: Provider 정보를 기반으로 DB Insert
      */
     private Member saveOrUpdate(OAuthAttributes attributes) {
-        Member member = memberRepository.findByEmailAndProvider(attributes.getEmail(), attributes.getProvider())
+        Member member = memberRepository.findByProviderAndProviderId(attributes.getProvider(), attributes.getProviderId())
                 .orElse(null);
 
         if (member != null) {
