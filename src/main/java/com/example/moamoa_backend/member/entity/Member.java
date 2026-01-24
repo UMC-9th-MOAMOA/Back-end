@@ -61,6 +61,24 @@ public class Member extends BaseEntity {
     @Column(nullable = true)
     private Integer weeklyGoal;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = true)
+    private GoalRetention goalRetention;
+
+    @Column(nullable = true)
+    private LocalDate goalEndDate;
+
+    @Column(nullable = true)
+    private Integer pendingDailyGoal;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = true)
+    private GoalRetention pendingGoalRetention;
+
+    @Column(nullable = true)
+    private LocalDate pendingApplyDate;
+
+
     @Column(nullable = true)
     private String phoneNumber;
 
@@ -74,6 +92,32 @@ public class Member extends BaseEntity {
     public void updateDailyGoal(Integer dailyGoal) {
         this.dailyGoal = dailyGoal;
         this.weeklyGoal = (dailyGoal == null) ? null : dailyGoal * 7;
+    }
+    public void applyGoalSetting(Integer dailyGoal, GoalRetention retention, LocalDate startDate) {
+        if (dailyGoal == null) {
+            this.dailyGoal = null;
+            this.weeklyGoal = null;
+            this.goalRetention = null;
+            this.goalEndDate = null;
+            return;
+        }
+
+        this.dailyGoal = dailyGoal;
+        this.weeklyGoal = dailyGoal * 7;
+        this.goalRetention = retention;
+        this.goalEndDate = retention == null ? null : retention.calculateEndDate(startDate);
+    }
+
+    public void scheduleGoalSetting(Integer dailyGoal, GoalRetention retention, LocalDate applyDate) {
+        this.pendingDailyGoal = dailyGoal;
+        this.pendingGoalRetention = retention;
+        this.pendingApplyDate = applyDate;
+    }
+
+    public void clearPendingGoalSetting() {
+        this.pendingDailyGoal = null;
+        this.pendingGoalRetention = null;
+        this.pendingApplyDate = null;
     }
 
 }
