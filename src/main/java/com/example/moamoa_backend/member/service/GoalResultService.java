@@ -147,7 +147,7 @@ public class GoalResultService {
 		return Math.toIntExact(
 			walletHistoryRepository.countByMemberAndTypeBetween(
 				memberId,
-				TransactionType.MISSION,
+				TransactionType.MISSION_COMPLETE,
 				startAt,
 				endAt
 			)
