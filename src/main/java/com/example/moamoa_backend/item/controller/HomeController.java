@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.moamoa_backend.auth.exception.AuthException;
+import com.example.moamoa_backend.auth.exception.code.AuthErrorCode;
 import com.example.moamoa_backend.global.apiPayload.response.ApiResponse;
 import com.example.moamoa_backend.item.dto.HomeResponseDto;
 import com.example.moamoa_backend.item.exception.code.ItemSuccessCode;
@@ -26,13 +28,9 @@ public class HomeController {
 	public ApiResponse<HomeResponseDto> getHome(
 		@AuthenticationPrincipal UserDetails userDetails
 	) {
-		Long memberId = extractMemberId(userDetails);
+		Long memberId = Long.parseLong(userDetails.getUsername());
 		HomeResponseDto result = homeService.getHome(memberId);
 
 		return ApiResponse.onSuccess(ItemSuccessCode.HOME_OK, result);
-	}
-
-	private Long extractMemberId(UserDetails userDetails) {
-		return Long.parseLong(userDetails.getUsername());
 	}
 }
