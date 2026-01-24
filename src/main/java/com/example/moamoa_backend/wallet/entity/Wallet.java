@@ -2,6 +2,9 @@ package com.example.moamoa_backend.wallet.entity;
 
 import com.example.moamoa_backend.global.entity.BaseEntity;
 import com.example.moamoa_backend.member.entity.Member;
+import com.example.moamoa_backend.wallet.exception.WalletException;
+import com.example.moamoa_backend.wallet.exception.code.WalletErrorCode;
+
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -33,7 +36,19 @@ public class Wallet extends BaseEntity {
     }
 
     public void addPoint(int amount) {
-        if (amount <= 0) throw new IllegalArgumentException("amount must be positive");
+        if (amount <= 0) {
+            throw new WalletException(WalletErrorCode.INVALID_AMOUNT);
+        }
         this.point += amount;
+    }
+
+    public void usePoint(int amount) {
+        if (amount <= 0) {
+            throw new WalletException(WalletErrorCode.INVALID_AMOUNT);
+        }
+        if (this.point < amount) {
+            throw new WalletException(WalletErrorCode.INSUFFICIENT_POINTS);
+        }
+        this.point -= amount;
     }
 }
