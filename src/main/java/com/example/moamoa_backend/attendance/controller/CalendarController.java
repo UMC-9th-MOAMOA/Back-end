@@ -9,10 +9,13 @@ import com.example.moamoa_backend.wallet.exception.code.WalletSuccessCode;
 import com.example.moamoa_backend.wallet.service.command.WalletHistoryQueryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,6 +26,7 @@ import java.time.LocalDate;
 @Tag(name = "Calendar", description = "캘린더 API")
 @RestController
 @RequiredArgsConstructor
+@Validated
 @RequestMapping("/api/v1/space/calendar")
 public class CalendarController {
 
@@ -40,8 +44,15 @@ public class CalendarController {
     @GetMapping("/calendar")
     public ApiResponse<AttendanceMonthResponseDto.Response> getMonthStatus(
             @AuthenticationPrincipal UserDetails userDetails,
-            @RequestParam int year,
-            @RequestParam int month
+            @RequestParam
+            @Min(value = 1900, message = "연도는 1900년 이상이어야 합니다")
+            @Max(value = 2100, message = "연도는 2100년 이하여야 합니다")
+            int year,
+
+            @RequestParam
+            @Min(value = 1, message = "월은 1 이상이어야 합니다")
+            @Max(value = 12, message = "월은 12 이하여야 합니다")
+            int month
     ) {
         Long memberId = Long.parseLong(userDetails.getUsername());
         AttendanceMonthResponseDto.Response result =

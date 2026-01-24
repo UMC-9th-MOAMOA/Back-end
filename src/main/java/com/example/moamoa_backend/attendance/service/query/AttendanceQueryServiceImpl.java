@@ -34,9 +34,6 @@ public class AttendanceQueryServiceImpl implements AttendanceQueryService{
 
     @Override
     public AttendanceMonthResponseDto.Response getMonthStatus(Long memberId, int year, int month) {
-        if (month < 1 || month > 12) {
-            throw new IllegalArgumentException("month must be 1~12");
-        }
 
         YearMonth ym = YearMonth.of(year, month);
         LocalDate startDate = ym.atDay(1);
