@@ -16,11 +16,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
@@ -180,6 +182,23 @@ public class MissionConverter {
                 .keywords(keywords)
                 .isScrapped(isScrapped)
                 .videoUrl(mission.getVideoUrl())
+                .build();
+    }
+
+    public MissionResponseDto.SearchResponse toSearchResponse(Slice<Mission> missionSlice, Map<Long, MemberMission> myMissionMap){
+        List<MissionResponseDto.RecommendResult> missinDtos = missionSlice.getContent().stream()
+                .map(mission -> {
+                    MemberMission mm = myMissionMap.get(mission.getId());
+
+                    boolean isScrapped = (mm!=null && mm.getMissionStatus() == MissionStatus.SCRAP);
+
+                    return toRecommendResult(mission,isScrapped);
+                })
+                .collect(Collectors.toList());
+
+        return MissionResponseDto.SearchResponse.builder()
+                .missions(missinDtos)
+                .hasNext(missionSlice.hasNext())
                 .build();
     }
 

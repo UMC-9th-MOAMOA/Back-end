@@ -1,6 +1,7 @@
 package com.example.moamoa_backend.mission.entity;
 
 import com.example.moamoa_backend.global.entity.BaseEntity;
+import com.example.moamoa_backend.member.entity.mapping.MemberMission;
 import com.example.moamoa_backend.mission.entity.mapping.MissionKeyword;
 import com.example.moamoa_backend.mission.entity.mapping.MissionSubInterest;
 import com.example.moamoa_backend.quiz.entity.Quiz;
@@ -50,4 +51,5 @@ public class Mission extends BaseEntity {
     @Builder.Default
     @OneToMany(mappedBy = "mission", cascade = CascadeType.ALL)
     private List<MissionSubInterest> missionSubInterests = new ArrayList<>();
+
 }

@@ -1,5 +1,6 @@
 package com.example.moamoa_backend.mission.entity.mapping;
 
+import com.example.moamoa_backend.global.entity.BaseEntity;
 import com.example.moamoa_backend.keyword.entity.Keyword;
 import com.example.moamoa_backend.mission.entity.Mission;
 import jakarta.persistence.*;
@@ -10,7 +11,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
-public class MissionKeyword {
+public class MissionKeyword extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

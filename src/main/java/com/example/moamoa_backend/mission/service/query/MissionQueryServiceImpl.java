@@ -16,11 +16,15 @@ import com.example.moamoa_backend.mission.exception.MissionException;
 import com.example.moamoa_backend.mission.exception.code.MissionErrorCode;
 import com.example.moamoa_backend.mission.repository.MissionRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -85,4 +89,26 @@ public class MissionQueryServiceImpl implements MissionQueryService{
 
     }
 
+    @Override
+    public MissionResponseDto.SearchResponse searchMissions(
+            Long memberId, String searchText, List<String> keywords,
+            Long categoryId, Long subCategoryId, Long seed, Pageable pageable
+    ){
+        Slice<Mission> missionSlice = missionRepository.searchMissions(
+                memberId,searchText,keywords,categoryId,subCategoryId,seed,pageable
+        );
+
+        List<Long> missionIds = missionSlice.getContent().stream()
+                .map(Mission::getId)
+                .toList();
+
+        Map<Long,MemberMission> myMissionMap = memberMissionRepository
+                .findAllByMemberIdAndMissionIdIn(memberId,missionIds).stream()
+                .collect(Collectors.toMap(
+                        mm-> mm.getMission().getId(),
+                        mm -> mm
+                ));
+
+        return missionConverter.toSearchResponse(missionSlice,myMissionMap);
+    }
 }

@@ -77,4 +77,10 @@ public class MissionResponseDto {
        boolean isScrapped,
        String videoUrl
     ){}
+
+    @Builder
+    public record SearchResponse(
+      List<RecommendResult> missions,
+      boolean hasNext
+    ){}
 }

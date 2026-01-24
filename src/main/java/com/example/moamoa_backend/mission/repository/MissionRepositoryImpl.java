@@ -10,6 +10,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 
 import java.util.List;
 import static com.example.moamoa_backend.member.entity.mapping.QMemberMission.memberMission;
@@ -23,7 +24,6 @@ public class MissionRepositoryImpl implements MissionRepositoryCustom {
     public List<Mission> findTodayRecommendMission(Long memberId, List<Long> interestIds, Integer time) {
 
 
-        OrderSpecifier<Double> rankByRandom = Expressions.numberTemplate(Double.class, "function('rand')").asc();
 
         return queryFactory
                 .selectFrom(mission)
@@ -40,27 +40,53 @@ public class MissionRepositoryImpl implements MissionRepositoryCustom {
                 .orderBy(
                         orderByScrapFirst(),
                         orderByScrapDuration(),
-                        rankByRandom
+                        orderByRandom(null)
                 )
                 .limit(5)
                 .fetch();
     }
 
-//    public Slice<Mission> searchMissions(Long memberId, String searchText, List<String> keywords, Pageable pageable){
-//
-//        List<Mission> results = queryFactory
-//                .selectFrom(mission)
-//                .leftJoin(memberMission)
-//                .on(memberMission.mission.id.eq(mission.id)
-//                        .and(memberMission.member.id.eq(memberId))
-//                )
-//                .where(
-//                        contains
-//                )
-//                .orderBy(
-//
-//                )
-//    }
+    @Override
+    public Slice<Mission> searchMissions(
+            Long memberId,
+            String searchText, //검색어임. 없으면 null
+            List<String> keywords, //키워드. 없으면 null
+            Long categoryId, //대분류 ID. 없으면 null
+            Long subCategoryId, //소분류 ID. 없으면 null
+            Long seed, //랜덤 시드(무작위 정렬을 위함)
+            Pageable pageable
+    ){
+
+        List<Mission> results = queryFactory
+                .selectFrom(mission)
+                .leftJoin(memberMission)
+                .on(memberMission.mission.id.eq(mission.id)
+                        .and(memberMission.member.id.eq(memberId))
+                )
+                .where(
+                        containsSearchText(searchText),
+                        inKeywords(keywords),
+                        eqCategory(categoryId),
+                        eqSubCategory(subCategoryId),
+                        isAvailableMission()
+                )
+                .orderBy(
+                        orderByScrapFirst(),
+                        orderByScrapDuration(),
+                        orderByRandom(seed)
+                )
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize()+1)
+                .fetch();
+
+        boolean hasNext = false;
+        if(results.size() > pageable.getPageSize()){
+            results.remove(pageable.getPageSize());
+            hasNext = true;
+        }
+
+        return new SliceImpl<>(results, pageable, hasNext);
+    }
 
     private BooleanExpression durationLoe(Integer time) {
         return time != null ? mission.durationMinutes.loe(time) : null;
@@ -90,6 +116,37 @@ public class MissionRepositoryImpl implements MissionRepositoryCustom {
                         memberMission.missionStatus.eq(MissionStatus.NONE)
                                 .and(memberMission.attemptCount.eq(0))
                 );
+    }
+    //랜덤 정렬(시드 있으면 고정 랜덤, 없으면 완전 랜덤임! -> 무한 스크롤 페이징 중복 방지)
+    private OrderSpecifier<Double> orderByRandom(Long seed){
+        if(seed !=null && seed!=0L){
+            return Expressions.numberTemplate(Double.class, "function('rand',{0})", mission.id.add(seed)).asc();
+
+        }
+        return Expressions.numberTemplate(Double.class, "function('rand')").asc();
+    }
+
+    //제목 검색
+    private BooleanExpression containsSearchText(String searchText){
+        return (searchText == null || searchText.trim().isEmpty()) ? null
+                : mission.title.containsIgnoreCase(searchText);
+    }
+
+    //키워드 검색
+    private BooleanExpression inKeywords(List<String> keywords){
+        return (keywords == null || keywords.isEmpty()) ? null
+                : mission.missionKeywords.any().keyword.name.in(keywords);
+    }
+
+    //대분류 필터
+    private BooleanExpression eqCategory(Long categoryId){
+        return (categoryId ==null) ? null
+                : mission.missionSubInterests.any().subInterest.interest.id.eq(categoryId);
+    }
+    //소분류 필터
+    private BooleanExpression eqSubCategory(Long subCategoryId) {
+        return (subCategoryId == null) ? null
+                : mission.missionSubInterests.any().subInterest.id.eq(subCategoryId);
     }
 
 }

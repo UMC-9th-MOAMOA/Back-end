@@ -11,6 +11,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -108,6 +110,40 @@ public class MissionController {
         List<MissionResponseDto.RecommendResult> result = missionQueryService.getTodayRecommendMissions(memberId,time);
 
         return ApiResponse.onSuccess(GeneralSuccessCode.OK,result);
+    }
+
+    @GetMapping("/search")
+    @Operation(summary = "미션 검색 API", description = "검색어, 키워드로 미션을 검색합니다. 시드값 랜덤으로 검색할때 하나씩 보내주시면 됩니다. ")
+    public ApiResponse<MissionResponseDto.SearchResponse> searchMissions(
+       @AuthenticationPrincipal UserDetails userDetails,
+       @RequestParam(required = false) String searchText,
+       @RequestParam(required = false) List<String> keywords,
+       @RequestParam(required = false) Long seed,
+       @PageableDefault(size = 10) Pageable pageable
+    ){
+        Long memberId = Long.parseLong(userDetails.getUsername());
+
+        return ApiResponse.onSuccess(GeneralSuccessCode.OK,
+                missionQueryService.searchMissions(memberId, searchText, keywords, null, null, seed, pageable)
+        );
+    }
+
+    @GetMapping("/categories")
+    @Operation(summary = "카테고리별 미션 조회 API", description = "대분류(categoryId) 또는 소분류(subCategoryId)로 미션을 조회합니다.")
+    public ApiResponse<MissionResponseDto.SearchResponse> getMissionsByCategory(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) Long subCategoryId,
+            @RequestParam(required = false) Long seed,
+            @PageableDefault(size = 10) Pageable pageable
+    ) {
+        Long memberId = Long.parseLong(userDetails.getUsername());
+        Long searchSeed = (seed != null) ? seed : 0L;
+
+        return ApiResponse.onSuccess(
+                GeneralSuccessCode.OK,
+                missionQueryService.searchMissions(memberId, null, null, categoryId, subCategoryId, searchSeed, pageable)
+        );
     }
 }
 
