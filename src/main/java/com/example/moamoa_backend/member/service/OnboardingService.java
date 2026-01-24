@@ -48,6 +48,7 @@ public class OnboardingService {
 		Member member = memberRepository.findById(memberId)
 			.orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 		LocalDate today = LocalDate.now();
+		// 요청 시점에 예약 적용/만료를 우선 반영
 		goalMaintenanceService.applyGoalStateIfNeeded(member, today);
 
 
@@ -58,6 +59,7 @@ public class OnboardingService {
 
 				validateGoalRetentionIfPresent(req.dailyMissionGoal(), req.goalRetention());
 
+				// 목표 설정(즉시 적용 or 다음 주 예약)
 				updateGoalSetting(member, req.dailyMissionGoal(), req.goalRetention(), today);
 				updateMemberInterestsSmartSync(member, req.selections()); // 관심사 Smart Sync 반영
 
@@ -73,6 +75,7 @@ public class OnboardingService {
 				requireGoal(req.dailyMissionGoal());      // GOAL scope에서는 null 불가
 				validateGoalRange(req.dailyMissionGoal()); // 0~5 범위 검증
 				requireGoalRetention(req.goalRetention());
+				// 목표 설정(즉시 적용 or 다음 주 예약)
 				updateGoalSetting(member, req.dailyMissionGoal(), req.goalRetention(), today);
 				yield toOnboardingResponse(loadSelections(memberId), member);
 			}
@@ -88,6 +91,7 @@ public class OnboardingService {
 	public OnboardingResponseDto getMyOnboarding(Long memberId, OnboardingUpdateScope scope) {
 		Member member = memberRepository.findById(memberId)
 			.orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+		// 조회 시점에도 목표 상태를 최신으로 맞춘다.
 		goalMaintenanceService.applyGoalStateIfNeeded(member, LocalDate.now());
 
 		return switch (scope) {
@@ -137,6 +141,11 @@ public class OnboardingService {
 		}
 	}
 
+	/**
+	 * 목표 설정/변경 로직.
+	 * - dailyGoal이 null이면 목표 OFF 처리
+	 * - 월요일이면 즉시 적용, 그 외는 다음 주 월요일 예약
+	 */
 	private void updateGoalSetting(Member member, Integer dailyGoal, GoalRetention retention, LocalDate today) {
 		if (dailyGoal == null) {
 			member.applyGoalSetting(null, null, today);
@@ -148,12 +157,14 @@ public class OnboardingService {
 		LocalDate applyDate = goalMaintenanceService.resolveApplyDate(today);
 
 		if (applyDate.isEqual(today)) {
+			// 오늘 적용 가능한 경우: 동일 설정이면 skip
 			if (isSameGoalSetting(member, dailyGoal, resolvedRetention) && member.getPendingApplyDate() == null) {
 				return;
 			}
 			member.applyGoalSetting(dailyGoal, resolvedRetention, applyDate);
 			member.clearPendingGoalSetting();
 		} else {
+			// 다음 주 예약 적용
 			if (isSamePendingSetting(member, dailyGoal, resolvedRetention, applyDate)) {
 				return;
 			}
@@ -165,6 +176,7 @@ public class OnboardingService {
 		if (retention != null) {
 			return retention;
 		}
+		// 요청에 유지기간이 없으면 기존 값, 없으면 CONTINUE
 		return Optional.ofNullable(member.getGoalRetention()).orElse(GoalRetention.CONTINUE);
 	}
 

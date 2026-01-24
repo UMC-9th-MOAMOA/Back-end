@@ -32,6 +32,10 @@ public class GoalResultService {
 	private final MemberRepository memberRepository;
 	private final WalletHistoryRepository walletHistoryRepository;
 
+	/**
+	 * 특정 날짜의 일간 목표 결과를 조회한다.
+	 * - 결과가 없으면 가능한 경우 즉시 생성한다.
+	 */
 	@Transactional
 	public Optional<GoalResultResponseDto> getDailyGoalResult(Long memberId, LocalDate goalDate) {
 		return goalResultRepository
@@ -40,6 +44,11 @@ public class GoalResultService {
 			.or(() -> createDailyGoalResultIfPossible(memberId, goalDate));
 	}
 
+	/**
+	 * 특정 주차의 주간 목표 결과를 조회한다.
+	 * - dateInWeek 기준으로 해당 주의 일요일(주차 종료일) 결과를 반환한다.
+	 * - 결과가 없으면 가능한 경우 즉시 생성한다.
+	 */
 	@Transactional
 	public Optional<GoalResultResponseDto> getWeeklyGoalResult(Long memberId, LocalDate dateInWeek) {
 		LocalDate weekEnd = resolveWeekEnd(dateInWeek);
@@ -49,6 +58,10 @@ public class GoalResultService {
 			.or(() -> createWeeklyGoalResultIfPossible(memberId, weekEnd));
 	}
 
+	/**
+	 * 전일 일간 목표 결과를 일괄 확정한다.
+	 * - 이미 존재하면 재생성하지 않는다.
+	 */
 	@Transactional
 	public void recordDailyResults(LocalDate goalDate) {
 		List<Member> members = memberRepository.findMembersWithDailyGoal();
@@ -64,6 +77,10 @@ public class GoalResultService {
 		}
 	}
 
+	/**
+	 * 주간 목표 결과를 일괄 확정한다.
+	 * - 이미 존재하면 재생성하지 않는다.
+	 */
 	@Transactional
 	public void recordWeeklyResults(LocalDate weekEndDate) {
 		List<Member> members = memberRepository.findMembersWithWeeklyGoal();
@@ -82,6 +99,7 @@ public class GoalResultService {
 	private Optional<GoalResultResponseDto> createDailyGoalResultIfPossible(Long memberId, LocalDate goalDate) {
 		Member member = memberRepository.findById(memberId)
 			.orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+		// 목표 OFF 상태면 결과를 만들지 않는다.
 		if (member.getDailyGoal() == null) {
 			return Optional.empty();
 		}
@@ -92,6 +110,7 @@ public class GoalResultService {
 	private Optional<GoalResultResponseDto> createWeeklyGoalResultIfPossible(Long memberId, LocalDate weekEndDate) {
 		Member member = memberRepository.findById(memberId)
 			.orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+		// 목표 OFF 상태면 결과를 만들지 않는다.
 		if (member.getWeeklyGoal() == null) {
 			return Optional.empty();
 		}
@@ -101,6 +120,7 @@ public class GoalResultService {
 
 	private GoalResult createDailyGoalResult(Member member, LocalDate goalDate) {
 		int targetCount = member.getDailyGoal();
+		// 지정일의 미션 보상(완료) 횟수를 집계
 		int achievedCount = countMissionRewards(member.getId(), goalDate);
 		GoalResultStatus status = achievedCount >= targetCount ? GoalResultStatus.SUCCESS : GoalResultStatus.FAIL;
 		GoalResult goalResult = GoalResult.createDaily(member, goalDate, targetCount, achievedCount, status);
@@ -110,6 +130,7 @@ public class GoalResultService {
 	private GoalResult createWeeklyGoalResult(Member member, LocalDate weekEndDate) {
 		int targetCount = member.getWeeklyGoal();
 		LocalDate weekStart = weekEndDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+		// 주차 범위 내 미션 보상(완료) 횟수를 집계
 		int achievedCount = countMissionRewardsBetween(member.getId(), weekStart, weekEndDate.plusDays(1));
 		GoalResultStatus status = achievedCount >= targetCount ? GoalResultStatus.SUCCESS : GoalResultStatus.FAIL;
 		GoalResult goalResult = GoalResult.createWeekly(member, weekEndDate, targetCount, achievedCount, status);
@@ -134,6 +155,7 @@ public class GoalResultService {
 	}
 
 	private LocalDate resolveWeekEnd(LocalDate dateInWeek) {
+		// 월~일 기준에서 주차 종료일(일요일)로 정규화
 		return dateInWeek.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
 	}
 }

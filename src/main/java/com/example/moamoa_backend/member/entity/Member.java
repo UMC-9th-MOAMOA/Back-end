@@ -61,23 +61,38 @@ public class Member extends BaseEntity {
     @Column(nullable = true)
     private Integer weeklyGoal;
 
+    /**
+     * 목표 유지 기간(없으면 null) - 설정 시 종료일 계산에 사용
+     */
     @Enumerated(EnumType.STRING)
     @Column(nullable = true)
     private GoalRetention goalRetention;
 
+    /**
+     * 목표 유지 종료일(포함) - 오늘이 이 날짜를 지나면 목표가 만료
+     */
     @Column(nullable = true)
     private LocalDate goalEndDate;
 
+
+    /**
+     * 다음 주 적용 대기 중인 목표 값
+     */
     @Column(nullable = true)
     private Integer pendingDailyGoal;
 
+    /**
+     * 다음 주 적용 대기 중인 목표 유지 기간
+     */
     @Enumerated(EnumType.STRING)
     @Column(nullable = true)
     private GoalRetention pendingGoalRetention;
 
+    /**
+     * 다음 주 적용 예정일(월요일)
+     */
     @Column(nullable = true)
     private LocalDate pendingApplyDate;
-
 
     @Column(nullable = true)
     private String phoneNumber;
@@ -89,10 +104,12 @@ public class Member extends BaseEntity {
     @Column(nullable = true)
     private LocalDate birthday;
 
-    public void updateDailyGoal(Integer dailyGoal) {
-        this.dailyGoal = dailyGoal;
-        this.weeklyGoal = (dailyGoal == null) ? null : dailyGoal * 7;
-    }
+
+    /**
+     * 목표 설정을 즉시 반영한다.
+     * - dailyGoal이 null이면 목표 OFF 처리(관련 필드 초기화)
+     * - dailyGoal이 있으면 weeklyGoal, retention, endDate까지 계산해 설정
+     */
     public void applyGoalSetting(Integer dailyGoal, GoalRetention retention, LocalDate startDate) {
         if (dailyGoal == null) {
             this.dailyGoal = null;
@@ -108,12 +125,18 @@ public class Member extends BaseEntity {
         this.goalEndDate = retention == null ? null : retention.calculateEndDate(startDate);
     }
 
+    /**
+     * 목표 변경을 다음 주 적용으로 예약한다.
+     */
     public void scheduleGoalSetting(Integer dailyGoal, GoalRetention retention, LocalDate applyDate) {
         this.pendingDailyGoal = dailyGoal;
         this.pendingGoalRetention = retention;
         this.pendingApplyDate = applyDate;
     }
 
+    /**
+     * 예약된 목표 변경 정보를 초기화한다.
+     */
     public void clearPendingGoalSetting() {
         this.pendingDailyGoal = null;
         this.pendingGoalRetention = null;

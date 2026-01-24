@@ -13,9 +13,9 @@ public record OnboardingResponseDto(
 	Integer dailyMissionGoal,      // scope=GOAL/ALL에서 내려줄 수 있음
 	GoalRetention goalRetention,   // 목표 유지 기간
 	LocalDate goalEndDate,         // 목표 유지 종료일(포함)
-	Integer pendingDailyMissionGoal,
-	GoalRetention pendingGoalRetention,
-	LocalDate pendingApplyDate
+	Integer pendingDailyMissionGoal, //다음 주 적용 대기 목표
+	GoalRetention pendingGoalRetention, //다음 주 적용 대기 유지 시간
+	LocalDate pendingApplyDate// 다음 주 적용 예정일(월요일)
 ) {
 	public record Selection(Long interestId, List<Long> subInterestIds) {}
 
