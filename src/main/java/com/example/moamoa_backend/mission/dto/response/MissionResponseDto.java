@@ -65,4 +65,16 @@ public class MissionResponseDto {
         String name,
         String type
     ){}
+
+    @Builder
+    public record RecommendResult(
+       Long missionId,
+       String title,
+       int durationMinutes,
+       String category, //대분류
+       int quizCount,
+       List<String> keywords,
+       boolean isScrapped,
+       String videoUrl
+    ){}
 }

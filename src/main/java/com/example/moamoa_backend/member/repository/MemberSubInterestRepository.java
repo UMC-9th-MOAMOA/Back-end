@@ -1,6 +1,6 @@
 package com.example.moamoa_backend.member.repository;
 
-import com.example.moamoa_backend.member.entity.MemberSubInterest;
+import com.example.moamoa_backend.member.entity.mapping.MemberSubInterest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

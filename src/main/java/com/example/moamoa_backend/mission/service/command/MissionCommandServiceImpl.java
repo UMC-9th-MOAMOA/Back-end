@@ -163,9 +163,6 @@ public class MissionCommandServiceImpl implements MissionCommandService {
                 //상황 2. 도전 시작/ 재도전인 경우 -> 시도횟수 +1
                 else {
                     memberMission.addAttemptCount();
-                    if (memberMission.getMissionStatus() != MissionStatus.SUCCESS) {
-                        memberMission.changeMissionStatus(MissionStatus.NONE);
-                    }
                 }
 
             }

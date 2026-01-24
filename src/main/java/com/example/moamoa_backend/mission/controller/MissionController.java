@@ -15,6 +15,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/missions")
@@ -94,6 +96,18 @@ public class MissionController {
     ) {
         MissionResponseDto.KeywordListResult result = missionQueryService.getRelatedKeywords(keyword);
         return ApiResponse.onSuccess(GeneralSuccessCode.OK, result);
+    }
+
+    @GetMapping("/recommend")
+    @Operation(summary = "오늘의 추천 미션 리스트 조회(소요시간 + 세부관심사별)", description = "유저의 관심사와 자투리 시간을 반영하여 미션 5개를 추천합니다. 찜한 미션이 최상단에 노출됩니다.")
+    public ApiResponse<List<MissionResponseDto.RecommendResult>> getTodayRecommendMissions(
+       @RequestParam(required = false) Integer time,
+       @AuthenticationPrincipal UserDetails userDetails
+    ){
+        Long memberId = Long.parseLong(userDetails.getUsername());
+        List<MissionResponseDto.RecommendResult> result = missionQueryService.getTodayRecommendMissions(memberId,time);
+
+        return ApiResponse.onSuccess(GeneralSuccessCode.OK,result);
     }
 }
 

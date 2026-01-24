@@ -158,6 +158,31 @@ public class MissionConverter {
                 .build();
     }
 
+    public MissionResponseDto.RecommendResult toRecommendResult(Mission mission,boolean isScrapped){
+        List<String> keywords = mission.getMissionKeywords().stream()
+                .map(mk -> mk.getKeyword().getName())
+                .toList();
+
+        String categoryName = "";
+        if(!mission.getMissionSubInterests().isEmpty()){
+            categoryName = mission.getMissionSubInterests().get(0)
+                    .getSubInterest()
+                    .getInterest()
+                    .getName();
+        }
+
+        return MissionResponseDto.RecommendResult.builder()
+                .missionId(mission.getId())
+                .title(mission.getTitle())
+                .durationMinutes(mission.getDurationMinutes())
+                .category(categoryName)
+                .quizCount(mission.getQuizzes().size())
+                .keywords(keywords)
+                .isScrapped(isScrapped)
+                .videoUrl(mission.getVideoUrl())
+                .build();
+    }
+
     private MissionResponseDto.QuizDetail toQuizDetail(Quiz quiz){
         List<String> options = Collections.emptyList();
 
