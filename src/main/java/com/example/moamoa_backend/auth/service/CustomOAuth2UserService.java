@@ -2,6 +2,7 @@ package com.example.moamoa_backend.auth.service;
 
 import com.example.moamoa_backend.auth.dto.oauth.OAuthAttributes;
 import com.example.moamoa_backend.member.entity.Member;
+import com.example.moamoa_backend.member.enums.MemberStatus;
 import com.example.moamoa_backend.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -77,6 +78,11 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
                 .orElse(null);
 
         if (member != null) {
+
+            // 데이터 삭제전 다시 로그인 시도시 탈퇴 철회로 간주
+            if(member.getStatus() == MemberStatus.WITHDRAWN){
+                member.activate();
+            }
             return member;
         }
 

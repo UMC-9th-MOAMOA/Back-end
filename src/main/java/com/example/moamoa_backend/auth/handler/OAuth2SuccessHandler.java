@@ -5,6 +5,7 @@ import com.example.moamoa_backend.auth.exception.code.AuthErrorCode;
 import com.example.moamoa_backend.global.security.jwt.JwtUtil;
 import com.example.moamoa_backend.global.util.RedisUtil;
 import com.example.moamoa_backend.member.entity.Member;
+import com.example.moamoa_backend.member.enums.MemberStatus;
 import com.example.moamoa_backend.member.enums.Provider;
 import com.example.moamoa_backend.member.exception.MemberException;
 import com.example.moamoa_backend.member.exception.code.MemberErrorCode;
@@ -72,6 +73,12 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         // Service 계층에서 이미 가입/업데이트 처리가 완료되었으므로, 여기서는 식별자(ID)와 권한(Role) 획득이 주 목적
         Member member = memberRepository.findByProviderAndProviderId(provider, providerId)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        if (member.getStatus() == MemberStatus.BANNED) {
+            String errorUrl = frontUrl + "/oauth/callback?error=ACCOUNT_BANNED";
+            getRedirectStrategy().sendRedirect(request, response, errorUrl);
+            return;
+        }
 
         // 3. JWT 토큰 발급
         // Access Token: API 요청 인가(Authorization) 용도
