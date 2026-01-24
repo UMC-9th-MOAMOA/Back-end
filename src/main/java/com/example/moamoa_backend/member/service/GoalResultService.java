@@ -66,6 +66,10 @@ public class GoalResultService {
 	public void recordDailyResults(LocalDate goalDate) {
 		List<Member> members = memberRepository.findMembersWithDailyGoal();
 		for (Member member : members) {
+
+			// 추가: 레포지토리 쿼리/데이터 이상 대비(언박싱 NPE 방지)
+			if (member.getDailyGoal() == null) continue;
+
 			if (goalResultRepository.findByMemberIdAndGoalTypeAndGoalDate(
 				member.getId(),
 				GoalResultType.DAILY,
@@ -83,8 +87,15 @@ public class GoalResultService {
 	 */
 	@Transactional
 	public void recordWeeklyResults(LocalDate weekEndDate) {
+
+		weekEndDate = resolveWeekEnd(weekEndDate);
+
 		List<Member> members = memberRepository.findMembersWithWeeklyGoal();
 		for (Member member : members) {
+
+			//  추가: 레포지토리 쿼리/데이터 이상 대비(언박싱 NPE 방지)
+			if (member.getWeeklyGoal() == null) continue;
+
 			if (goalResultRepository.findByMemberIdAndGoalTypeAndGoalDate(
 				member.getId(),
 				GoalResultType.WEEKLY,
@@ -119,6 +130,9 @@ public class GoalResultService {
 	}
 
 	private GoalResult createDailyGoalResult(Member member, LocalDate goalDate) {
+
+		//  Integer dailyGoal 꺼내서 null이면 return null 하던 코드 제거
+		//         -> 호출부에서 dailyGoal != null을 보장하도록 정책화(언박싱 NPE 방지)
 		int targetCount = member.getDailyGoal();
 		// 지정일의 미션 보상(완료) 횟수를 집계
 		int achievedCount = countMissionRewards(member.getId(), goalDate);
@@ -128,7 +142,10 @@ public class GoalResultService {
 	}
 
 	private GoalResult createWeeklyGoalResult(Member member, LocalDate weekEndDate) {
+		// ️ 변경: weeklyGoal null이면 return null 하던 코드 제거
+		//         -> 호출부에서 weeklyGoal != null을 보장하도록 정책화
 		int targetCount = member.getWeeklyGoal();
+
 		LocalDate weekStart = weekEndDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
 		// 주차 범위 내 미션 보상(완료) 횟수를 집계
 		int achievedCount = countMissionRewardsBetween(member.getId(), weekStart, weekEndDate.plusDays(1));

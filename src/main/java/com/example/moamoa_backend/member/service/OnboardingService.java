@@ -115,7 +115,9 @@ public class OnboardingService {
 		if (goal == null) {
 			throw new InterestException(InterestErrorCode.ONBOARDING_GOAL_REQUIRED);
 		}
-	}private void requireGoalRetention(GoalRetention retention) {
+	}
+
+	private void requireGoalRetention(GoalRetention retention) {
 		if (retention == null) {
 			throw new InterestException(InterestErrorCode.ONBOARDING_GOAL_RETENTION_REQUIRED);
 		}

@@ -111,6 +111,11 @@ public class Member extends BaseEntity {
      * - dailyGoal이 있으면 weeklyGoal, retention, endDate까지 계산해 설정
      */
     public void applyGoalSetting(Integer dailyGoal, GoalRetention retention, LocalDate startDate) {
+
+        if (dailyGoal != null && retention != null && startDate == null) {
+                   throw new IllegalArgumentException("startDate는 retention 설정 시 필수입니다.");
+                }
+
         if (dailyGoal == null) {
             this.dailyGoal = null;
             this.weeklyGoal = null;
