@@ -1,5 +1,6 @@
 package com.example.moamoa_backend.attendance.controller;
 
+import com.example.moamoa_backend.attendance.dto.AttendanceMonthResponseDto;
 import com.example.moamoa_backend.attendance.dto.AttendanceResponseDto;
 import com.example.moamoa_backend.attendance.dto.AttendanceWeekResponseDto;
 import com.example.moamoa_backend.attendance.exception.code.AttendanceSuccessCode;
@@ -30,7 +31,7 @@ public class AttendanceController {
                     - 이미 출석한 경우: '이미 출석했습니다' 에러 반환
                     """
     )
-    @PostMapping
+    @PostMapping("/check")
     public ApiResponse<AttendanceResponseDto.CheckInResult> checkIn(
             @AuthenticationPrincipal UserDetails userDetails
     ) {
@@ -59,4 +60,5 @@ public class AttendanceController {
                 new AttendanceWeekResponseDto.Response(streak)
         );
     }
+
 }
