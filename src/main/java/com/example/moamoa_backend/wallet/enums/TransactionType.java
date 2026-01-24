@@ -7,8 +7,8 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum TransactionType {
     // 포인트 증가 (적립)
-    CHARGE("광고 보상"),
     MISSION("미션 보상"),
+    MISSION_COMPLETE("미션 완료 보상"),
     ATTENDANCE("출석 보상"),
     EVENT("이벤트 지급"),
     REFUND("구매 환불"),

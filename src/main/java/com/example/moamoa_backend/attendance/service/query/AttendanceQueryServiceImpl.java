@@ -70,7 +70,7 @@ public class AttendanceQueryServiceImpl implements AttendanceQueryService{
                 .join(wh.wallet, w)
                 .where(
                         w.member.id.eq(memberId),
-                        wh.type.eq(TransactionType.MISSION),
+                        wh.type.in(TransactionType.MISSION, TransactionType.MISSION_COMPLETE),
                         wh.createdAt.goe(startAt),
                         wh.createdAt.lt(endAt)
                 )
