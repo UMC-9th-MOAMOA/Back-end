@@ -1,6 +1,8 @@
 package com.example.moamoa_backend.member.controller;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -120,10 +122,16 @@ public class OnboardingController {
 	) {
 		Long memberId = Long.parseLong(userDetails.getUsername());
 		LocalDate today = LocalDate.now();
-		LocalDate targetDate = date == null ? today.minusDays(1) : date;
+
+		// 지난 주 마지막 날(일요일) = "이전 일요일"
+		LocalDate defaultWeekEnd = today.with(TemporalAdjusters.previous(DayOfWeek.SUNDAY));
+
+		// date가 없으면 지난 주 일요일로 고정
+		LocalDate dateInWeek = (date == null) ? defaultWeekEnd : date;
+
 		return ApiResponse.onSuccess(
 			MemberSuccessCode.MEMBER_GET_WEEKLY_GOAL_RESULT,
-			goalResultService.getWeeklyGoalResult(memberId, targetDate).orElse(null)
+			goalResultService.getWeeklyGoalResult(memberId, dateInWeek).orElse(null)
 		);
 	}
 }
