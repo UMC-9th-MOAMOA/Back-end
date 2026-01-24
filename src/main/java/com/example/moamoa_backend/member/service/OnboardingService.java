@@ -7,6 +7,7 @@ import com.example.moamoa_backend.member.dto.OnboardingPatchRequestDto;
 import com.example.moamoa_backend.member.dto.OnboardingResponseDto;
 import com.example.moamoa_backend.member.entity.Member;
 import com.example.moamoa_backend.member.entity.MemberSubInterest;
+import com.example.moamoa_backend.member.enums.GoalRetention;
 import com.example.moamoa_backend.member.enums.OnboardingUpdateScope;
 import com.example.moamoa_backend.member.exception.MemberException;
 import com.example.moamoa_backend.member.exception.code.MemberErrorCode;
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -26,6 +28,8 @@ public class OnboardingService {
 	private final MemberRepository memberRepository;
 	private final MemberSubInterestRepository memberSubInterestRepository;
 	private final SubInterestRepository subInterestRepository;
+	private final GoalMaintenanceService goalMaintenanceService;
+
 
 	/**
 	 * 온보딩 수정 API
@@ -40,31 +44,40 @@ public class OnboardingService {
 	 */
 	@Transactional
 	public OnboardingResponseDto patchOnboarding(Long memberId, OnboardingUpdateScope scope, OnboardingPatchRequestDto req) {
-		// 인증 도입 전 임시 memberId 방식: 존재하지 않으면 404
+
 		Member member = memberRepository.findById(memberId)
 			.orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+		LocalDate today = LocalDate.now();
+		// 요청 시점에 예약 적용/만료를 우선 반영
+		goalMaintenanceService.applyGoalStateIfNeeded(member, today);
+
 
 		return switch (scope) {
 			case ALL -> {
 				requireSelections(req.selections());              // 관심사 최소 1개 이상 필수
 				validateGoalRangeIfPresent(req.dailyMissionGoal()); // goal은 null 허용, 값이 있으면 범위만 검증
 
-				member.updateDailyGoal(req.dailyMissionGoal());           // goal 저장(null 가능)
+				validateGoalRetentionIfPresent(req.dailyMissionGoal(), req.goalRetention());
+
+				// 목표 설정(즉시 적용 or 다음 주 예약)
+				updateGoalSetting(member, req.dailyMissionGoal(), req.goalRetention(), today);
 				updateMemberInterestsSmartSync(member, req.selections()); // 관심사 Smart Sync 반영
 
 				// 최신 ALL 상태로 응답 (member 재조회 없이)
-				yield OnboardingResponseDto.of(loadSelections(memberId), member.getDailyGoal());
+				yield toOnboardingResponse(loadSelections(memberId), member);
 			}
 			case INTERESTS -> {
 				requireSelections(req.selections());
 				updateMemberInterestsSmartSync(member, req.selections());
-				yield OnboardingResponseDto.of(loadSelections(memberId), member.getDailyGoal());
+				yield toOnboardingResponse(loadSelections(memberId), member);
 			}
 			case GOAL -> {
 				requireGoal(req.dailyMissionGoal());      // GOAL scope에서는 null 불가
 				validateGoalRange(req.dailyMissionGoal()); // 0~5 범위 검증
-				member.updateDailyGoal(req.dailyMissionGoal());
-				yield OnboardingResponseDto.of(loadSelections(memberId), member.getDailyGoal());
+				requireGoalRetention(req.goalRetention());
+				// 목표 설정(즉시 적용 or 다음 주 예약)
+				updateGoalSetting(member, req.dailyMissionGoal(), req.goalRetention(), today);
+				yield toOnboardingResponse(loadSelections(memberId), member);
 			}
 		};
 	}
@@ -74,15 +87,17 @@ public class OnboardingService {
 	 * - scope에 따라 필요한 데이터만 내려줄 수 있도록 분기
 	 * - OnboardingResponseDto는 NON_NULL 설정이므로 null 필드는 응답에서 빠진다.
 	 */
-	@Transactional(readOnly = true)
+	@Transactional
 	public OnboardingResponseDto getMyOnboarding(Long memberId, OnboardingUpdateScope scope) {
 		Member member = memberRepository.findById(memberId)
 			.orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+		// 조회 시점에도 목표 상태를 최신으로 맞춘다.
+		goalMaintenanceService.applyGoalStateIfNeeded(member, LocalDate.now());
 
 		return switch (scope) {
-			case ALL -> OnboardingResponseDto.of(loadSelections(memberId), member.getDailyGoal());
-			case INTERESTS -> OnboardingResponseDto.of(loadSelections(memberId), null);
-			case GOAL -> OnboardingResponseDto.of(null, member.getDailyGoal());
+			case ALL -> toOnboardingResponse(loadSelections(memberId), member);
+			case INTERESTS -> OnboardingResponseDto.of(loadSelections(memberId), null, null, null, null, null, null);
+			case GOAL -> toOnboardingResponse(null, member);
 		};
 	}
 
@@ -102,6 +117,12 @@ public class OnboardingService {
 		}
 	}
 
+	private void requireGoalRetention(GoalRetention retention) {
+		if (retention == null) {
+			throw new InterestException(InterestErrorCode.ONBOARDING_GOAL_RETENTION_REQUIRED);
+		}
+	}
+
 	private void validateGoalRange(Integer goal) {
 		if (goal < 0 || goal > 5) {
 			throw new InterestException(InterestErrorCode.ONBOARDING_GOAL_OUT_OF_RANGE);
@@ -113,6 +134,83 @@ public class OnboardingService {
 	 */
 	private void validateGoalRangeIfPresent(Integer goal) {
 		if (goal != null) validateGoalRange(goal);
+	}
+
+
+	private void validateGoalRetentionIfPresent(Integer goal, GoalRetention retention) {
+		if (goal == null && retention != null) {
+			throw new InterestException(InterestErrorCode.ONBOARDING_GOAL_RETENTION_INVALID);
+		}
+	}
+
+	/**
+	 * 목표 설정/변경 로직.
+	 * - dailyGoal이 null이면 목표 OFF 처리
+	 * - 월요일이면 즉시 적용, 그 외는 다음 주 월요일 예약
+	 */
+	private void updateGoalSetting(Member member, Integer dailyGoal, GoalRetention retention, LocalDate today) {
+		if (dailyGoal == null) {
+			member.applyGoalSetting(null, null, today);
+			member.clearPendingGoalSetting();
+			return;
+		}
+
+		GoalRetention resolvedRetention = resolveRetention(member, retention);
+		LocalDate applyDate = goalMaintenanceService.resolveApplyDate(today);
+
+		if (applyDate.isEqual(today)) {
+			// 오늘 적용 가능한 경우: 동일 설정이면 skip
+			if (isSameGoalSetting(member, dailyGoal, resolvedRetention) && member.getPendingApplyDate() == null) {
+				return;
+			}
+			member.applyGoalSetting(dailyGoal, resolvedRetention, applyDate);
+			member.clearPendingGoalSetting();
+		} else {
+			// 다음 주 예약 적용
+			if (isSamePendingSetting(member, dailyGoal, resolvedRetention, applyDate)) {
+				return;
+			}
+			member.scheduleGoalSetting(dailyGoal, resolvedRetention, applyDate);
+		}
+	}
+
+	private GoalRetention resolveRetention(Member member, GoalRetention retention) {
+		if (retention != null) {
+			return retention;
+		}
+		// 요청에 유지기간이 없으면 기존 값, 없으면 CONTINUE
+		return Optional.ofNullable(member.getGoalRetention()).orElse(GoalRetention.CONTINUE);
+	}
+
+	private boolean isSameGoalSetting(Member member, Integer dailyGoal, GoalRetention retention) {
+		return Objects.equals(member.getDailyGoal(), dailyGoal)
+			&& Objects.equals(member.getGoalRetention(), retention);
+	}
+
+	private boolean isSamePendingSetting(Member member, Integer dailyGoal, GoalRetention retention, LocalDate applyDate) {
+		return Objects.equals(member.getPendingDailyGoal(), dailyGoal)
+			&& Objects.equals(member.getPendingGoalRetention(), retention)
+			&& Objects.equals(member.getPendingApplyDate(), applyDate);
+	}
+
+	private OnboardingResponseDto toOnboardingResponse(List<OnboardingResponseDto.Selection> selections, Member member) {
+		return toOnboardingResponse(selections, member == null ? null : member.getDailyGoal(), member);
+	}
+
+	private OnboardingResponseDto toOnboardingResponse(
+		List<OnboardingResponseDto.Selection> selections,
+		Integer dailyGoal,
+		Member member
+	) {
+		return OnboardingResponseDto.of(
+			selections,
+			dailyGoal,
+			member == null ? null : member.getGoalRetention(),
+			member == null ? null : member.getGoalEndDate(),
+			member == null ? null : member.getPendingDailyGoal(),
+			member == null ? null : member.getPendingGoalRetention(),
+			member == null ? null : member.getPendingApplyDate()
+		);
 	}
 
 	/**

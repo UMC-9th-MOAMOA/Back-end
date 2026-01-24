@@ -40,10 +40,21 @@ public enum InterestErrorCode implements BaseErrorCode {
 		"ONBOARDING400_4",
 		"일일 목표는 0~5 사이여야 합니다."
 	),
+
 	INVALID_SCOPE(
 		HttpStatus.BAD_REQUEST,
 		"ONBOARDING400_5",
 		"scope 값이 올바르지 않습니다."
+	),
+	ONBOARDING_GOAL_RETENTION_REQUIRED(
+		HttpStatus.BAD_REQUEST,
+		"ONBOARDING400_6",
+		"목표 유지 기간은 필수 입력입니다."
+	),
+	ONBOARDING_GOAL_RETENTION_INVALID(
+		HttpStatus.BAD_REQUEST,
+		"ONBOARDING400_7",
+		"목표 유지 기간 입력이 올바르지 않습니다."
 	);
 
 	private final HttpStatus status;

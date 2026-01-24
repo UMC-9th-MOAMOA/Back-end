@@ -35,7 +35,15 @@ public enum MemberSuccessCode implements BaseSuccessCode {
 
     MEMBER_UPDATE_ONBOARDING(HttpStatus.OK,
         "MEMBER200_6",
-        "온보딩 수정에 성공했습니다.");
+        "온보딩 수정에 성공했습니다."),
+
+    MEMBER_GET_DAILY_GOAL_RESULT(HttpStatus.OK,
+        "MEMBER200_7",
+        "일간 목표 결과 조회에 성공했습니다."),
+
+    MEMBER_GET_WEEKLY_GOAL_RESULT(HttpStatus.OK,
+        "MEMBER200_8",
+        "주간 목표 결과 조회에 성공했습니다.");
 
     private final HttpStatus status;
     private final String code;

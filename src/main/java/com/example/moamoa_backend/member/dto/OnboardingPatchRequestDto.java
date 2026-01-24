@@ -2,6 +2,8 @@ package com.example.moamoa_backend.member.dto;
 
 import java.util.List;
 
+import com.example.moamoa_backend.member.enums.GoalRetention;
+
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -12,7 +14,9 @@ public record OnboardingPatchRequestDto(
 
 	@Min(value = 0, message = "일일 목표는 0~5 사이여야 합니다.")
 	@Max(value = 5, message = "일일 목표는 0~5 사이여야 합니다.")
-	Integer dailyMissionGoal      // scope=GOAL/ALL에서 사용 (INTERESTS에서는 null 허용)
+	Integer dailyMissionGoal,      // scope=GOAL/ALL에서 사용 (INTERESTS에서는 null 허용)
+
+	GoalRetention goalRetention    // scope=GOAL/ALL에서 사용 (OFF 시 null 허용)
 ) {
 	public record Selection(
 		Long interestId,            // 대분류 ID (소속 검증에 사용)
