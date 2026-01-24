@@ -146,4 +146,27 @@ public class AuthController {
         return ApiResponse.onSuccess(AuthSuccessCode.LOGIN_SUCCESS, authService.exchangeAuthCode(request.code()));
 
     }
+
+    @Operation(summary = "계정복구 요청", description = "삭제 요청된 회원에 대한 복구를 진행합니다.")
+    @SecurityRequirements(value = {})
+    @PostMapping("/recover")
+    public ApiResponse<AuthResDto.TokenDto> recover(
+            @RequestBody @Valid AuthReqDto.LoginDto request,
+            HttpServletResponse response
+    ) {
+        AuthResDto.GeneratedTokenDto generatedTokenDto = authService.recover(request);
+
+        // Refresh Token 쿠키 설정
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", generatedTokenDto.refreshToken())
+                .path("/")
+                .sameSite("None")
+                .httpOnly(true)
+                .secure(true)
+                .maxAge(14 * 24 * 60 * 60)
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
+        return ApiResponse.onSuccess(AuthSuccessCode.RECOVER_SUCCESS, AuthConverter.toTokenDto(generatedTokenDto));
+    }
 }
