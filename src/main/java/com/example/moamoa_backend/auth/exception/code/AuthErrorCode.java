@@ -46,7 +46,7 @@ public enum AuthErrorCode implements BaseErrorCode {
         "지원하지 않는 소셜 로그인 플랫폼입니다."),
 
     INVALID_RECOVER_REQUEST(HttpStatus.BAD_REQUEST,
-            "AUTH400_10",
+            "AUTH400_9",
             "복구할 수 없는 계정입니다."),
 
     // ============= 401 Unauthorized =============
