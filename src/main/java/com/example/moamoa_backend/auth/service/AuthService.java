@@ -9,6 +9,7 @@ import com.example.moamoa_backend.global.security.jwt.exception.JwtException;
 import com.example.moamoa_backend.global.security.jwt.exception.code.JwtErrorCode;
 import com.example.moamoa_backend.global.util.RedisUtil;
 import com.example.moamoa_backend.member.entity.Member;
+import com.example.moamoa_backend.member.enums.MemberStatus;
 import com.example.moamoa_backend.member.enums.Provider;
 import com.example.moamoa_backend.member.enums.Role;
 import com.example.moamoa_backend.member.exception.MemberException;
@@ -240,7 +241,15 @@ public class AuthService {
             throw new AuthException(AuthErrorCode.LOGIN_FAILED);
         }
 
-        // 3. 토큰 발급 및 Redis 저장
+        // 3. 상태 검증
+        if (member.getStatus() == MemberStatus.WITHDRAWN) {
+            throw new AuthException(AuthErrorCode.ACCOUNT_WITHDRAWN);
+        }
+        if (member.getStatus() == MemberStatus.BANNED) {
+            throw new AuthException(AuthErrorCode.ACCOUNT_BANNED);
+        }
+
+        // 4. 토큰 발급 및 Redis 저장
         return generateTokens(member.getId(), member.getRole());
     }
 
@@ -281,6 +290,32 @@ public class AuthService {
     public void logout(Long memberId) {
         // Redis에서 Refresh Token 삭제
         redisUtil.deleteData("RT:" + memberId);
+    }
+
+    /**
+     * 로컬계정 복구
+     */
+    @Transactional
+    public AuthResDto.GeneratedTokenDto recover(AuthReqDto.LoginDto request) {
+        // 1. 이메일로 회원 조회
+        Member member = memberRepository.findByProviderAndProviderId(Provider.LOCAL, request.email())
+                .orElseThrow(() -> new AuthException(AuthErrorCode.LOGIN_FAILED));
+
+        // 2. 비밀번호 검증
+        if (!passwordEncoder.matches(request.password(), member.getPassword())) {
+            throw new AuthException(AuthErrorCode.LOGIN_FAILED);
+        }
+
+        // 3. WITHDRAWN 상태만 복구 가능
+        if (member.getStatus() != MemberStatus.WITHDRAWN) {
+            throw new AuthException(AuthErrorCode.INVALID_RECOVER_REQUEST);
+        }
+
+        // 4. 상태 변경
+        member.activate();
+
+        // 5. 토큰 발급
+        return generateTokens(member.getId(), member.getRole());
     }
 
     // -- Helper Methods --

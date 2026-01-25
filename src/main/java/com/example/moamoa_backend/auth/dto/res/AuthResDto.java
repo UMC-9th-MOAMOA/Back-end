@@ -2,23 +2,30 @@ package com.example.moamoa_backend.auth.dto.res;
 
 import lombok.Builder;
 
+/**
+ * 인증 관련 Response DTO
+ */
 public class AuthResDto {
 
-    // login, refresh 요청시 응답
+    /**
+     * 클라이언트 응답용 (Refresh Token 제외)
+     */
     @Builder
     public record TokenDto(
-            String grantType, // Bearer
+            String grantType,
             String accessToken,
-            Long accessTokenExpiresIn // access 만료시간 정보
+            Long accessTokenExpiresIn
     ) {}
 
-    // login, refresh 요청시 controller layer 까지 정보 전달
+    /**
+     * 내부 전달용 (Refresh Token 포함)
+     */
     @Builder
     public record GeneratedTokenDto(
-            String grantType, //Bearer
+            String grantType,
             String accessToken,
             String refreshToken,
-            Long accessTokenExpiresIn // access 만료시간 정보
+            Long accessTokenExpiresIn
     ) {}
 
 }

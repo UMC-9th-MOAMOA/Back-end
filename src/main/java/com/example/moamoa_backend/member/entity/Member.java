@@ -148,4 +148,9 @@ public class Member extends BaseEntity {
         this.pendingApplyDate = null;
     }
 
+    public void activate() {
+        this.status = MemberStatus.ACTIVE;
+        this.deletedAt = null;
+    }
+
 }

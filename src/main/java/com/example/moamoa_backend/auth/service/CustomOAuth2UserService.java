@@ -2,6 +2,7 @@ package com.example.moamoa_backend.auth.service;
 
 import com.example.moamoa_backend.auth.dto.oauth.OAuthAttributes;
 import com.example.moamoa_backend.member.entity.Member;
+import com.example.moamoa_backend.member.enums.MemberStatus;
 import com.example.moamoa_backend.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,10 +21,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 소셜 로그인 후처리를 담당하는 Service
- * - Provider(Google, Naver 등)로부터 받은 사용자 정보를 기반으로
- * - 강제 회원가입(Insert) 또는 기존 회원 조회(Select)를 수행
- * - SecurityContext에 저장될 OAuth2User 객체를 반환
+ * OAuth2 사용자 정보 처리 서비스
+ * - Provider별 사용자 정보를 표준화하여 처리
+ * - 신규 회원 자동 가입 / 기존 회원 조회
  */
 @Slf4j
 @Service
@@ -37,29 +37,26 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         log.info("Processing OAuth2 login for registrationId: {}", userRequest.getClientRegistration().getRegistrationId());
 
-        // 1. Provider(Google 등)로부터 User Info 가져오기 (Default 구현체 위임)
+        // Provider로부터 사용자 정보 조회
         OAuth2UserService<OAuth2UserRequest, OAuth2User> delegate = new DefaultOAuth2UserService();
         OAuth2User oAuth2User = delegate.loadUser(userRequest);
 
-        // 2. OAuth2 Provider 식별자 및 PK 키값 추출
-        // registrationId: google, naver, kakao ...
-        // userNameAttributeName: sub(Google), response(Naver), id(Kakao) ...
+        // Provider 식별 정보 추출
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
         String userNameAttributeName = userRequest.getClientRegistration().getProviderDetails()
                 .getUserInfoEndpoint().getUserNameAttributeName();
 
-        // 3. 표준화된 DTO로 변환 (Provider별 상이한 JSON 구조 통일)
+        // Provider별 응답을 표준 DTO로 변환
         OAuthAttributes attributes = OAuthAttributes.of(registrationId, userNameAttributeName, oAuth2User.getAttributes());
 
-        // 4. 사용자 영속화 (신규 가입 or 기존 회원 조회)
+        // 회원 저장 또는 조회
         Member member = saveOrUpdate(attributes);
 
-        // 5. attributes에 providerId 추가 (OAuth2SuccessHandler에서 사용하기 위해)
+        // SuccessHandler에서 사용할 providerId 추가
         Map<String, Object> modifiedAttributes = new HashMap<>(attributes.getAttributes());
         modifiedAttributes.put("providerId", attributes.getProviderId());
 
-        // 6. Principal 반환 (SecurityContext 저장용)
-        // Role 정보와 함께 반환하여 이후 권한 제어(Authorize)에 사용됨
+        // SecurityContext용 Principal 반환
         return new DefaultOAuth2User(
                 Collections.singleton(new SimpleGrantedAuthority(member.getRole().name())),
                 modifiedAttributes,
@@ -68,15 +65,19 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
     }
 
     /**
-     * 사용자 정보 동기화 정책
-     * - 기존 회원: 별도 Update 없이 조회된 엔티티 반환 (사용자 커스텀 정보 유지)
-     * - 신규 회원: Provider 정보를 기반으로 DB Insert
+     * 회원 저장 또는 조회
+     * - 기존 회원: 조회 (WITHDRAWN 상태면 자동 복구)
+     * - 신규 회원: 저장
      */
     private Member saveOrUpdate(OAuthAttributes attributes) {
         Member member = memberRepository.findByProviderAndProviderId(attributes.getProvider(), attributes.getProviderId())
                 .orElse(null);
 
         if (member != null) {
+            // WITHDRAWN 상태 재로그인 시 자동 복구
+            if(member.getStatus() == MemberStatus.WITHDRAWN){
+                member.activate();
+            }
             return member;
         }
 

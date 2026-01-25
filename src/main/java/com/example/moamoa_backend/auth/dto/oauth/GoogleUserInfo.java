@@ -2,8 +2,8 @@ package com.example.moamoa_backend.auth.dto.oauth;
 
 import java.util.Map;
 
-/*
- * Google 소셜 로그인으로 받은 객체를 OAuth2UserInfo 규격에 맞추어 꺼내주는 구현체
+/**
+ * Google OAuth2 사용자 정보 구현체
  */
 public class GoogleUserInfo implements OAuth2UserInfo {
 
@@ -20,7 +20,7 @@ public class GoogleUserInfo implements OAuth2UserInfo {
 
     @Override
     public String getProviderId() {
-        return (String) attributes.get("sub"); // 구글의 식별자 키 sub
+        return (String) attributes.get("sub");
     }
 
     @Override

@@ -42,8 +42,9 @@ public class SecurityConfig {
             "/api/v1/auth/email/verify", // 이메일 인증
             "/api/v1/auth/oauth2/token", // 소셜 로그인 후 토큰 발급
             "/api/v1/auth/social/**", // 소셜 로그인 요청
-            "/login/**", //소셜 로그인 이후 돌아옴
-            "/actuator/health/**"
+            "/login/**", // 소셜 로그인 이후 돌아옴
+            "/actuator/health/**", // 헬스체크
+            "/api/v1/auth/recover" // 계정복구 요청
     };
 
     // 관리자만 접근 가능

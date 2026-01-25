@@ -13,6 +13,11 @@ import org.springframework.util.SerializationUtils;
 
 import java.util.Base64;
 
+/**
+ * OAuth2 인증 요청을 쿠키에 저장/조회/삭제하는 Repository
+ * - 세션 대신 쿠키 사용 (Stateless 유지)
+ * - CSRF 방지를 위한 state 값 보존 용도
+ */
 @Component
 public class HttpCookieOAuth2AuthorizationRequestRepository
         implements AuthorizationRequestRepository<OAuth2AuthorizationRequest> {
@@ -70,6 +75,8 @@ public class HttpCookieOAuth2AuthorizationRequestRepository
         deleteCookie(request, response, REDIRECT_URI_PARAM_COOKIE_NAME);
     }
 
+    // ----- Helper Methods -----
+
     private java.util.Optional<Cookie> getCookie(HttpServletRequest request, String name) {
         Cookie[] cookies = request.getCookies();
         if (cookies != null && cookies.length > 0) {
@@ -106,7 +113,7 @@ public class HttpCookieOAuth2AuthorizationRequestRepository
                             .maxAge(0)
                             .build();
                     response.addHeader(HttpHeaders.SET_COOKIE, deleteCookie.toString());
-                    return;  // 찾았으면 종료
+                    return;
                 }
             }
         }
