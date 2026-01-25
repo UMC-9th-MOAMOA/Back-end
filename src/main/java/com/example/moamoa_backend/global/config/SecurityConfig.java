@@ -1,5 +1,8 @@
 package com.example.moamoa_backend.global.config;
 
+import com.example.moamoa_backend.auth.handler.OAuth2SuccessHandler;
+import com.example.moamoa_backend.auth.repository.HttpCookieOAuth2AuthorizationRequestRepository;
+import com.example.moamoa_backend.auth.service.CustomOAuth2UserService;
 import com.example.moamoa_backend.global.security.jwt.JwtAuthFilter;
 import com.example.moamoa_backend.global.security.jwt.JwtAuthenticationEntryPoint;
 import com.example.moamoa_backend.member.enums.Role;
@@ -26,21 +29,26 @@ public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
+    private final HttpCookieOAuth2AuthorizationRequestRepository cookieAuthorizationRequestRepository;
 
     // 로그인 필요X - 모두 접근 가능
     private final String[] allowUris = {
-            "/api/v1/auth/signup",
-            "/api/v1/auth/login",
-            "/api/v1/auth/refresh",
-            "/api/v1/auth/email/send-verification",
-            "/api/v1/auth/email/verify",
-            "/actuator/health/**",
-
+            "/api/v1/auth/signup", // 회원가입
+            "/api/v1/auth/login", //로그인
+            "/api/v1/auth/refresh", // 재발급
+            "/api/v1/auth/email/send-verification", // 이메일 전송
+            "/api/v1/auth/email/verify", // 이메일 인증
+            "/api/v1/auth/oauth2/token", // 소셜 로그인 후 토큰 발급
+            "/api/v1/auth/social/**", // 소셜 로그인 요청
+            "/login/**", // 소셜 로그인 이후 돌아옴
+            "/actuator/health/**", // 헬스체크
+            "/api/v1/auth/recover" // 계정복구 요청
     };
 
     // 관리자만 접근 가능
     private final String[] adminUris = {
-            "/api/v1/missions/admin",
             "/api/v1/admin/**"
     };
 
@@ -79,7 +87,20 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
 
                 .exceptionHandling(exception -> exception
-                .authenticationEntryPoint(jwtAuthenticationEntryPoint));
+                .authenticationEntryPoint(jwtAuthenticationEntryPoint))
+
+                //
+                .oauth2Login(oauth2 -> oauth2
+
+                        .authorizationEndpoint(endpoint -> endpoint
+                                .baseUri("/api/v1/auth/social")
+                                .authorizationRequestRepository(cookieAuthorizationRequestRepository)
+                        )
+                        .userInfoEndpoint(endpoint -> endpoint
+                                .userService(customOAuth2UserService)
+                        )
+                        .successHandler(oAuth2SuccessHandler)
+                );
 
 
         return http.build();

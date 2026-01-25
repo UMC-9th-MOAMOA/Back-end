@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 public enum AuthSuccessCode implements BaseSuccessCode {
 
+    // ============= 200 OK =============
     LOGIN_SUCCESS(HttpStatus.OK,
             "AUTH200_1",
             "로그인에 성공했습니다."),
@@ -29,6 +30,11 @@ public enum AuthSuccessCode implements BaseSuccessCode {
             "AUTH200_5",
             "이메일 인증에 성공했습니다."),
 
+    RECOVER_SUCCESS(HttpStatus.OK,
+            "AUTH200_6",
+            "계정이 복구되었습니다."),
+
+    // ============= 201 Created =============
     SIGNUP_SUCCESS(HttpStatus.CREATED,
             "AUTH201_1",
             "회원가입이 완료되었습니다.");

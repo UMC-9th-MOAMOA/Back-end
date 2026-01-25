@@ -1,7 +1,10 @@
 package com.example.moamoa_backend.wallet.entity;
 
 import com.example.moamoa_backend.global.entity.BaseEntity;
+import com.example.moamoa_backend.mission.entity.Mission;
 import com.example.moamoa_backend.wallet.enums.TransactionType;
+import com.example.moamoa_backend.wallet.exception.WalletException;
+import com.example.moamoa_backend.wallet.exception.code.WalletErrorCode;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -16,20 +19,105 @@ public class WalletHistory extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /**
+     * N:1 관계. 지갑 1개에 히스토리는 여러 개.
+     */
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "wallet_id", nullable = false)
-    @ManyToOne(fetch = FetchType.LAZY)
     private Wallet wallet;
 
+    /**
+     * 사용자에게 보여줄 내역 설명(예: "아이템 구매: 모자")
+     */
     @Column(nullable = false)
     private String description;
 
+    /**
+     * 거래 금액(증가/감소).
+     * 정책: 증가=양수, 감소=음수로 저장하면 합계 계산/통계가 쉬움.
+     */
     @Column(nullable = false)
     private Integer amount;
 
+    /**
+     * 거래 직후 잔액 스냅샷.
+     * 과거 내역을 재구성할 때 정확한 잔액을 보장하기 위해 저장.
+     */
     @Column(nullable = false)
     private Integer balanceSnapshot;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TransactionType type;
+
+    /**
+     * MISSION 타입일 때만 연결되는 미션.
+     * 그 외 타입은 null이어야 한다(도메인 규칙).
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "mission_id")
+    private Mission mission;
+
+    private WalletHistory(
+        Wallet wallet,
+        Mission mission,
+        String description,
+        Integer amount,
+        Integer balanceSnapshot,
+        TransactionType type
+    ) {
+        validate(type, mission);
+        this.wallet = wallet;
+        this.mission = mission;
+        this.description = description;
+        this.amount = amount;
+        this.balanceSnapshot = balanceSnapshot;
+        this.type = type;
+    }
+
+    /**
+     * 범용 생성 팩토리(정책/규칙은 validate로 강제).
+     */
+    public static WalletHistory create(
+        Wallet wallet,
+        Mission mission,
+        String description,
+        int amount,
+        int balanceSnapshot,
+        TransactionType type
+    ) {
+        return new WalletHistory(wallet, mission, description, amount, balanceSnapshot, type);
+    }
+
+    /**
+     * 구매 전용 히스토리 생성.
+     * spent는 양수로 받되, 저장은 amount를 음수로 저장한다.
+     */
+    public static WalletHistory forPurchase(Wallet wallet, int spent, int balanceSnapshot, String description) {
+        if (spent <= 0) {
+            throw new WalletException(WalletErrorCode.INVALID_AMOUNT);
+        }
+        return WalletHistory.create(
+            wallet,
+            null,
+            description,
+            -spent,
+            balanceSnapshot,
+            TransactionType.PURCHASE
+        );
+    }
+
+    /**
+     * 도메인 규칙:
+     * - type == MISSION 이면 mission 필수
+     * - type != MISSION 이면 mission 금지
+     */
+    private static void validate(TransactionType type, Mission mission) {
+        if (type == TransactionType.MISSION && mission == null) {
+            throw new WalletException(WalletErrorCode.MISSION_REQUIRED_FOR_MISSION_TYPE);
+        }
+        if (type != TransactionType.MISSION && mission != null) {
+            throw new WalletException(WalletErrorCode.MISSION_NOT_ALLOWED_FOR_NON_MISSION_TYPE);
+        }
+    }
 }

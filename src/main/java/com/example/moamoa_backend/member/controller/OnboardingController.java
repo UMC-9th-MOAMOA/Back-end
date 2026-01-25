@@ -1,5 +1,10 @@
 package com.example.moamoa_backend.member.controller;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
+
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,10 +16,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.moamoa_backend.global.apiPayload.response.ApiResponse;
+import com.example.moamoa_backend.member.dto.GoalResultResponseDto;
 import com.example.moamoa_backend.member.dto.OnboardingPatchRequestDto;
 import com.example.moamoa_backend.member.dto.OnboardingResponseDto;
 import com.example.moamoa_backend.member.enums.OnboardingUpdateScope;
 import com.example.moamoa_backend.member.exception.code.MemberSuccessCode;
+import com.example.moamoa_backend.member.service.GoalResultService;
 import com.example.moamoa_backend.member.service.OnboardingService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,14 +36,16 @@ import lombok.RequiredArgsConstructor;
 public class OnboardingController {
 
 	private final OnboardingService onboardingService;
+	private final GoalResultService goalResultService;
+
 
 	@Operation(
 		summary = "내 온보딩 조회",
 		description = """
             내 온보딩 정보를 조회합니다. scope에 따라 필요한 항목만 반환합니다.
-            - ALL: selections + dailyMissionGoal
+            - ALL: selections + dailyMissionGoal + goalRetention + goalEndDate + pendingGoal*
             - INTERESTS: selections
-            - GOAL: dailyMissionGoal
+            - GOAL: dailyMissionGoal + goalRetention + goalEndDate + pendingGoal*
             """
 	)
 	@GetMapping("/onboarding")
@@ -59,9 +68,9 @@ public class OnboardingController {
             서버는 기존 저장값과 비교하여 DB 상태를 최종 결과와 동일하게 갱신합니다(동기화).
             
             scope로 수정 범위를 지정합니다.
-            - ALL: selections 필수, dailyMissionGoal은 선택(null 허용)
+            - ALL: selections 필수, dailyMissionGoal/goalRetention은 선택(null 허용)
             - INTERESTS: selections 필수
-            - GOAL: dailyMissionGoal 필수(0~5)
+            - GOAL: dailyMissionGoal/goalRetention 필수(0~5)
             """
 	)
 	@PatchMapping("/onboarding")
@@ -75,6 +84,54 @@ public class OnboardingController {
 		return ApiResponse.onSuccess(
 			MemberSuccessCode.MEMBER_UPDATE_ONBOARDING,
 			onboardingService.patchOnboarding(memberId, scope, request)
+		);
+	}
+	@Operation(
+		summary = "일간 목표 결과 조회",
+		description = """
+            특정 날짜의 일간 목표 결과(성공/실패)를 조회합니다.
+            date가 없으면 기본값은 어제 날짜입니다.
+            """
+	)
+	@GetMapping("/goal-results/daily")
+	public ApiResponse<GoalResultResponseDto> getDailyGoalResult(
+		@AuthenticationPrincipal UserDetails userDetails,
+		@RequestParam(required = false)
+		@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+	) {
+		Long memberId = Long.parseLong(userDetails.getUsername());
+		LocalDate targetDate = date == null ? LocalDate.now().minusDays(1) : date;
+		return ApiResponse.onSuccess(
+			MemberSuccessCode.MEMBER_GET_DAILY_GOAL_RESULT,
+			goalResultService.getDailyGoalResult(memberId, targetDate).orElse(null)
+		);
+	}
+
+	@Operation(
+		summary = "주간 목표 결과 조회",
+		description = """
+            특정 주차의 주간 목표 결과(성공/실패)를 조회합니다.
+            date가 없으면 기본값은 지난 주 마지막 날(일요일)입니다.
+            """
+	)
+	@GetMapping("/goal-results/weekly")
+	public ApiResponse<GoalResultResponseDto> getWeeklyGoalResult(
+		@AuthenticationPrincipal UserDetails userDetails,
+		@RequestParam(required = false)
+		@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+	) {
+		Long memberId = Long.parseLong(userDetails.getUsername());
+		LocalDate today = LocalDate.now();
+
+		// 지난 주 마지막 날(일요일) = "이전 일요일"
+		LocalDate defaultWeekEnd = today.with(TemporalAdjusters.previous(DayOfWeek.SUNDAY));
+
+		// date가 없으면 지난 주 일요일로 고정
+		LocalDate dateInWeek = (date == null) ? defaultWeekEnd : date;
+
+		return ApiResponse.onSuccess(
+			MemberSuccessCode.MEMBER_GET_WEEKLY_GOAL_RESULT,
+			goalResultService.getWeeklyGoalResult(memberId, dateInWeek).orElse(null)
 		);
 	}
 }

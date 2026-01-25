@@ -1,15 +1,15 @@
 package com.example.moamoa_backend.auth.service;
 
 import com.example.moamoa_backend.auth.dto.req.AuthReqDto;
-import com.example.moamoa_backend.auth.dto.req.AuthResDto;
+import com.example.moamoa_backend.auth.dto.res.AuthResDto;
 import com.example.moamoa_backend.auth.exception.AuthException;
 import com.example.moamoa_backend.auth.exception.code.AuthErrorCode;
-import com.example.moamoa_backend.global.apiPayload.response.ApiResponse;
 import com.example.moamoa_backend.global.security.jwt.JwtUtil;
 import com.example.moamoa_backend.global.security.jwt.exception.JwtException;
 import com.example.moamoa_backend.global.security.jwt.exception.code.JwtErrorCode;
 import com.example.moamoa_backend.global.util.RedisUtil;
 import com.example.moamoa_backend.member.entity.Member;
+import com.example.moamoa_backend.member.enums.MemberStatus;
 import com.example.moamoa_backend.member.enums.Provider;
 import com.example.moamoa_backend.member.enums.Role;
 import com.example.moamoa_backend.member.exception.MemberException;
@@ -80,7 +80,7 @@ public class AuthService {
     // 이메일 인증번호 전송
     public void sendEmailAuthCode(String email, String clientIp) {
         // 중복 가입 체크
-        if (memberRepository.existsByEmailAndProvider(email, Provider.LOCAL)) {
+        if (memberRepository.findByProviderAndProviderId(Provider.LOCAL, email).isPresent()) {
             throw new MemberException(MemberErrorCode.EMAIL_ALREADY_EXISTS);
         }
 
@@ -193,19 +193,22 @@ public class AuthService {
         redisUtil.deleteData(VERIFIED_PREFIX + email);
     }
 
-    //회원가입
-    @Transactional // Write 작업이므로 readOnly = false
-    public Long signup(AuthReqDto.SignupDto request) {
+    /**
+     * 회원가입 (Local)
+     * - 자동 로그인
+     */
+    @Transactional
+    public AuthResDto.GeneratedTokenDto signup(AuthReqDto.SignupDto request) {
 
         // 이메일 인증 여부 확인 (인증 안 된 이메일로 가입 시도 차단)
         String isVerified = redisUtil.getData(VERIFIED_PREFIX + request.email());
-        if (isVerified == null || !"TRUE".equals(isVerified)) {
+        if (!"TRUE".equals(isVerified)) {
             //인증되지 않은 이메일을 이용한 회원가입 -> 접근 거부
             throw new AuthException(AuthErrorCode.ACCESS_DENIED);
         }
 
         // 이메일 중복 체크 (Double Check: 동시성 이슈 및 방어 로직)
-        if (memberRepository.existsByEmailAndProvider(request.email(), Provider.LOCAL)) {
+        if (memberRepository.findByProviderAndProviderId(Provider.LOCAL, request.email()).isPresent()) {
             throw new MemberException(MemberErrorCode.EMAIL_ALREADY_EXISTS);
         }
 
@@ -221,10 +224,13 @@ public class AuthService {
         // 약관 동의 내역 저장
         saveTermsAgreements(savedMember, request.agreedTerms());
 
+        //자동 로그인을 위해 토큰 생성 및 Redis에 Refresh Token 저장
+        AuthResDto.GeneratedTokenDto tokenDto = generateTokens(savedMember.getId(), savedMember.getRole());
+
         // 인증 플래그 삭제 (재사용 방지)
         redisUtil.deleteData(VERIFIED_PREFIX + request.email());
 
-        return savedMember.getId();
+        return tokenDto;
     }
 
     /**
@@ -233,7 +239,7 @@ public class AuthService {
     @Transactional
     public AuthResDto.GeneratedTokenDto login(AuthReqDto.LoginDto request) {
         // 1. 이메일로 회원 조회
-        Member member = memberRepository.findByEmailAndProvider(request.email(),Provider.LOCAL)
+        Member member = memberRepository.findByProviderAndProviderId(Provider.LOCAL, request.email())
                 .orElseThrow(() -> new AuthException(AuthErrorCode.LOGIN_FAILED));
 
         // 2. 비밀번호 검증
@@ -241,7 +247,15 @@ public class AuthService {
             throw new AuthException(AuthErrorCode.LOGIN_FAILED);
         }
 
-        // 3. 토큰 발급 및 Redis 저장
+        // 3. 상태 검증
+        if (member.getStatus() == MemberStatus.WITHDRAWN) {
+            throw new AuthException(AuthErrorCode.ACCOUNT_WITHDRAWN);
+        }
+        if (member.getStatus() == MemberStatus.BANNED) {
+            throw new AuthException(AuthErrorCode.ACCOUNT_BANNED);
+        }
+
+        // 4. 토큰 발급 및 Redis 저장
         return generateTokens(member.getId(), member.getRole());
     }
 
@@ -282,6 +296,32 @@ public class AuthService {
     public void logout(Long memberId) {
         // Redis에서 Refresh Token 삭제
         redisUtil.deleteData("RT:" + memberId);
+    }
+
+    /**
+     * 로컬계정 복구
+     */
+    @Transactional
+    public AuthResDto.GeneratedTokenDto recover(AuthReqDto.LoginDto request) {
+        // 1. 이메일로 회원 조회
+        Member member = memberRepository.findByProviderAndProviderId(Provider.LOCAL, request.email())
+                .orElseThrow(() -> new AuthException(AuthErrorCode.LOGIN_FAILED));
+
+        // 2. 비밀번호 검증
+        if (!passwordEncoder.matches(request.password(), member.getPassword())) {
+            throw new AuthException(AuthErrorCode.LOGIN_FAILED);
+        }
+
+        // 3. WITHDRAWN 상태만 복구 가능
+        if (member.getStatus() != MemberStatus.WITHDRAWN) {
+            throw new AuthException(AuthErrorCode.INVALID_RECOVER_REQUEST);
+        }
+
+        // 4. 상태 변경
+        member.activate();
+
+        // 5. 토큰 발급
+        return generateTokens(member.getId(), member.getRole());
     }
 
     // -- Helper Methods --
@@ -413,6 +453,33 @@ public class AuthService {
                 .refreshToken(refreshToken)
                 .accessTokenExpiresIn(jwtUtil.getAccessTokenValidity())
                 .build();
+    }
+
+    /**
+     * 임시 코드(OAuthCode)를 검증하고 AccessToken을 반환
+     * 소셜 로그인에서 accessToken 최초 발급 시 사용
+     */
+    public AuthResDto.TokenDto exchangeAuthCode(String code) {
+        // 1. Redis Key 생성
+        String redisKey = "OAUTH_CODE:" + code;
+
+        // 2. Redis 조회 및 파기
+        String accessToken = redisUtil.getAndDeleteData(redisKey);
+
+        // 3. 검증
+        if (accessToken == null) {
+            throw new AuthException(AuthErrorCode.INVALID_OAUTH_CODE);
+        }
+
+        AuthResDto.TokenDto tokenDto = AuthResDto.TokenDto.builder()
+                .grantType("Bearer")
+                .accessToken(accessToken)
+                .accessTokenExpiresIn(jwtUtil.getAccessTokenValidity())
+                .build();
+
+
+        // 4. 토큰 반환
+        return tokenDto;
     }
 
 }

@@ -14,6 +14,9 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.util.List;
 
+/**
+ * 인증 관련 Request DTO
+ */
 public class AuthReqDto {
 
     // 이메일 전송 요청
@@ -67,6 +70,7 @@ public class AuthReqDto {
                     .gender(gender)
                     .role(Role.ROLE_USER)
                     .provider(Provider.LOCAL)
+                    .providerId(email)
                     .status(MemberStatus.ACTIVE)
                     .build();
         }
@@ -95,6 +99,12 @@ public class AuthReqDto {
     public record ReissueDto(
             @NotBlank(message = "Refresh Token은 필수 입력 값입니다.")
             String refreshToken
+    ){}
+
+    // 소셜 로그인 시 accessToken 요청
+    public record OAuthLoginReqDto(
+            @NotBlank (message = "인증 코드는 필수입니다.")
+            String code
     ){}
 
 }
