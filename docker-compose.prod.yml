@@ -7,7 +7,6 @@ services:
       - "8080:8080"
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    network_mode: "host"
     environment:
       SPRING_PROFILES_ACTIVE: prod
       DB_URL: ${DB_URL}
@@ -15,8 +14,7 @@ services:
       DB_PW: ${DB_PW}
 
       REDIS_HOST: ${REDIS_HOST}
-      REDIS_HORT: ${REDIS_PORT:-6379}
-      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_PORT: ${REDIS_PORT:-6379}
 
       MAIL_USERNAME: ${MAIL_USERNAME}
       MAIL_PASSWORD: ${MAIL_PASSWORD}
