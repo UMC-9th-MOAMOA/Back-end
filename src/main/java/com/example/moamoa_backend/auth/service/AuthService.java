@@ -224,11 +224,13 @@ public class AuthService {
         // 약관 동의 내역 저장
         saveTermsAgreements(savedMember, request.agreedTerms());
 
+        //자동 로그인을 위해 토큰 생성 및 Redis에 Refresh Token 저장
+        AuthResDto.GeneratedTokenDto tokenDto = generateTokens(savedMember.getId(), savedMember.getRole());
+
         // 인증 플래그 삭제 (재사용 방지)
         redisUtil.deleteData(VERIFIED_PREFIX + request.email());
 
-        //자동 로그인을 위해 토큰 생성 및 Redis에 Refresh Token 저장
-        return generateTokens(savedMember.getId(), savedMember.getRole());
+        return tokenDto;
     }
 
     /**
