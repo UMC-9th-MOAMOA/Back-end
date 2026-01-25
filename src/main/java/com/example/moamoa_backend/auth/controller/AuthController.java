@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -53,12 +54,17 @@ public class AuthController {
         return ApiResponse.onSuccess(AuthSuccessCode.EMAIL_VERIFY_SUCCESS, null);
     }
 
-    @Operation(summary = "회원가입", description = "이메일 인증이 완료된 요청에 대해 회원가입을 진행합니다.")
+    @Operation(summary = "회원가입", description = "이메일 인증이 완료된 요청에 대해 회원가입을 진행하고 자동 로그인을 진행합니다.")
     @SecurityRequirements(value = {})
+    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/signup")
-    public ApiResponse<Void> signup(@RequestBody @Valid AuthReqDto.SignupDto request) {
-        authService.signup(request);
-        return ApiResponse.onSuccess(AuthSuccessCode.SIGNUP_SUCCESS, null);
+    public ApiResponse<AuthResDto.TokenDto> signup(
+            @RequestBody @Valid AuthReqDto.SignupDto request,
+            HttpServletResponse response
+    ) {
+        AuthResDto.GeneratedTokenDto generatedTokenDto = authService.signup(request);
+        setRefreshTokenCookie(response, generatedTokenDto.refreshToken());
+        return ApiResponse.onSuccess(AuthSuccessCode.SIGNUP_SUCCESS, AuthConverter.toTokenDto(generatedTokenDto));
     }
 
     @Operation(summary = "일반 로그인 API", description = "이메일과 비밀번호로 로그인하여 Access/Refresh Token을 발급받습니다.")

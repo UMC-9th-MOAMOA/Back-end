@@ -193,13 +193,16 @@ public class AuthService {
         redisUtil.deleteData(VERIFIED_PREFIX + email);
     }
 
-    //회원가입
-    @Transactional // Write 작업이므로 readOnly = false
-    public Long signup(AuthReqDto.SignupDto request) {
+    /**
+     * 회원가입 (Local)
+     * - 자동 로그인
+     */
+    @Transactional
+    public AuthResDto.GeneratedTokenDto signup(AuthReqDto.SignupDto request) {
 
         // 이메일 인증 여부 확인 (인증 안 된 이메일로 가입 시도 차단)
         String isVerified = redisUtil.getData(VERIFIED_PREFIX + request.email());
-        if (isVerified == null || !"TRUE".equals(isVerified)) {
+        if (!"TRUE".equals(isVerified)) {
             //인증되지 않은 이메일을 이용한 회원가입 -> 접근 거부
             throw new AuthException(AuthErrorCode.ACCESS_DENIED);
         }
@@ -221,10 +224,13 @@ public class AuthService {
         // 약관 동의 내역 저장
         saveTermsAgreements(savedMember, request.agreedTerms());
 
+        //자동 로그인을 위해 토큰 생성 및 Redis에 Refresh Token 저장
+        AuthResDto.GeneratedTokenDto tokenDto = generateTokens(savedMember.getId(), savedMember.getRole());
+
         // 인증 플래그 삭제 (재사용 방지)
         redisUtil.deleteData(VERIFIED_PREFIX + request.email());
 
-        return savedMember.getId();
+        return tokenDto;
     }
 
     /**
