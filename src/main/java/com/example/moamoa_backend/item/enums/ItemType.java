@@ -4,5 +4,6 @@ public enum ItemType {
     FACE,
     TOP,
     BOTTOM,
-    ACCESSORY;
+    ACCESSORY,
+    BACKGROUND;
 }
