@@ -111,4 +111,12 @@ public class MissionQueryServiceImpl implements MissionQueryService{
 
         return missionConverter.toSearchResponse(missionSlice,myMissionMap);
     }
+
+    @Override
+    public MissionResponseDto.SearchResponse getMyMissions(Long memberId, String status, String condition, Long categoryId, Pageable pageable) {
+
+        Slice<MissionResponseDto.RecommendResult> slice = missionRepository.getMyMissions(memberId, status, condition, categoryId, pageable);
+
+        return missionConverter.toMyMissionsResult(slice);
+    }
 }

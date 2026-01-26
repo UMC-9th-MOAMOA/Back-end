@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -145,6 +146,78 @@ public class MissionController {
                 missionQueryService.searchMissions(memberId, null, null, categoryId, subCategoryId, searchSeed, pageable)
         );
     }
+
+    @GetMapping("/me")
+    @Operation(
+            summary = "내 미션 보관함 조회 (찜/완료/다시풀기)",
+            description = """
+        내 미션 상태에 따라 목록을 조회합니다 (무한 스크롤 지원).
+        
+        **파라미터 설명:**
+        - `status` (필수):
+            - **SCRAP**: 찜한 미션
+            - **COMPLETE**: 성공(SUCCESS)한 미션
+            - **RETRY**: 실패(FAIL)했거나, 풀다가 중단한(NONE + 시도횟수>0) 미션
+        - `sort` (선택, 기본값 LATEST):
+            - **LATEST**: 최근 활동(저장/완료/시도) 순
+            - **TIME_ASC**: 소요시간 짧은 순
+            - **TIME_DESC**: 소요시간 긴 순
+        - `categoryId` (선택): 대분류 ID로 필터링
+        """
+    )
+    public ApiResponse<MissionResponseDto.SearchResponse> getMyMissions(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam String status,
+            @RequestParam(required = false) String condition,
+            @RequestParam(required = false) Long categoryId,
+            @PageableDefault(size = 10) Pageable pageable
+    ) {
+        Long memberId = Long.parseLong(userDetails.getUsername());
+
+        return ApiResponse.onSuccess(
+                GeneralSuccessCode.OK,
+                missionQueryService.getMyMissions(memberId, status, condition, categoryId, pageable)
+        );
+    }
+
+    @PostMapping("/{missionId}/submit")
+    @Operation(summary = "미션 정답 제출 및 채점",
+            description = """
+                   **[기능 설명]**
+                   유저의 퀴즈 답안을 채점하고 성공 여부와 보상을 반환합니다.
+                   
+                   **[보상 지급 정책]**
+                   이 API는 **'최초 시도'** 여부에 따라 결과가 다릅니다.
+                   
+                   1. 첫 시도 & 정답 
+                      - 성공 처리 (`isSuccess: true`)
+                      - **미션 보상 지급됨**
+                      - **일간/주간 목표 카운트 인정됨** (목표 달성 시 추가 보상)
+                      
+                   2. 첫 시도 & 오답 
+                      - 실패 처리 (`isSuccess: false`)
+                      - 보상 없음
+                      
+                   3. 재시도 & 정답 (Retry) 
+                      - 성공 처리 (`isSuccess: true`)
+                      - **보상 없음 (`missionReward: 0`)**
+                      - **목표 카운트 인정 안 됨** (이미 실패했거나 기록이 있으므로 제외)
+                   
+                   **[요청 형식]**
+                   - `submissions`: 퀴즈 ID와 답안 리스트 (모든 문제 답안 필수)
+                   """)
+    public ApiResponse<MissionResponseDto.SubmitResult> submitMission(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable Long missionId,
+            @RequestBody @Valid MissionRequestDto.SubmitAnswer request
+    ) {
+        Long memberId = Long.parseLong(userDetails.getUsername());
+        return ApiResponse.onSuccess(
+                GeneralSuccessCode.OK,
+                missionCommandService.submitMissionAnswer(memberId, missionId, request)
+        );
+    }
+
 }
 
 

@@ -83,4 +83,16 @@ public class MissionResponseDto {
       List<RecommendResult> missions,
       boolean hasNext
     ){}
+
+    @Builder
+    public record SubmitResult(
+       boolean isSuccess, //이번 미션 성공 여부
+       int missionReward, //이번 미션 보상(첫 성공 아니면 0)
+       int goalReward, //목표 달성 추가 보상
+       int totalReward, //총 획득량
+       int dailyCount, //오늘 성공 횟수
+       boolean dailyGoalAchieved, //일간 목표 달성 여부
+       int weeklyCount, //이번주 성공 횟수
+       boolean weeklyGoalAchieved //주간 목표 달성 여부
+    ){}
 }

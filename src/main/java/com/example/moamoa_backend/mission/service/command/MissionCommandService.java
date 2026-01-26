@@ -14,4 +14,7 @@ public interface MissionCommandService {
 
     @Transactional
     MissionResponseDto.StatusResult updateMissionStatus(Long memberId, Long missionId, MissionRequestDto.PatchStatus request);
+
+    @Transactional
+    MissionResponseDto.SubmitResult submitMissionAnswer(Long memberId, Long missionId, MissionRequestDto.SubmitAnswer request);
 }

@@ -1,6 +1,8 @@
 package com.example.moamoa_backend.member.repository;
 
+import com.example.moamoa_backend.member.entity.Member;
 import com.example.moamoa_backend.member.entity.mapping.MemberMission;
+import com.example.moamoa_backend.mission.entity.Mission;
 import com.example.moamoa_backend.mission.enums.MissionStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -13,4 +15,5 @@ public interface MemberMissionRepository extends JpaRepository<MemberMission, Lo
     boolean existsByMemberIdAndMissionIdAndMissionStatus(Long memberId, Long missionId, MissionStatus status);
 
     List<MemberMission> findAllByMemberIdAndMissionIdIn(Long memberId, List<Long> missionIds);
+
 }

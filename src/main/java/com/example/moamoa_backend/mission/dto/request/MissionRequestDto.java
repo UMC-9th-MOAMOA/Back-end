@@ -38,4 +38,16 @@ public class MissionRequestDto {
             @NotBlank(message = "상태값은 필수입니다.")
             String status
     ){}
+
+    public record SubmitAnswer(
+            @NotNull(message = "답안 목록은 필수입니다.")
+            List<QuizSubmission> submissions
+    ){}
+
+    public record QuizSubmission(
+            @NotNull(message = "퀴즈 ID는 필수입니다.")
+            Long quizId,
+            @NotBlank(message = "답안은 필수입니다.")
+            String answer
+    ){}
 }

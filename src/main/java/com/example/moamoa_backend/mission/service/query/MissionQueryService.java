@@ -18,4 +18,6 @@ public interface MissionQueryService {
             Long memberId, String searchText, List<String> keywords,
             Long categoryId, Long subCategoryId, Long seed, Pageable pageable
     );
+
+    MissionResponseDto.SearchResponse getMyMissions(Long memberId, String status, String condition, Long categoryId, Pageable pageable);
 }

@@ -1,20 +1,48 @@
 server:
   port: 8080
+  forward-headers-strategy: framework
+
+app:
+  front-url: ${FRONT_URL:http://localhost:3000}
 
 spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope:
+              - profile
+              - email
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            client-name: Google
+
+  # [수정됨] 중복 제거 및 들여쓰기 교정 완료
   mail:
     host: smtp.gmail.com
-    port: 587
+    port: 465
     username: ${MAIL_USERNAME}
     password: ${MAIL_PASSWORD}
     default-encoding: UTF-8
     properties:
       mail:
+        debug: true
         smtp:
           auth: true
-          starttls:
+          localhost: 127.0.0.1  # 👈 핵심: 내 컴퓨터 이름 대신 IP 쓰기
+          socketFactory:        # 👈 핵심: SSL 강제 적용
+            class: javax.net.ssl.SSLSocketFactory
+            fallback: false
+            port: 465
+          ssl:
             enable: true
-            required: true
+            trust: "*"
+            protocols: TLSv1.2
+          starttls:
+            enable: false
+            required: false
           connectiontimeout: 5000
           timeout: 5000
           writetimeout: 5000
@@ -40,7 +68,7 @@ spring:
   data:
     redis:
       host: ${REDIS_HOST:localhost}
-      port: 6379
+      port: ${REDIS_PORT:6379}
 
 jwt:
   secret-key: ${JWT_SECRET_KEY}

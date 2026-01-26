@@ -23,9 +23,18 @@ import com.example.moamoa_backend.mission.entity.mapping.MissionSubInterest;
 import com.example.moamoa_backend.mission.repository.MissionKeywordRepository;
 import com.example.moamoa_backend.mission.repository.MissionRepository;
 import com.example.moamoa_backend.mission.repository.MissionSubInterestRepository;
+import com.example.moamoa_backend.quiz.entity.Quiz;
+import com.example.moamoa_backend.wallet.entity.Wallet;
+import com.example.moamoa_backend.wallet.entity.WalletHistory;
+import com.example.moamoa_backend.wallet.enums.TransactionType;
+import com.example.moamoa_backend.wallet.repository.WalletHistoryRepository;
+import com.example.moamoa_backend.wallet.repository.WalletRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -39,6 +48,8 @@ public class MissionCommandServiceImpl implements MissionCommandService {
     private final MissionConverter missionConverter;
     private final MemberMissionRepository memberMissionRepository;
     private final MemberRepository memberRepository;
+    private final WalletHistoryRepository walletHistoryRepository;
+    private final WalletRepository walletRepository;
 
     @Transactional
     @Override
@@ -168,6 +179,162 @@ public class MissionCommandServiceImpl implements MissionCommandService {
             }
         }
         return missionConverter.toStatusResult(memberMission);
+    }
+
+    @Transactional
+    @Override
+    public MissionResponseDto.SubmitResult submitMissionAnswer(Long memberId, Long missionId, MissionRequestDto.SubmitAnswer request) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+        Mission mission = missionRepository.findById(missionId)
+                .orElseThrow(() -> new MissionException(MissionErrorCode.MISSION_NOT_FOUND));
+        Wallet wallet = walletRepository.findByMemberIdForUpdate(memberId)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        List<Quiz> quizzes = mission.getQuizzes();
+        int earnedScore = 0;
+        boolean isAllCorrect = true;
+
+        if(quizzes.size() != request.submissions().size()){
+            isAllCorrect = false;
+        }else{
+            for(Quiz quiz : quizzes){
+                String userAnswer = request.submissions().stream()
+                        .filter(s -> s.quizId().equals(quiz.getId()))
+                        .findFirst()
+                        .map(MissionRequestDto.QuizSubmission::answer)
+                        .orElse(null);
+
+                if(userAnswer != null && userAnswer.trim().equalsIgnoreCase(quiz.getAnswer())){
+                    earnedScore += missionConverter.getRewardByType(quiz.getType());
+                }else{
+                    isAllCorrect = false;
+                }
+            }
+        }
+
+        //기록 조회 및 첫 시도 판별
+        MemberMission memberMission = memberMissionRepository.findByMemberIdAndMissionId(member.getId(), mission.getId())
+                .orElse(null);
+
+        //첫 시도 여부 판별
+        //기록이 아예 없거나, 기록은 있는데 (NONE 상태 && 시도횟수 1)
+        boolean isFirstAttempt = (memberMission == null) || (memberMission.getMissionStatus() == MissionStatus.NONE && memberMission.getAttemptCount() <= 1);
+
+        //기록 없으면 생성
+        if (memberMission == null) {
+            memberMission = MemberMission.builder()
+                    .member(member)
+                    .mission(mission)
+                    .missionStatus(MissionStatus.NONE)
+                    .attemptCount(1)
+                    .build();
+            memberMissionRepository.save(memberMission);
+        }
+
+        LocalDate today = LocalDate.now();
+        LocalDate tomorrow = today.plusDays(1);
+        LocalDate thisMonday = today.with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY));
+
+        //case 1 -> 실패 (일부정답 or 모두 오답)
+        if(!isAllCorrect){
+            memberMission.changeMissionStatus(MissionStatus.FAIL);
+            memberMission.addAttemptCount();
+
+            //첫 시도라면 실패했더라도 MISSION 타입으로 월렛히스토리에 기록
+            if(isFirstAttempt){
+                String desc = (earnedScore > 0) ? "참여(부분점수)" : "참여(0점)";
+
+                updateWalletAndSaveHistory(wallet,mission,TransactionType.MISSION,earnedScore,mission.getTitle() + desc);
+                walletHistoryRepository.flush();
+            }
+
+            long currentDailyCount = countMissionCompleteBetween(memberId, today, tomorrow);
+            long currentWeeklyCount = countMissionCompleteBetween(memberId, thisMonday, tomorrow);
+
+            return missionConverter.toSubmitResult(
+                    false,
+                    earnedScore,
+                    0,
+                    (int) currentDailyCount,
+                    (member.getDailyGoal() != null && currentDailyCount >= member.getDailyGoal()),
+                    (int) currentWeeklyCount,
+                    (member.getWeeklyGoal() != null && currentWeeklyCount >= member.getWeeklyGoal())
+            );
+        }
+
+        //case 2 -> 성공 (모두 정답)
+        int finalMissionReward = 0;
+
+        if(isFirstAttempt){
+            memberMission.markAsSuccess();
+            updateWalletAndSaveHistory(wallet,mission,TransactionType.MISSION_COMPLETE,finalMissionReward,mission.getTitle() + "성공");
+            walletHistoryRepository.flush();
+        }
+        else{
+            memberMission.changeMissionStatus(MissionStatus.SUCCESS);
+        }
+
+        // --- 목표 달성 체크 ---
+        int earnedGoalReward = 0;
+
+        long dailyCount = walletHistoryRepository.countByMemberAndTypeBetween(
+                memberId, TransactionType.MISSION_COMPLETE, today.atStartOfDay(), tomorrow.atStartOfDay());
+
+        long weeklyCount = walletHistoryRepository.countByMemberAndTypeBetween(
+                memberId, TransactionType.MISSION_COMPLETE, thisMonday.atStartOfDay(), tomorrow.atStartOfDay());
+
+        if (member.getDailyGoal() != null && dailyCount == member.getDailyGoal()) {
+            int reward = member.getDailyGoal() * 5;
+            earnedGoalReward += reward;
+            updateWalletAndSaveHistory(wallet, mission, TransactionType.MISSION_COMPLETE, reward, "일간 목표 달성");
+        }
+
+        if (member.getWeeklyGoal() != null && weeklyCount == member.getWeeklyGoal()) {
+            int reward = member.getWeeklyGoal() * 10;
+            earnedGoalReward += reward;
+            updateWalletAndSaveHistory(wallet, mission, TransactionType.MISSION_COMPLETE, reward, "주간 목표 달성");
+        }
+
+        if (earnedGoalReward > 0) walletHistoryRepository.flush();
+
+        return missionConverter.toSubmitResult(
+                true, finalMissionReward, earnedGoalReward,
+                (int) dailyCount, (member.getDailyGoal() != null && dailyCount >= member.getDailyGoal()),
+                (int) weeklyCount, (member.getWeeklyGoal() != null && weeklyCount >= member.getWeeklyGoal())
+        );
+
+    }
+
+    //카운트 조회
+    private Long countMissionCompleteBetween(Long memberId, LocalDate startDate, LocalDate endDateExclusive){
+        return walletHistoryRepository.countByMemberAndTypeBetween(
+                memberId,
+                TransactionType.MISSION_COMPLETE,
+                startDate.atStartOfDay(),
+                endDateExclusive.atStartOfDay()
+        );
+    }
+
+
+    //히스토리 저장
+    private void updateWalletAndSaveHistory(Wallet wallet, Mission mission, TransactionType type, int amount, String description) {
+
+        if (amount > 0) {
+            wallet.addPoint(amount);
+        }
+
+        WalletHistory history = WalletHistory.create(
+                wallet,
+                mission,
+                null,
+                description,
+                amount,
+                wallet.getPoint(),
+                type
+        );
+
+        walletHistoryRepository.save(history);
     }
 }
 

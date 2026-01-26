@@ -1,5 +1,6 @@
 package com.example.moamoa_backend.mission.repository;
 
+import com.example.moamoa_backend.mission.dto.response.MissionResponseDto;
 import com.example.moamoa_backend.mission.entity.Mission;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -17,5 +18,9 @@ public interface MissionRepositoryCustom {
             Long subCategoryId, //소분류 ID. 없으면 null
             Long seed, //랜덤 시드(무작위 정렬을 위함)
             Pageable pageable
+    );
+
+    Slice<MissionResponseDto.RecommendResult> getMyMissions(
+            Long memberId, String status, String condition, Long categoryId, Pageable pageable
     );
 }

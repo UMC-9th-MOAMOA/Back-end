@@ -1,11 +1,16 @@
 package com.example.moamoa_backend.mission.repository;
 
+import com.example.moamoa_backend.mission.dto.response.MissionResponseDto;
 import com.example.moamoa_backend.mission.entity.Mission;
 import com.example.moamoa_backend.mission.enums.MissionStatus;
+import com.example.moamoa_backend.mission.exception.MissionException;
+import com.example.moamoa_backend.mission.exception.code.MissionErrorCode;
 import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -13,8 +18,11 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 
 import java.util.List;
+
+import static com.example.moamoa_backend.interest.entity.QSubInterest.subInterest;
 import static com.example.moamoa_backend.member.entity.mapping.QMemberMission.memberMission;
 import static com.example.moamoa_backend.mission.entity.QMission.mission;
+import static com.example.moamoa_backend.mission.entity.mapping.QMissionSubInterest.missionSubInterest;
 
 @RequiredArgsConstructor
 public class MissionRepositoryImpl implements MissionRepositoryCustom {
@@ -88,6 +96,46 @@ public class MissionRepositoryImpl implements MissionRepositoryCustom {
         return new SliceImpl<>(results, pageable, hasNext);
     }
 
+    @Override
+    public Slice<MissionResponseDto.RecommendResult> getMyMissions(
+            Long memberId, String status, String condition, Long categoryId, Pageable pageable
+    ) {
+        List<MissionResponseDto.RecommendResult> content = queryFactory
+                .select(Projections.constructor(MissionResponseDto.RecommendResult.class,
+                        mission.id,
+                        mission.title,
+                        mission.durationMinutes,
+                        JPAExpressions.select(subInterest.interest.name)
+                                .from(missionSubInterest)
+                                .join(missionSubInterest.subInterest, subInterest)
+                                .where(missionSubInterest.mission.eq(mission))
+                                .orderBy(missionSubInterest.id.asc())
+                                .limit(1),
+                        mission.quizzes.size(),
+                        Expressions.nullExpression(List.class),
+                        memberMission.missionStatus.eq(MissionStatus.SCRAP),
+                        mission.videoUrl
+                ))
+                .from(memberMission)
+                .join(memberMission.mission, mission)
+                .where(
+                        memberMission.member.id.eq(memberId),
+                        filterStatus(status),
+                        eqCategory(categoryId)
+                )
+                .orderBy(orderByMyMission(condition))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize() + 1)
+                .fetch();
+
+        boolean hasNext = false;
+        if (content.size() > pageable.getPageSize()) {
+            content.remove(pageable.getPageSize());
+            hasNext = true;
+        }
+
+        return new SliceImpl<>(content, pageable, hasNext);
+    }
     private BooleanExpression durationLoe(Integer time) {
         return time != null ? mission.durationMinutes.loe(time) : null;
     }
@@ -149,4 +197,30 @@ public class MissionRepositoryImpl implements MissionRepositoryCustom {
                 : mission.missionSubInterests.any().subInterest.id.eq(subCategoryId);
     }
 
+    //최근 저장순/소요시간순
+    private OrderSpecifier<?> orderByMyMission(String condition) {
+        if (condition == null || condition.trim().isEmpty()) {
+            return memberMission.updatedAt.desc();
+        }
+
+        return switch (condition.trim().toUpperCase()) {
+            case "TIME_ASC" -> mission.durationMinutes.asc();
+            case "TIME_DESC" -> mission.durationMinutes.desc();
+            default -> memberMission.updatedAt.desc();
+        };
+    }
+
+    //상태 필터링
+    private BooleanExpression filterStatus(String status) {
+        if (status == null || status.isBlank()) {
+            throw new MissionException(MissionErrorCode.INVALID_MISSION_STATUS_PARAM);
+        }
+        return switch (status.toUpperCase()) {
+            case "SCRAP" -> memberMission.missionStatus.eq(MissionStatus.SCRAP);
+            case "COMPLETE" -> memberMission.missionStatus.eq(MissionStatus.SUCCESS);
+            case "RETRY" -> memberMission.missionStatus.eq(MissionStatus.FAIL)
+                    .or(memberMission.missionStatus.eq(MissionStatus.NONE).and(memberMission.attemptCount.gt(0)));
+            default -> throw new MissionException(MissionErrorCode.INVALID_MISSION_STATUS_PARAM);
+        };
+    }
 }

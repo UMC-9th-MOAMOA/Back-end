@@ -202,6 +202,34 @@ public class MissionConverter {
                 .build();
     }
 
+    public MissionResponseDto.SearchResponse toMyMissionsResult(Slice<MissionResponseDto.RecommendResult> slice) {
+        return MissionResponseDto.SearchResponse.builder()
+                .missions(slice.getContent()) // 리스트
+                .hasNext(slice.hasNext())     // 다음 페이지 여부
+                .build();
+    }
+
+    public MissionResponseDto.SubmitResult toSubmitResult(
+       boolean isSuccess,
+       int missionReward,
+       int goalReward,
+       int dailyCount,
+       boolean dailyGoalAchieved,
+       int weeklyCount,
+       boolean weeklyGoalAchieved
+    ){
+        return MissionResponseDto.SubmitResult.builder()
+                .isSuccess(isSuccess)
+                .missionReward(missionReward)
+                .goalReward(goalReward)
+                .totalReward(missionReward + goalReward)
+                .dailyCount(dailyCount)
+                .dailyGoalAchieved(dailyGoalAchieved)
+                .weeklyCount(weeklyCount)
+                .weeklyGoalAchieved(weeklyGoalAchieved)
+                .build();
+    }
+
     private MissionResponseDto.QuizDetail toQuizDetail(Quiz quiz){
         List<String> options = Collections.emptyList();
 
@@ -236,7 +264,7 @@ public class MissionConverter {
     }
 
 
-    private int getRewardByType(QuizType type){
+    public int getRewardByType(QuizType type){
         return switch (type){
             case OX -> 3;
             case MULTIPLE -> 5;

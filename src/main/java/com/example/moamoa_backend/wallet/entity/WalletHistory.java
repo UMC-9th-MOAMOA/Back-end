@@ -2,6 +2,7 @@ package com.example.moamoa_backend.wallet.entity;
 
 import com.example.moamoa_backend.global.entity.BaseEntity;
 import com.example.moamoa_backend.mission.entity.Mission;
+import com.example.moamoa_backend.item.entity.Item;
 import com.example.moamoa_backend.wallet.enums.TransactionType;
 import com.example.moamoa_backend.wallet.exception.WalletException;
 import com.example.moamoa_backend.wallet.exception.code.WalletErrorCode;
@@ -58,17 +59,26 @@ public class WalletHistory extends BaseEntity {
     @JoinColumn(name = "mission_id")
     private Mission mission;
 
+    /**
+     * PURCHASE 타입일 때만 연결되는 아이템
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "item_id")
+    private Item item;
+
     private WalletHistory(
-        Wallet wallet,
-        Mission mission,
-        String description,
-        Integer amount,
-        Integer balanceSnapshot,
-        TransactionType type
+            Wallet wallet,
+            Mission mission,
+            Item item,
+            String description,
+            Integer amount,
+            Integer balanceSnapshot,
+            TransactionType type
     ) {
-        validate(type, mission);
+        validate(type, mission, item);
         this.wallet = wallet;
         this.mission = mission;
+        this.item = item;
         this.description = description;
         this.amount = amount;
         this.balanceSnapshot = balanceSnapshot;
@@ -79,31 +89,29 @@ public class WalletHistory extends BaseEntity {
      * 범용 생성 팩토리(정책/규칙은 validate로 강제).
      */
     public static WalletHistory create(
-        Wallet wallet,
-        Mission mission,
-        String description,
-        int amount,
-        int balanceSnapshot,
-        TransactionType type
+            Wallet wallet,
+            Mission mission,
+            Item item,
+            String description,
+            int amount,
+            int balanceSnapshot,
+            TransactionType type
     ) {
-        return new WalletHistory(wallet, mission, description, amount, balanceSnapshot, type);
+        return new WalletHistory(wallet, mission, item, description, amount, balanceSnapshot, type);
     }
 
-    /**
-     * 구매 전용 히스토리 생성.
-     * spent는 양수로 받되, 저장은 amount를 음수로 저장한다.
-     */
-    public static WalletHistory forPurchase(Wallet wallet, int spent, int balanceSnapshot, String description) {
+    public static WalletHistory forPurchase(Wallet wallet, Item item, int spent, int balanceSnapshot, String description) {
         if (spent <= 0) {
             throw new WalletException(WalletErrorCode.INVALID_AMOUNT);
         }
         return WalletHistory.create(
-            wallet,
-            null,
-            description,
-            -spent,
-            balanceSnapshot,
-            TransactionType.PURCHASE
+                wallet,
+                null,
+                item,
+                description,
+                -spent,
+                balanceSnapshot,
+                TransactionType.PURCHASE
         );
     }
 
@@ -112,12 +120,21 @@ public class WalletHistory extends BaseEntity {
      * - type == MISSION 이면 mission 필수
      * - type != MISSION 이면 mission 금지
      */
-    private static void validate(TransactionType type, Mission mission) {
-        if (type == TransactionType.MISSION && mission == null) {
+    private static void validate(TransactionType type, Mission mission, Item item) {
+        // ✅ 미션 관련 타입은 Mission 연결 필수
+        if ((type == TransactionType.MISSION || type == TransactionType.MISSION_COMPLETE) && mission == null) {
             throw new WalletException(WalletErrorCode.MISSION_REQUIRED_FOR_MISSION_TYPE);
         }
-        if (type != TransactionType.MISSION && mission != null) {
+        if (!(type == TransactionType.MISSION || type == TransactionType.MISSION_COMPLETE) && mission != null) {
             throw new WalletException(WalletErrorCode.MISSION_NOT_ALLOWED_FOR_NON_MISSION_TYPE);
+        }
+
+        // ✅ PURCHASE 타입은 Item 연결 필수
+        if (type == TransactionType.PURCHASE && item == null) {
+            throw new WalletException(WalletErrorCode.ITEM_REQUIRED_FOR_PURCHASE_TYPE);
+        }
+        if (type != TransactionType.PURCHASE && item != null) {
+            throw new WalletException(WalletErrorCode.ITEM_NOT_ALLOWED_FOR_NON_PURCHASE_TYPE);
         }
     }
 }

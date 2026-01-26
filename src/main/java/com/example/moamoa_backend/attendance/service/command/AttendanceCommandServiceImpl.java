@@ -63,7 +63,7 @@ public class AttendanceCommandServiceImpl implements AttendanceCommandService{
             try {
                 attendanceRepository.save(Attendance.create(member, today));
             } catch (DataIntegrityViolationException e) {
-                        // 중복 키 위반인지 확인 (다른 무결성 오류와 구분)
+                // 중복 키 위반인지 확인 (다른 무결성 오류와 구분)
                 if (attendanceRepository.existsByMember_IdAndAttendanceDate(memberId, today)) {
                     throw new AttendanceException(AttendanceErrorCode.ALREADY_ATTENDED);
                 }
@@ -89,6 +89,7 @@ public class AttendanceCommandServiceImpl implements AttendanceCommandService{
                     WalletHistory.create(
                             wallet,
                             null,
+                            null,
                             "출석 보상으로 도토리를 1개 받았다",
                             ATTENDANCE_REWARD,
                             wallet.getPoint(),
@@ -102,6 +103,7 @@ public class AttendanceCommandServiceImpl implements AttendanceCommandService{
                 walletHistoryRepository.save(
                         WalletHistory.create(
                                 wallet,
+                                null,
                                 null,
                                 "연속 7일 출석 달성 보너스로 도토리를 10개 받았다",
                                 STREAK_7_BONUS,
