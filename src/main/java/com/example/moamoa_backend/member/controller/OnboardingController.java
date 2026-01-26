@@ -10,7 +10,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -69,8 +68,11 @@ public class OnboardingController {
             
             scope로 수정 범위를 지정합니다.
             - ALL: selections 필수, dailyMissionGoal/goalRetention은 선택(null 허용)
+             	   (dailyMissionGoal=null AND goalRetention=null 이면 목표는 변경하지 않음: '나중에 설정' 케이스)
             - INTERESTS: selections 필수
-            - GOAL: dailyMissionGoal/goalRetention 필수(0~5)
+            - GOAL: 
+			 		- OFF: dailyMissionGoal=null, goalRetention=null
+			        - ON/변경: dailyMissionGoal 필수(0~5) + goalRetention 필수
             """
 	)
 	@PatchMapping("/onboarding")
