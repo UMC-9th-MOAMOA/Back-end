@@ -13,36 +13,27 @@ spring:
           google:
             client-id: ${GOOGLE_CLIENT_ID}
             client-secret: ${GOOGLE_CLIENT_SECRET}
+
             scope:
               - profile
               - email
-            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
-            client-name: Google
 
-  # [수정됨] 중복 제거 및 들여쓰기 교정 완료
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+
+            client-name: Google
   mail:
     host: smtp.gmail.com
-    port: 465
+    port: 587
     username: ${MAIL_USERNAME}
     password: ${MAIL_PASSWORD}
     default-encoding: UTF-8
     properties:
       mail:
-        debug: true
         smtp:
           auth: true
-          localhost: 127.0.0.1  # 👈 핵심: 내 컴퓨터 이름 대신 IP 쓰기
-          socketFactory:        # 👈 핵심: SSL 강제 적용
-            class: javax.net.ssl.SSLSocketFactory
-            fallback: false
-            port: 465
-          ssl:
-            enable: true
-            trust: "*"
-            protocols: TLSv1.2
           starttls:
-            enable: false
-            required: false
+            enable: true
+            required: true
           connectiontimeout: 5000
           timeout: 5000
           writetimeout: 5000
