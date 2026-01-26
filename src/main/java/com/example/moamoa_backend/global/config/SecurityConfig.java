@@ -116,7 +116,9 @@ public class SecurityConfig {
                 "https://moamoa.io.kr",
                 "https://www.moamoa.io.kr",
                 "https://moamoamoa.netlify.app",
-                "https://api.moamoa.io.kr"
+                "https://api.moamoa.io.kr",
+                "http://localhost:5173",
+                "https://localhost:5173"
         ));
 
         // 허용할 HTTP 메서드

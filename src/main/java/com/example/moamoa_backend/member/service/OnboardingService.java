@@ -56,11 +56,13 @@ public class OnboardingService {
 			case ALL -> {
 				requireSelections(req.selections());              // 관심사 최소 1개 이상 필수
 				validateGoalRangeIfPresent(req.dailyMissionGoal()); // goal은 null 허용, 값이 있으면 범위만 검증
-
 				validateGoalRetentionIfPresent(req.dailyMissionGoal(), req.goalRetention());
 
-				// 목표 설정(즉시 적용 or 다음 주 예약)
-				updateGoalSetting(member, req.dailyMissionGoal(), req.goalRetention(), today);
+				// "나중에 설정": goal 관련 값이 아예 없으면 목표를 건드리지 않는다.
+				if (!(req.dailyMissionGoal() == null && req.goalRetention() == null)) {
+					updateGoalSetting(member, req.dailyMissionGoal(), req.goalRetention(), today);
+				}
+
 				updateMemberInterestsSmartSync(member, req.selections()); // 관심사 Smart Sync 반영
 
 				// 최신 ALL 상태로 응답 (member 재조회 없이)
@@ -72,9 +74,17 @@ public class OnboardingService {
 				yield toOnboardingResponse(loadSelections(memberId), member);
 			}
 			case GOAL -> {
-				requireGoal(req.dailyMissionGoal());      // GOAL scope에서는 null 불가
-				validateGoalRange(req.dailyMissionGoal()); // 0~5 범위 검증
+				// 설정 화면 토글 OFF 지원: dailyMissionGoal == null 이면 OFF 처리
+				if (req.dailyMissionGoal() == null) {
+					validateGoalRetentionIfPresent(null, req.goalRetention());
+					updateGoalSetting(member, null, null, today);
+					yield toOnboardingResponse(loadSelections(memberId), member);
+				}
+
+				// 토글 ON 상태에서 값 변경/저장하는 케이스
+				validateGoalRange(req.dailyMissionGoal());   // 0~5 범위 검증
 				requireGoalRetention(req.goalRetention());
+
 				// 목표 설정(즉시 적용 or 다음 주 예약)
 				updateGoalSetting(member, req.dailyMissionGoal(), req.goalRetention(), today);
 				yield toOnboardingResponse(loadSelections(memberId), member);
