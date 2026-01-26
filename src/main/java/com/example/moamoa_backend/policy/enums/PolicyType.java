@@ -9,6 +9,7 @@ public enum PolicyType {
 
     TERMS_OF_SERVICE("서비스 이용약관"),
     PRIVACY_POLICY("개인정보 처리방침"),
+    PRIVACY_COLLECTION("개인정보 수집 및 이용 동의"),
 
     ELECTRONIC_FINANCIAL("전자금융거래 약관"),
 
