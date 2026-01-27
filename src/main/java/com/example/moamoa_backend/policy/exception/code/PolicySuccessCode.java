@@ -15,7 +15,11 @@ public enum PolicySuccessCode implements BaseSuccessCode {
 
     POLICY_LIST_GET_SUCCESS(HttpStatus.OK,
             "POLICY200_2",
-            "약관 목록 조회를 완료했습니다.");
+            "약관 목록 조회를 완료했습니다."),
+
+    POLICY_AGREEMENT_UPDATE_SUCCESS(HttpStatus.OK,
+            "POLICY200_3",
+            "약관 동의 내역 수정 성공");
 
     private final HttpStatus status;
     private final String code;

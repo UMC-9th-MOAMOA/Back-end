@@ -12,6 +12,12 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(uniqueConstraints = {
+        @UniqueConstraint(
+                name = "uk_member_policy",
+                columnNames = {"member_id", "policy_id"}
+        )
+})
 public class MemberPolicy extends BaseEntity {
 
     @Id
@@ -31,4 +37,11 @@ public class MemberPolicy extends BaseEntity {
 
     @Column(nullable = true)
     private LocalDateTime agreedAt;
+
+    public void updateAgreement(boolean isAgreed) {
+        this.isAgreed = isAgreed;
+        if (isAgreed) {
+            this.agreedAt = LocalDateTime.now();
+        }
+    }
 }
