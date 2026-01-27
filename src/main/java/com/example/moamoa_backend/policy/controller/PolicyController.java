@@ -37,7 +37,7 @@ public class PolicyController {
     }
 
     @Operation(summary = "약관 동의 내역 수정", description = "로그인한 사용자의 약관 동의 내역을 수정합니다.")
-    @PatchMapping("/agreements")
+    @PutMapping("/agreements")
     public ApiResponse<Void> updateAgreements(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody @Valid PolicyReqDto.AgreementListDto request
