@@ -385,7 +385,7 @@ public class AuthService {
                 .collect(Collectors.toSet());
 
         // 2. 현재 활성화된 모든 약관 조회
-        List<Policy> allActivePolicies = policyRepository.findAllByIsActiveTrue();
+        List<Policy> allActivePolicies = policyRepository.findAllByIsActiveTrueOrderByIsMandatoryDescIdAsc();
 
         // 3. 유효하지 않은 약관 ID 체크
         Set<Long> validPolicyIds = allActivePolicies.stream()

@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface PolicyRepository extends JpaRepository<Policy,Long> {
     List<Policy> findByIsMandatoryTrueAndIsActiveTrue();
-    List<Policy> findAllByIsActiveTrue();
+    List<Policy> findAllByIsActiveTrueOrderByIsMandatoryDescIdAsc();
 }
