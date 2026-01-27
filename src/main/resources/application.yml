@@ -6,6 +6,10 @@ app:
   front-url: ${FRONT_URL:http://localhost:3000}
 
 spring:
+  application:
+    name: MOAMOA_Backend
+
+  # ============= OAuth2 =============
   security:
     oauth2:
       client:
@@ -13,14 +17,30 @@ spring:
           google:
             client-id: ${GOOGLE_CLIENT_ID}
             client-secret: ${GOOGLE_CLIENT_SECRET}
-
             scope:
               - profile
               - email
-
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
-
             client-name: Google
+
+          kakao:
+            client-id: ${KAKAO_CLIENT_ID}
+            client-secret: ${KAKAO_CLIENT_SECRET}
+            scope:
+              - profile_nickname
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            authorization-grant-type: authorization_code
+            client-authentication-method: client_secret_post
+            client-name: Kakao
+
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id
+
+  # ============= Mail =============
   mail:
     host: smtp.gmail.com
     port: 587
@@ -38,9 +58,7 @@ spring:
           timeout: 5000
           writetimeout: 5000
 
-  application:
-    name: MOAMOA_Backend
-
+  # ============= Database =============
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: ${DB_URL}
@@ -56,16 +74,26 @@ spring:
       hibernate:
         format_sql: true
 
+  # ============= Redis =============
   data:
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
 
+# ============= JWT =============
 jwt:
   secret-key: ${JWT_SECRET_KEY}
   access-token-validity: 3600000
   refresh-token-validity: 1209600000
 
+# ============= AWS =============
+aws:
+  region: ap-northeast-2
+  s3:
+    bucket: moamoa-s3-prod-bucket
+    public-base-url: https://moamoa-s3-prod-bucket.s3.ap-northeast-2.amazonaws.com
+
+# ============= Actuator =============
 management:
   endpoints:
     web:
@@ -74,9 +102,3 @@ management:
   endpoint:
     health:
       show-details: never
-
-aws:
-  region: ap-northeast-2
-  s3:
-    bucket: moamoa-s3-prod-bucket
-    public-base-url: https://moamoa-s3-prod-bucket.s3.ap-northeast-2.amazonaws.com
