@@ -1,5 +1,7 @@
 package com.example.moamoa_backend.auth.dto.oauth;
 
+import com.example.moamoa_backend.auth.exception.AuthException;
+import com.example.moamoa_backend.auth.exception.code.AuthErrorCode;
 import com.example.moamoa_backend.member.entity.Member;
 import com.example.moamoa_backend.member.enums.MemberStatus;
 import com.example.moamoa_backend.member.enums.Provider;
@@ -37,8 +39,13 @@ public class OAuthAttributes {
      * Provider별 팩토리 메서드
      */
     public static OAuthAttributes of(String registrationId, String userNameAttributeName, Map<String, Object> attributes) {
-        // TODO: 카카오 등 추가 시 registrationId로 분기 처리
-        return ofGoogle(userNameAttributeName, attributes);
+        if ("kakao".equals(registrationId)) {
+            return ofKakao(userNameAttributeName, attributes);
+        }
+        if("google".equals(registrationId)){
+            return ofGoogle(userNameAttributeName, attributes);
+        }
+        throw new AuthException(AuthErrorCode.UNSUPPORTED_OAUTH_PROVIDER);
     }
 
     private static OAuthAttributes ofGoogle(String userNameAttributeName, Map<String, Object> attributes) {
@@ -49,6 +56,18 @@ public class OAuthAttributes {
                 .email(googleUserInfo.getEmail())
                 .provider(Provider.GOOGLE)
                 .providerId(googleUserInfo.getProviderId())
+                .attributes(attributes)
+                .nameAttributeKey(userNameAttributeName)
+                .build();
+    }
+    private static OAuthAttributes ofKakao(String userNameAttributeName, Map<String, Object> attributes) {
+        KakaoUserInfo kakaoUserInfo = new KakaoUserInfo(attributes);
+
+        return OAuthAttributes.builder()
+                .name(kakaoUserInfo.getName())
+                .email(kakaoUserInfo.getEmail())
+                .provider(Provider.KAKAO)
+                .providerId(kakaoUserInfo.getProviderId())
                 .attributes(attributes)
                 .nameAttributeKey(userNameAttributeName)
                 .build();
