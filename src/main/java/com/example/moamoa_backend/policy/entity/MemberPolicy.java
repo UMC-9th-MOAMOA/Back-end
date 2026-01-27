@@ -40,8 +40,6 @@ public class MemberPolicy extends BaseEntity {
 
     public void updateAgreement(boolean isAgreed) {
         this.isAgreed = isAgreed;
-        if (isAgreed) {
-            this.agreedAt = isAgreed ? LocalDateTime.now() : null;
-        }
+        this.agreedAt = isAgreed ? LocalDateTime.now() : null;
     }
 }
