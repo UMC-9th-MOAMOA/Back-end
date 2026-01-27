@@ -18,10 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -68,6 +65,9 @@ public class PolicyService {
         // 활성 약관 전체 조회
         List<Policy> allPolicies = policyRepository.findAllByIsActiveTrueOrderByIsMandatoryDescIdAsc();
 
+        // 요청 약관에 중복이 존재하는지 체크
+        validateDuplicatePolicyIds(requests);
+
         // 요청 데이터 Map 변환
         Map<Long, Boolean> requestMap = requests.stream()
                 .collect(Collectors.toMap(PolicyReqDto.AgreementDto::policyId, PolicyReqDto.AgreementDto::isAgreed));
@@ -102,6 +102,9 @@ public class PolicyService {
 
         // 활성 약관 전체 조회
         List<Policy> allPolicies = policyRepository.findAllByIsActiveTrueOrderByIsMandatoryDescIdAsc();
+
+        // 요청 약관에 중복이 존재하는지 체크
+        validateDuplicatePolicyIds(requests);
 
         // 요청 데이터 Map 변환
         Map<Long, Boolean> requestMap = requests.stream()
@@ -184,6 +187,18 @@ public class PolicyService {
 
         if (!invalidIds.isEmpty()) {
             throw new PolicyException(PolicyErrorCode.POLICY_NOT_FOUND);
+        }
+    }
+
+    /**
+     * 중복된 약관 ID 체크
+     */
+    private void validateDuplicatePolicyIds(List<PolicyReqDto.AgreementDto> requests) {
+        Set<Long> policyIds = new HashSet<>();
+        for (PolicyReqDto.AgreementDto request : requests) {
+            if (!policyIds.add(request.policyId())) {
+                throw new PolicyException(PolicyErrorCode.DUPLICATE_POLICY_ID);
+            }
         }
     }
 }

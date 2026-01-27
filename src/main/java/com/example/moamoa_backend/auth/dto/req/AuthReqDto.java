@@ -61,7 +61,7 @@ public class AuthReqDto {
             @NotNull(message = "약관 동의 내역은 필수입니다.")
             @Size(min = 1, message = "최소 하나 이상의 약관에 동의해야 합니다.")
             @Valid
-            List<PolicyReqDto.AgreementDto> agreedTerms
+            List<PolicyReqDto.@NotNull @Valid AgreementDto> agreedTerms
     ) {
         // 엔티티 변환 메서드
         public Member toEntity(PasswordEncoder passwordEncoder) {

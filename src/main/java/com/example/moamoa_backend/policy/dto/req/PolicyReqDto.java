@@ -14,9 +14,8 @@ public class PolicyReqDto {
      * 약관 동의 목록 요청 (List Wrapper)
      */
     public record AgreementListDto(
-            @Valid
             @NotNull
-            List<AgreementDto> agreements
+            List<@Valid @NotNull AgreementDto> agreements
     ) {}
 
     /**
