@@ -24,7 +24,7 @@ public class PolicyService {
 
         return PolicyResDto.DetailDto.builder()
                 .id(policy.getId())
-                .policyType(policy.getPolicyType().getDescription())
+                .policyType(policy.getPolicyType().name())
                 .isMandatory(policy.isMandatory())
                 .version(policy.getVersion())
                 .title(policy.getTitle())
