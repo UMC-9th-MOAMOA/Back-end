@@ -153,4 +153,9 @@ public class Member extends BaseEntity {
         this.deletedAt = null;
     }
 
+    public void promoteToUser() {
+        if (this.role == Role.ROLE_GUEST) {
+            this.role = Role.ROLE_USER;
+        }
+    }
 }

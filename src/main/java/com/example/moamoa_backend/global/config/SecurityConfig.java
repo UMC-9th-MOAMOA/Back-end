@@ -9,6 +9,7 @@ import com.example.moamoa_backend.member.enums.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -44,7 +45,12 @@ public class SecurityConfig {
             "/api/v1/auth/social/**", // 소셜 로그인 요청
             "/login/**", // 소셜 로그인 이후 돌아옴
             "/actuator/health/**", // 헬스체크
-            "/api/v1/auth/recover" // 계정복구 요청
+            "/api/v1/auth/recover", // 계정복구 요청
+    };
+
+    //로그인 필요X - GET 요청만 가능
+    private final String[] allowGetUris = {
+            "/api/v1/policies/**"
     };
 
     // 관리자만 접근 가능
@@ -75,6 +81,9 @@ public class SecurityConfig {
                     // Swagger 및 공용 경로
                     auth.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-resources/**").permitAll();
                     auth.requestMatchers(allowUris).permitAll();
+
+                    // GET 요청에 대해서만 모든 사용자에게 허용
+                    auth.requestMatchers(HttpMethod.GET, allowGetUris).permitAll();
 
                     // 관리자 전용 경로
                     if (adminUris.length > 0) {

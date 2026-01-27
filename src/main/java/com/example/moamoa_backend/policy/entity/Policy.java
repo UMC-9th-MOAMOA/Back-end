@@ -31,7 +31,7 @@ public class Policy extends BaseEntity {
     @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(nullable = false, columnDefinition = "LONGTEXT")
     private String content;
 
     @Column(nullable = false)
