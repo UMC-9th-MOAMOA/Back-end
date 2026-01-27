@@ -15,10 +15,9 @@ import com.example.moamoa_backend.member.enums.Role;
 import com.example.moamoa_backend.member.exception.MemberException;
 import com.example.moamoa_backend.member.exception.code.MemberErrorCode;
 import com.example.moamoa_backend.member.repository.MemberRepository;
-import com.example.moamoa_backend.policy.entity.MemberPolicy;
-import com.example.moamoa_backend.policy.entity.Policy;
 import com.example.moamoa_backend.policy.repository.MemberPolicyRepository;
 import com.example.moamoa_backend.policy.repository.PolicyRepository;
+import com.example.moamoa_backend.policy.service.PolicyService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -29,11 +28,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.security.SecureRandom;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.time.LocalDateTime;
+
 
 @Slf4j
 @Service
@@ -48,6 +43,7 @@ public class AuthService {
     private final PolicyRepository policyRepository;
     private final MemberPolicyRepository memberPolicyRepository;
     private final JwtUtil jwtUtil;
+    private final PolicyService policyService;
 
     // 이메일과 보안코드 저장 관련 (예)AuthCode:moamoa@gmail.com : 123456
     private static final String AUTH_CODE_PREFIX = "AuthCode:";
@@ -212,9 +208,6 @@ public class AuthService {
             throw new MemberException(MemberErrorCode.EMAIL_ALREADY_EXISTS);
         }
 
-        // 필수 약관 동의 검증
-        validateRequiredTerms(request.agreedTerms());
-
         // Member 엔티티 생성 및 비밀번호 암호화
         Member newMember = request.toEntity(passwordEncoder);
 
@@ -222,7 +215,7 @@ public class AuthService {
         Member savedMember = memberRepository.save(newMember);
 
         // 약관 동의 내역 저장
-        saveTermsAgreements(savedMember, request.agreedTerms());
+        policyService.createPolicyAgreements(savedMember,request.agreedTerms());
 
         //자동 로그인을 위해 토큰 생성 및 Redis에 Refresh Token 저장
         AuthResDto.GeneratedTokenDto tokenDto = generateTokens(savedMember.getId(), savedMember.getRole());
@@ -359,70 +352,7 @@ public class AuthService {
         );
         return message;
     }
-    private void validateRequiredTerms(List<AuthReqDto.TermDto> agreedPolicy) {
-        Set<Long> agreedPolicyIds = agreedPolicy.stream()
-                .filter(AuthReqDto.TermDto::agreed)
-                .map(AuthReqDto.TermDto::policyId)
-                .collect(Collectors.toSet());
 
-        // PolicyRepository에서 필수 약관 조회
-        List<Policy> requiredPolicies = policyRepository.findByIsMandatoryTrueAndIsActiveTrue();
-
-        List<Long> missingTermIds = requiredPolicies.stream()
-                .map(Policy::getId)
-                .filter(id -> !agreedPolicyIds.contains(id))
-                .toList();
-
-        if (!missingTermIds.isEmpty()) {
-            throw new AuthException(AuthErrorCode.REQUIRED_TERMS_NOT_AGREED);
-        }
-    }
-    private void saveTermsAgreements(Member member, List<AuthReqDto.TermDto> requestPolicies) {
-
-        // 1. 요청된 약관 ID 추출
-        Set<Long> requestedPolicyIds = requestPolicies.stream()
-                .map(AuthReqDto.TermDto::policyId)
-                .collect(Collectors.toSet());
-
-        // 2. 현재 활성화된 모든 약관 조회
-        List<Policy> allActivePolicies = policyRepository.findAllByIsActiveTrueOrderByIsMandatoryDescIdAsc();
-
-        // 3. 유효하지 않은 약관 ID 체크
-        Set<Long> validPolicyIds = allActivePolicies.stream()
-                .map(Policy::getId)
-                .collect(Collectors.toSet());
-
-        Set<Long> invalidPolicyIds = requestedPolicyIds.stream()
-                .filter(id -> !validPolicyIds.contains(id))
-                .collect(Collectors.toSet());
-
-        if (!invalidPolicyIds.isEmpty()) {
-            log.error("Invalid policy IDs received: {}", invalidPolicyIds);
-            throw new AuthException(AuthErrorCode.INVALID_POLICY_ID);
-        }
-
-        // 4. Map 변환
-        Map<Long, Boolean> requestTermMap = requestPolicies.stream()
-                .collect(Collectors.toMap(
-                        AuthReqDto.TermDto::policyId,
-                        AuthReqDto.TermDto::agreed,
-                        (existing, replacement) -> replacement
-                ));
-
-        // 5. 저장
-        List<MemberPolicy> memberPolicies = allActivePolicies.stream()
-                .map(policy -> MemberPolicy.builder()
-                        .member(member)
-                        .policy(policy)
-                        .isAgreed(requestTermMap.getOrDefault(policy.getId(), false))
-                        .agreedAt(requestTermMap.getOrDefault(policy.getId(), false)
-                                ? LocalDateTime.now() : null)
-                        .build())
-                .toList();
-
-        // 6. 일괄 저장
-        memberPolicyRepository.saveAll(memberPolicies);
-    }
     private String maskEmail(String email) {
         if (email == null || email.isBlank()) {
             return email;
