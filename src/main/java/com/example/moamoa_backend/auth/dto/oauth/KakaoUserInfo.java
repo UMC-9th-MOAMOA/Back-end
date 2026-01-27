@@ -1,5 +1,6 @@
 package com.example.moamoa_backend.auth.dto.oauth;
 
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -14,8 +15,16 @@ public class KakaoUserInfo implements OAuth2UserInfo {
     @SuppressWarnings("unchecked")
     public KakaoUserInfo(Map<String, Object> attributes) {
         this.attributes = attributes;
-        this.kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
-        this.profile = (Map<String, Object>) kakaoAccount.get("profile");
+
+        Object accountObj = attributes.get("kakao_account");
+        this.kakaoAccount = accountObj instanceof Map
+                ? (Map<String, Object>) accountObj
+                : Collections.emptyMap();
+
+        Object profileObj = kakaoAccount.get("profile");
+        this.profile = profileObj instanceof Map
+                ? (Map<String, Object>) profileObj
+                : Collections.emptyMap();
     }
 
     @Override
@@ -25,7 +34,10 @@ public class KakaoUserInfo implements OAuth2UserInfo {
 
     @Override
     public String getProviderId() {
-        return String.valueOf(attributes.get("id"));
+        Object id = attributes.get("id");
+        if (id == null) throw new IllegalArgumentException("Kakao OAuth response missing required id");
+
+        return String.valueOf(id);
     }
 
     @Override
