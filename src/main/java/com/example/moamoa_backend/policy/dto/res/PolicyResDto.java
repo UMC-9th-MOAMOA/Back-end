@@ -10,6 +10,9 @@ import java.time.LocalDateTime;
  */
 public class PolicyResDto {
 
+    /**
+     * 약관 상세 조회용
+     */
     @Builder
     public record DetailDto(
             Long id,
@@ -20,5 +23,16 @@ public class PolicyResDto {
             String content,
             boolean isActive,
             LocalDateTime effectiveAt
+    ) {}
+
+    /**
+     * 약관 목록 조회용 (회원가입)
+     */
+    @Builder
+    public record SignupDto(
+            Long id,
+            String title,
+            String content,
+            boolean isMandatory
     ) {}
 }

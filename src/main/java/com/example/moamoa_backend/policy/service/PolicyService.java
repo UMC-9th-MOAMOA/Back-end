@@ -10,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -32,6 +34,19 @@ public class PolicyService {
                 .isActive(policy.isActive())
                 .effectiveAt(policy.getEffectiveAt())
                 .build();
+    }
+
+    public List<PolicyResDto.SignupDto> getActivePolicies() {
+        List<Policy> policies = policyRepository.findAllByIsActiveTrue();
+
+        return policies.stream()
+                .map(policy -> PolicyResDto.SignupDto.builder()
+                        .id(policy.getId())
+                        .title(policy.getTitle())
+                        .content(policy.getContent())
+                        .isMandatory(policy.isMandatory())
+                        .build())
+                .toList();
     }
 
 }
