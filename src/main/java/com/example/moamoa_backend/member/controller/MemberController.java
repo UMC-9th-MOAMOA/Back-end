@@ -43,7 +43,7 @@ public class MemberController {
         return ApiResponse.onSuccess(MemberSuccessCode.PROFILE_FETCHED, response);
     }
 
-    @PatchMapping("/me/profile")
+    @PutMapping("/me/profile")
     public ApiResponse<Void> updateProfile(
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestBody MemberReqDto.ProfileUpdate request
