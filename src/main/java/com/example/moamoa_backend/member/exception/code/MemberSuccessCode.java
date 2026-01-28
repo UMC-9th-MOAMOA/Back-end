@@ -13,21 +13,17 @@ public enum MemberSuccessCode implements BaseSuccessCode {
             "MEMBER201_1",
             "회원가입이 완료되었습니다."),
 
-    MEMBER_EMAIL_CHECK(HttpStatus.OK,
-            "MEMBER200_1",
-            "사용 가능한 이메일입니다."),
-
     MEMBER_GET_PROFILE(HttpStatus.OK,
-            "MEMBER200_2",
+            "MEMBER200_1",
             "회원 정보 조회에 성공했습니다."),
 
     MEMBER_UPDATE(HttpStatus.OK,
-            "MEMBER200_3",
+            "MEMBER200_2",
             "회원 정보 수정이 완료되었습니다."),
 
     MEMBER_WITHDRAW(HttpStatus.OK,
-            "MEMBER200_4",
-            "회원 탈퇴가 완료되었습니다."),
+            "MEMBER200_3",
+            "회원 탈퇴가 완료되었습니다. 30일 이내 재로그인 시 복구 가능합니다."),
 
     MEMBER_GET_ONBOARDING(HttpStatus.OK,
         "MEMBER200_5",

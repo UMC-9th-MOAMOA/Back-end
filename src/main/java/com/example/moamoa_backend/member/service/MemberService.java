@@ -2,6 +2,7 @@ package com.example.moamoa_backend.member.service;
 
 import com.example.moamoa_backend.member.dto.MemberReqDto;
 import com.example.moamoa_backend.member.entity.Member;
+import com.example.moamoa_backend.member.enums.MemberStatus;
 import com.example.moamoa_backend.member.enums.Provider;
 import com.example.moamoa_backend.member.exception.MemberException;
 import com.example.moamoa_backend.member.exception.code.MemberErrorCode;
@@ -54,5 +55,25 @@ public class MemberService {
         member.changePassword(passwordEncoder.encode(request.newPassword()));
     }
 
+    /**
+     * 회원 탈퇴
+     * 복구 요청 가능하기 때문에 access token 보유시 별도의 인증없이 삭제
+     */
+    @Transactional
+    public void deleteMember(Long memberId) {
 
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        // 정지 계정 혹은 이미 삭제 요청된 계정 체크
+        if(member.getStatus() == MemberStatus.BANNED){
+            throw new MemberException(MemberErrorCode.MEMBER_BANNED);
+        }
+        if(member.getStatus() == MemberStatus.WITHDRAWN){
+            throw new MemberException(MemberErrorCode.MEMBER_WITHDRAWN);
+        }
+
+        // soft delete 수행
+        member.softDelete();
+    }
 }

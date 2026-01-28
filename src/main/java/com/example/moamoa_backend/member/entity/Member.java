@@ -162,4 +162,9 @@ public class Member extends BaseEntity {
     public void changePassword(String newPassword) {
         this.password = newPassword;
     }
+
+    public void softDelete() {
+        this.status = MemberStatus.WITHDRAWN;
+        this.deletedAt = LocalDateTime.now();
+    }
 }
