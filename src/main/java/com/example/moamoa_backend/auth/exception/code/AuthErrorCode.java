@@ -68,6 +68,10 @@ public enum AuthErrorCode implements BaseErrorCode {
             "AUTH403_3",
             "정지된 계정입니다. 문의사항은 관리자(moamoamoa2026@gmail.com)에게 연락해주세요."),
 
+    MEMBER_NOT_ACTIVE(HttpStatus.FORBIDDEN,
+            "AUTH403_4",
+            "활성화되지 않은 계정입니다. 고객센터에 문의해주세요."),
+
     // ============= 429 Too Many Requests =============
     IP_RATE_LIMIT_EXCEEDED(HttpStatus.TOO_MANY_REQUESTS,
         "AUTH429_1",

@@ -13,7 +13,7 @@ public enum MemberSuccessCode implements BaseSuccessCode {
             "MEMBER201_1",
             "회원가입이 완료되었습니다."),
 
-    MEMBER_GET_PROFILE(HttpStatus.OK,
+    PROFILE_FETCHED(HttpStatus.OK,
             "MEMBER200_1",
             "회원 정보 조회에 성공했습니다."),
 

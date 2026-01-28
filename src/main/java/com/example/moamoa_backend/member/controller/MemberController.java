@@ -1,7 +1,8 @@
 package com.example.moamoa_backend.member.controller;
 
 import com.example.moamoa_backend.global.apiPayload.response.ApiResponse;
-import com.example.moamoa_backend.member.dto.MemberReqDto;
+import com.example.moamoa_backend.member.dto.req.MemberReqDto;
+import com.example.moamoa_backend.member.dto.res.MemberResDto;
 import com.example.moamoa_backend.member.exception.code.MemberSuccessCode;
 import com.example.moamoa_backend.member.service.MemberService;
 import jakarta.validation.Valid;
@@ -32,5 +33,13 @@ public class MemberController {
     ) {
         memberService.deleteMember(Long.parseLong(userDetails.getUsername()));
         return ApiResponse.onSuccess(MemberSuccessCode.MEMBER_WITHDRAW, null);
+    }
+
+    @GetMapping("/me/profile")
+    public ApiResponse<MemberResDto.ProfileResponse> getProfile(
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        MemberResDto.ProfileResponse response = memberService.getProfile(Long.parseLong(userDetails.getUsername()));
+        return ApiResponse.onSuccess(MemberSuccessCode.PROFILE_FETCHED, response);
     }
 }

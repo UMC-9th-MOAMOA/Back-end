@@ -1,6 +1,8 @@
 package com.example.moamoa_backend.member.service;
 
-import com.example.moamoa_backend.member.dto.MemberReqDto;
+import com.example.moamoa_backend.global.util.RedisUtil;
+import com.example.moamoa_backend.member.dto.req.MemberReqDto;
+import com.example.moamoa_backend.member.dto.res.MemberResDto;
 import com.example.moamoa_backend.member.entity.Member;
 import com.example.moamoa_backend.member.enums.MemberStatus;
 import com.example.moamoa_backend.member.enums.Provider;
@@ -19,6 +21,7 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
+    private final RedisUtil redisUtil;
 
     /**
      * 비밀번호 변경
@@ -75,5 +78,18 @@ public class MemberService {
 
         // soft delete 수행
         member.softDelete();
+
+        // 서버에 저장된 Refresh Token 삭제
+        redisUtil.deleteData("RT:" + memberId);
+    }
+
+    /**
+     * 프로필 조회
+     */
+    public MemberResDto.ProfileResponse getProfile(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        return MemberResDto.ProfileResponse.from(member);
     }
 }

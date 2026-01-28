@@ -104,6 +104,9 @@ public class Member extends BaseEntity {
     @Column(nullable = true)
     private LocalDate birthday;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private Integer profileImage = 1;
 
     /**
      * 목표 설정을 즉시 반영한다.

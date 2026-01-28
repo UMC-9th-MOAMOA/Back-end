@@ -278,6 +278,12 @@ public class AuthService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new AuthException(AuthErrorCode.LOGIN_FAILED));
 
+        // 기존 발급과 재발급 사이에 멤버 상태 변경 체크
+        if (member.getStatus() != MemberStatus.ACTIVE) {
+            throw new AuthException(AuthErrorCode.MEMBER_NOT_ACTIVE);
+        }
+
+
         // 5. 새 토큰 발급 (RTR)
         return generateTokens(member.getId(), member.getRole());
     }
