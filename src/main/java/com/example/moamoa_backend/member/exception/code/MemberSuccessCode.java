@@ -17,7 +17,7 @@ public enum MemberSuccessCode implements BaseSuccessCode {
             "MEMBER200_1",
             "회원 정보 조회에 성공했습니다."),
 
-    MEMBER_UPDATE(HttpStatus.OK,
+    MEMBER_UPDATED(HttpStatus.OK,
             "MEMBER200_2",
             "회원 정보 수정이 완료되었습니다."),
 

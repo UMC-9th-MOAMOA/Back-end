@@ -42,4 +42,13 @@ public class MemberController {
         MemberResDto.ProfileResponse response = memberService.getProfile(Long.parseLong(userDetails.getUsername()));
         return ApiResponse.onSuccess(MemberSuccessCode.PROFILE_FETCHED, response);
     }
+
+    @PatchMapping("/me/profile")
+    public ApiResponse<Void> updateProfile(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Valid @RequestBody MemberReqDto.ProfileUpdate request
+    ) {
+        memberService.updateProfile(Long.parseLong(userDetails.getUsername()), request);
+        return ApiResponse.onSuccess(MemberSuccessCode.MEMBER_UPDATED, null);
+    }
 }

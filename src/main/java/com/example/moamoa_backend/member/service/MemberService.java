@@ -4,6 +4,7 @@ import com.example.moamoa_backend.global.util.RedisUtil;
 import com.example.moamoa_backend.member.dto.req.MemberReqDto;
 import com.example.moamoa_backend.member.dto.res.MemberResDto;
 import com.example.moamoa_backend.member.entity.Member;
+import com.example.moamoa_backend.member.enums.Gender;
 import com.example.moamoa_backend.member.enums.MemberStatus;
 import com.example.moamoa_backend.member.enums.Provider;
 import com.example.moamoa_backend.member.exception.MemberException;
@@ -91,5 +92,30 @@ public class MemberService {
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
         return MemberResDto.ProfileResponse.from(member);
+    }
+
+    /**
+     * 프로필 수정
+     */
+    @Transactional
+    public void updateProfile(Long memberId, MemberReqDto.ProfileUpdate request) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        Gender genderEnum = null;
+        if (request.gender() != null) {
+            try {
+                genderEnum = Gender.valueOf(request.gender());
+            } catch (IllegalArgumentException e) {
+                throw new MemberException(MemberErrorCode.INVALID_GENDER);
+            }
+        }
+
+        member.updateProfile(
+                request.profileImage(),
+                request.name(),
+                request.birthday(),
+                genderEnum
+        );
     }
 }

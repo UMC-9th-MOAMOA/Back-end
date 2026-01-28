@@ -170,4 +170,16 @@ public class Member extends BaseEntity {
         this.status = MemberStatus.WITHDRAWN;
         this.deletedAt = LocalDateTime.now();
     }
+
+    public void updateProfile(
+            Integer profileImage,
+            String name,
+            LocalDate birthday,
+            Gender gender
+    ) {
+        this.profileImage = profileImage;
+        this.name = name;
+        this.birthday = birthday;
+        this.gender = gender;
+    }
 }

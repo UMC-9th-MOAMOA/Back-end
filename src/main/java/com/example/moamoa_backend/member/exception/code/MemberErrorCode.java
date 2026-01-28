@@ -21,6 +21,10 @@ public enum MemberErrorCode implements BaseErrorCode {
             "MEMBER400_3",
             "새 비밀번호는 기존 비밀번호와 달라야 합니다."),
 
+    INVALID_GENDER(HttpStatus.BAD_REQUEST,
+            "MEMBER400_5",
+            "성별 값이 올바르지 않습니다."),
+
     SOCIAL_LOGIN_MEMBER(HttpStatus.BAD_REQUEST,
             "MEMBER400_4",
             "소셜 로그인 회원은 비밀번호를 변경할 수 없습니다."),
