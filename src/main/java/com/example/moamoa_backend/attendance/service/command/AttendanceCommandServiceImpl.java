@@ -97,7 +97,7 @@ public class AttendanceCommandServiceImpl implements AttendanceCommandService{
                     )
             );
 
-            // ✅ 연속 7일 달성 보너스 +10 (type=ATTENDANCE)
+            // ✅ 연속 7일 달성 보너스 +10 (type=ATTENDANCE_STREAK_BONUS)
             if (completedToday) {
                 wallet.addPoint(STREAK_7_BONUS);
                 walletHistoryRepository.save(

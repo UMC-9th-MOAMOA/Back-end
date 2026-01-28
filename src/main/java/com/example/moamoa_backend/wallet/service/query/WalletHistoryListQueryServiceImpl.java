@@ -61,9 +61,9 @@ public class WalletHistoryListQueryServiceImpl implements WalletHistoryListQuery
                 .and(applyTab(wh, tab))
                 .and(applyEarnSource(wh, tab, earnSource));
 
-        OrderSpecifier<?> order = (sort == WalletHistoryListRequestDto.Sort.OLDEST)
-                ? wh.createdAt.asc()
-                : wh.createdAt.desc();
+        OrderSpecifier<?>[] order = (sort == WalletHistoryListRequestDto.Sort.OLDEST)
+                ? new OrderSpecifier[]{wh.createdAt.asc(), wh.id.asc()}    // 오래된 순
+                : new OrderSpecifier[]{wh.createdAt.desc(), wh.id.desc()}; // 최신 순
 
         // ✅ 1) total count 쿼리
         Long totalElementsObj = queryFactory
@@ -105,8 +105,8 @@ public class WalletHistoryListQueryServiceImpl implements WalletHistoryListQuery
                 .leftJoin(wh.item, i)
                 .where(where)
                 .orderBy(order)
-                .offset(offset)     // ✅ 추가
-                .limit(safeSize)    // ✅ 추가
+                .offset(offset)
+                .limit(safeSize)
                 .fetch();
 
         // ✅ title 보정
