@@ -9,6 +9,22 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 public enum MemberErrorCode implements BaseErrorCode {
 
+    PASSWORD_NOT_MATCH(HttpStatus.BAD_REQUEST,
+            "MEMBER400_1",
+            "현재 비밀번호가 일치하지 않습니다."),
+
+    PASSWORD_CONFIRM_NOT_MATCH(HttpStatus.BAD_REQUEST,
+            "MEMBER400_2",
+            "새 비밀번호와 확인이 일치하지 않습니다."),
+
+    SAME_AS_OLD_PASSWORD(HttpStatus.BAD_REQUEST,
+            "MEMBER400_3",
+            "새 비밀번호는 기존 비밀번호와 달라야 합니다."),
+
+    SOCIAL_LOGIN_MEMBER(HttpStatus.BAD_REQUEST,
+            "MEMBER400_4",
+            "소셜 로그인 회원은 비밀번호를 변경할 수 없습니다."),
+
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND,
             "MEMBER404_1",
             "존재하지 않는 회원입니다."),

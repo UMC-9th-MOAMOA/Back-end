@@ -158,4 +158,8 @@ public class Member extends BaseEntity {
             this.role = Role.ROLE_USER;
         }
     }
+
+    public void changePassword(String newPassword) {
+        this.password = newPassword;
+    }
 }
