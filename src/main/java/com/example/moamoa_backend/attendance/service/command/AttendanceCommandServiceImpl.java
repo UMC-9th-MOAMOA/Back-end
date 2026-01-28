@@ -108,7 +108,7 @@ public class AttendanceCommandServiceImpl implements AttendanceCommandService{
                                 "연속 7일 출석 달성 보너스로 도토리를 10개 받았다",
                                 STREAK_7_BONUS,
                                 wallet.getPoint(),
-                                TransactionType.ATTENDANCE
+                                TransactionType.ATTENDANCE_STREAK_BONUS
                         )
                 );
             }
