@@ -9,6 +9,11 @@ import java.util.List;
 public class WalletHistoryListResponseDto {
     public record Response(
             int balance,
+            int page,              // ✅ 현재 페이지(1부터)
+            int size,              // ✅ 페이지당 개수
+            long totalElements,    // ✅ 전체 개수
+            int totalPages,        // ✅ 전체 페이지 수
+            boolean hasNext,       // ✅ 다음 페이지 존재 여부
             List<Item> items
     ) {}
 
@@ -17,8 +22,8 @@ public class WalletHistoryListResponseDto {
             TransactionType type,
             int amount,
             LocalDateTime createdAt,
-            String title,          // 구매=아이템명, 미션=미션명, 나머지=type.description
-            String categoryLabel,  // "도토리 적립" | "도토리 사용"
-            ItemType itemType      // 구매일 때만 값 존재(그 외 null)
+            String title,
+            String categoryLabel,
+            ItemType itemType
     ) {}
 }

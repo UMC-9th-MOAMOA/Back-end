@@ -9,6 +9,8 @@ public interface WalletHistoryListQueryService {
             WalletHistoryListRequestDto.Tab tab,
             WalletHistoryListRequestDto.Sort sort,
             WalletHistoryListRequestDto.Period period,
-            WalletHistoryListRequestDto.EarnSource earnSource
+            WalletHistoryListRequestDto.EarnSource earnSource,
+            int page,   // ✅ 추가 (1부터)
+            int size    // ✅ 추가
     );
 }

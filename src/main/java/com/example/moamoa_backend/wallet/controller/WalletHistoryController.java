@@ -40,12 +40,17 @@ public class WalletHistoryController {
             @RequestParam(defaultValue = "ALL") WalletHistoryListRequestDto.Tab tab,
             @RequestParam(defaultValue = "RECENT") WalletHistoryListRequestDto.Sort sort,
             @RequestParam(defaultValue = "ALL") WalletHistoryListRequestDto.Period period,
-            @RequestParam(defaultValue = "ALL") WalletHistoryListRequestDto.EarnSource earnSource
+            @RequestParam(defaultValue = "ALL") WalletHistoryListRequestDto.EarnSource earnSource,
+
+            // ✅ 추가
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size
     ) {
         Long memberId = Long.parseLong(userDetails.getUsername());
+
         return ApiResponse.onSuccess(
                 WalletSuccessCode.WALLET_HISTORY_INQUIRY_SUCCESS,
-                walletHistoryListQueryService.getHistories(memberId, tab, sort, period, earnSource)
+                walletHistoryListQueryService.getHistories(memberId, tab, sort, period, earnSource, page, size)
         );
     }
 }

@@ -11,6 +11,7 @@ import com.example.moamoa_backend.wallet.enums.TransactionType;
 import com.example.moamoa_backend.wallet.exception.WalletException;
 import com.example.moamoa_backend.wallet.exception.code.WalletErrorCode;
 import com.example.moamoa_backend.wallet.repository.WalletRepository;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
@@ -36,8 +37,15 @@ public class WalletHistoryListQueryServiceImpl implements WalletHistoryListQuery
             WalletHistoryListRequestDto.Tab tab,
             WalletHistoryListRequestDto.Sort sort,
             WalletHistoryListRequestDto.Period period,
-            WalletHistoryListRequestDto.EarnSource earnSource
+            WalletHistoryListRequestDto.EarnSource earnSource,
+            int page,
+            int size
     ) {
+        // ✅ page/size 방어 (page는 1부터)
+        int safePage = Math.max(page, 1);
+        int safeSize = Math.min(Math.max(size, 1), 50); // 한 번에 너무 많이 못 가져가게(원하면 조정)
+        long offset = (long) (safePage - 1) * safeSize;
+
         Wallet wallet = walletRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new WalletException(WalletErrorCode.WALLET_NOT_FOUND));
 
@@ -53,6 +61,25 @@ public class WalletHistoryListQueryServiceImpl implements WalletHistoryListQuery
                 .and(applyTab(wh, tab))
                 .and(applyEarnSource(wh, tab, earnSource));
 
+        OrderSpecifier<?> order = (sort == WalletHistoryListRequestDto.Sort.OLDEST)
+                ? wh.createdAt.asc()
+                : wh.createdAt.desc();
+
+        // ✅ 1) total count 쿼리
+        Long totalElementsObj = queryFactory
+                .select(wh.count())
+                .from(wh)
+                .join(wh.wallet, w)
+                .leftJoin(wh.mission, m)
+                .leftJoin(wh.item, i)
+                .where(where)
+                .fetchOne();
+
+        long totalElements = (totalElementsObj == null) ? 0L : totalElementsObj;
+        int totalPages = (totalElements == 0) ? 0 : (int) Math.ceil((double) totalElements / safeSize);
+        boolean hasNext = safePage < totalPages;
+
+        // ✅ 2) 실제 page 데이터 조회 (offset/limit)
         List<WalletHistoryListResponseDto.Item> rows = queryFactory
                 .select(
                         Projections.constructor(
@@ -62,7 +89,7 @@ public class WalletHistoryListQueryServiceImpl implements WalletHistoryListQuery
                                 wh.amount,
                                 wh.createdAt,
 
-                                // 후보 title: PURCHASE=item.name, 미션류=mission.title, 그 외는 type명(아래 normalize에서 description으로)
+                                // ✅ ExpressionUtils 없이 coalesce
                                 i.name.coalesce(m.title).coalesce(wh.type.stringValue()),
 
                                 new CaseBuilder()
@@ -77,9 +104,12 @@ public class WalletHistoryListQueryServiceImpl implements WalletHistoryListQuery
                 .leftJoin(wh.mission, m)
                 .leftJoin(wh.item, i)
                 .where(where)
-                .orderBy(sort == WalletHistoryListRequestDto.Sort.OLDEST ? wh.createdAt.asc() : wh.createdAt.desc())
+                .orderBy(order)
+                .offset(offset)     // ✅ 추가
+                .limit(safeSize)    // ✅ 추가
                 .fetch();
 
+        // ✅ title 보정
         List<WalletHistoryListResponseDto.Item> normalized = rows.stream()
                 .map(it -> new WalletHistoryListResponseDto.Item(
                         it.walletHistoryId(),
@@ -92,21 +122,24 @@ public class WalletHistoryListQueryServiceImpl implements WalletHistoryListQuery
                 ))
                 .toList();
 
-        return new WalletHistoryListResponseDto.Response(wallet.getPoint(), normalized);
+        return new WalletHistoryListResponseDto.Response(
+                wallet.getPoint(),
+                safePage,
+                safeSize,
+                totalElements,
+                totalPages,
+                hasNext,
+                normalized
+        );
     }
 
     private String normalizeTitle(WalletHistoryListResponseDto.Item it) {
-        // 구매: 아이템명 우선
         if (it.type() == TransactionType.PURCHASE) {
             return (it.title() != null && !it.title().isBlank()) ? it.title() : it.type().getDescription();
         }
-
-        // 미션 성공/완료: 미션명 우선
         if (it.type() == TransactionType.MISSION || it.type() == TransactionType.MISSION_COMPLETE) {
             return (it.title() != null && !it.title().isBlank()) ? it.title() : it.type().getDescription();
         }
-
-        // 출석/연속출석/일일/주간/이벤트 등: enum description
         return it.type().getDescription();
     }
 
@@ -117,11 +150,9 @@ public class WalletHistoryListQueryServiceImpl implements WalletHistoryListQuery
         return null;
     }
 
-    /**
-     * ✅ 적립 탭에서만 미션/출석 필터 적용
-     * - 미션: MISSION + MISSION_COMPLETE
-     * - 출석: ATTENDANCE + ATTENDANCE_STREAK_BONUS
-     */
+    // ✅ 적립 탭에서만 미션/출석 필터 적용
+    // - 미션: MISSION + MISSION_COMPLETE
+    // - 출석: ATTENDANCE + ATTENDANCE_STREAK_BONUS
     private BooleanExpression applyEarnSource(QWalletHistory wh,
                                               WalletHistoryListRequestDto.Tab tab,
                                               WalletHistoryListRequestDto.EarnSource earnSource) {
