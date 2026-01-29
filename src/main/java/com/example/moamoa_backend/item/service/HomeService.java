@@ -33,7 +33,7 @@ public class HomeService {
 	private final WalletHistoryQueryService walletHistoryQueryService;
 
 
-	@Transactional(readOnly = true)
+	@Transactional
 	public HomeResponseDto getHome(Long memberId) {
 		Member member = memberRepository.findById(memberId)
 			.orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
@@ -43,7 +43,7 @@ public class HomeService {
 		// 만약 Response가 record가 아니라 class면: .getPoint()
 
 		//  다시보지않기 체크했으면 false(팝업 안띄움), 없으면 true(띄움)
-		boolean shouldShowTutorial = memberSettingService.shouldShowPopup(memberId, TUTORIAL_KEY);
+		boolean shouldShowTutorial = memberSettingService.checkAndInitPopup(memberId, TUTORIAL_KEY);
 
 		// EntityGraph로 item까지 함께 로딩 (N+1 방지)
 		List<MemberItem> equippedAll = memberItemRepository.findByMemberIdAndIsEquippedTrue(memberId);
