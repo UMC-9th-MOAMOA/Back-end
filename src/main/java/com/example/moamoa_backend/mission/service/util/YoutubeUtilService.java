@@ -3,9 +3,11 @@ package com.example.moamoa_backend.mission.service.util;
 import com.example.moamoa_backend.mission.exception.MissionException;
 import com.example.moamoa_backend.mission.exception.code.MissionErrorCode;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -23,8 +25,18 @@ public class YoutubeUtilService {
     @Value("${youtube.api.key}")
     private String apiKey;
 
-    private final RestClient restClient = RestClient.create();
+    private RestClient restClient;
 
+    @PostConstruct
+    private void init() {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(5000); // 연결 5초 대기
+        factory.setReadTimeout(10000);   // 데이터 읽기 10초 대기
+
+        this.restClient = RestClient.builder()
+                .requestFactory(factory)
+                .build();
+    }
     public int getDurationInSeconds(String videoUrl) {
         try {
             String videoId = extractVideoId(videoUrl);
