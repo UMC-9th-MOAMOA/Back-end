@@ -31,7 +31,7 @@ public class HomeService {
 			.orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
 		// EntityGraph로 item까지 함께 로딩 (N+1 방지)
-		List<MemberItem> equippedAll = memberItemRepository.findByMemberIdAndEquippedTrue(memberId);
+		List<MemberItem> equippedAll = memberItemRepository.findByMemberIdAndIsEquippedTrue(memberId);
 
 		Map<ItemType, HomeResponseDto.EquippedItem> equippedItems = equippedAll.stream()
 			.collect(Collectors.toMap(
