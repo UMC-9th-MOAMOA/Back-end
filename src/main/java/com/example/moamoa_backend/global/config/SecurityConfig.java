@@ -57,12 +57,10 @@ public class SecurityConfig {
     // 로그인 필요O - Guest는 제한된 요청만 가능
     private final String[] guestAllowUris = {
             "/api/v1/auth/**",
-            "/api/v1/policies/**",
-            "/api/v1/members/policy",
+            "/api/v1/policies/**", // 약관 조회 및 동의 내역 수정
             "/v3/api-docs/**",
             "/swagger-ui/**",
             "/swagger-resources/**",
-            "/actuator/health/**"
     };
 
     // 관리자만 접근 가능
