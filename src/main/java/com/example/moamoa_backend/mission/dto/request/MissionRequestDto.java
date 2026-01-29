@@ -44,7 +44,7 @@ public class MissionRequestDto {
 
     public record SubmitAnswer(
             @NotNull(message = "답안 목록은 필수입니다.")
-            List<QuizSubmission> submissions
+            @Valid List<QuizSubmission> submissions
     ){}
 
     public record QuizSubmission(
