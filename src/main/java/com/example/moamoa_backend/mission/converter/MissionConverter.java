@@ -40,7 +40,7 @@ public class MissionConverter {
                 .build();
     }
 
-    public Mission toEntity(MissionRequestDto.Create request){
+    public Mission toEntity(MissionRequestDto.Create request, int videoDuration){
         List<Quiz> quizzes = request.quizzes().stream()
                 .map(this::toQuizEntity)
                 .collect(Collectors.toList());
@@ -48,7 +48,7 @@ public class MissionConverter {
         int totalReward = quizzes.stream().mapToInt(quiz-> getRewardByType(quiz.getType()))
                 .sum();
 
-        int totalTimeSeconds = request.videoLength();
+        int totalTimeSeconds = videoDuration;
         for(Quiz quiz: quizzes){
             totalTimeSeconds += getTimeByType(quiz.getType());
         }
@@ -60,7 +60,7 @@ public class MissionConverter {
                 .description(request.description())
                 .videoUrl(request.videoUrl())
                 .durationMinutes(durationMinutes)
-                .videoLength(request.videoLength())
+                .videoLength(videoDuration)
                 .reward(totalReward)
                 .build();
 
