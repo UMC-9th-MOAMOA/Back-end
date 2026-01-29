@@ -37,12 +37,8 @@ public class MemberReqDto {
     ) {}
 
     public record SettingRequest(
-
             @NotBlank(message = "설정 키는 필수입니다.")
-            String settingKey,
-
-            @NotNull(message = "설정 값은 필수입니다.")
-            SettingValue settingValue
+            String settingKey
     ) {}
 
 }

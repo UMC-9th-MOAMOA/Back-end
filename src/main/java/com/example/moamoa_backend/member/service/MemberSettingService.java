@@ -44,6 +44,14 @@ public class MemberSettingService {
     }
 
     /**
+     * 팝업/튜토리얼 다시 보지 않음 설정
+     */
+    @Transactional
+    public void banPopup(Long memberId, String settingKey) {
+        saveSetting(memberId, settingKey, SettingValue.NEVER_SHOW);
+    }
+
+    /**
      * 팝업/튜토리얼 출력 필요 여부 체크
      */
     @Transactional
