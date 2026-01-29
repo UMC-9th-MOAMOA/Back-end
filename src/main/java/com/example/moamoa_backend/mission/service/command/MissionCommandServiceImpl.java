@@ -267,6 +267,7 @@ public class MissionCommandServiceImpl implements MissionCommandService {
 
         if(isFirstAttempt){
             memberMission.markAsSuccess();
+            finalMissionReward = earnedScore;
             updateWalletAndSaveHistory(wallet,mission,TransactionType.MISSION_COMPLETE,finalMissionReward,mission.getTitle() + "성공");
             walletHistoryRepository.flush();
         }
