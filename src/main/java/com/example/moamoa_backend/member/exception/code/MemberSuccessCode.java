@@ -43,7 +43,11 @@ public enum MemberSuccessCode implements BaseSuccessCode {
 
     PASSWORD_CHANGED(HttpStatus.OK,
             "MEMBER200_9",
-            "비밀번호가 성공적으로 변경되었습니다.");
+            "비밀번호가 성공적으로 변경되었습니다."),
+
+    SETTING_SAVED(HttpStatus.OK,
+            "MEMBER200_10",
+            "설정이 저장되었습니다.");
 
     private final HttpStatus status;
     private final String code;

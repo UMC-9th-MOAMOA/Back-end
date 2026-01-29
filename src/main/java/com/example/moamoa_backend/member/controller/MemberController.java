@@ -5,6 +5,7 @@ import com.example.moamoa_backend.member.dto.req.MemberReqDto;
 import com.example.moamoa_backend.member.dto.res.MemberResDto;
 import com.example.moamoa_backend.member.exception.code.MemberSuccessCode;
 import com.example.moamoa_backend.member.service.MemberService;
+import com.example.moamoa_backend.member.service.MemberSettingService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 public class MemberController {
 
     private final MemberService memberService;
+    private final MemberSettingService memberSettingService;
 
     @Operation(summary = "비밀번호 변경", description = "로컬 로그인 회원의 비밀번호를 변경합니다.")
     @PatchMapping("/me/password")
@@ -55,5 +57,19 @@ public class MemberController {
     ) {
         memberService.updateProfile(Long.parseLong(userDetails.getUsername()), request);
         return ApiResponse.onSuccess(MemberSuccessCode.MEMBER_UPDATED, null);
+    }
+
+    @Operation(summary = "회원 설정 저장", description = "팝업 노출 여부 등 회원 설정을 저장합니다.")
+    @PostMapping("/settings")
+    public ApiResponse<Void> saveSetting(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Valid @RequestBody MemberReqDto.SettingRequest request
+    ) {
+        memberSettingService.saveSetting(
+                Long.parseLong(userDetails.getUsername()),
+                request.settingKey(),
+                request.settingValue()
+        );
+        return ApiResponse.onSuccess(MemberSuccessCode.SETTING_SAVED, null);
     }
 }
