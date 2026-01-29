@@ -163,7 +163,7 @@ public class ItemShopService {
 
         // 같은 타입 기존 장착 아이템 모두 해제
         List<MemberItem> equippedSameType = memberItemRepository
-                .findByMemberIdAndItem_TypeAndEquippedTrue(memberId, type);
+                .findByMemberIdAndItem_TypeAndIsEquippedTrue(memberId, type);
 
         for (MemberItem mi : equippedSameType) {
             mi.unequip();
@@ -172,7 +172,7 @@ public class ItemShopService {
         target.equip();
 
         // 장착 전체 반환 (EntityGraph로 item까지 함께 로딩)
-        List<MemberItem> equippedAll = memberItemRepository.findByMemberIdAndEquippedTrue(memberId);
+        List<MemberItem> equippedAll = memberItemRepository.findByMemberIdAndIsEquippedTrue(memberId);
 
         List<AvatarEquipmentResponseDto.EquippedItem> equippedDtos = equippedAll.stream()
                 .map(mi -> new AvatarEquipmentResponseDto.EquippedItem(
