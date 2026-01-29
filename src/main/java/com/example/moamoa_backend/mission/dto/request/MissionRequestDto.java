@@ -1,6 +1,7 @@
 package com.example.moamoa_backend.mission.dto.request;
 
 import com.example.moamoa_backend.quiz.enums.QuizType;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -16,9 +17,9 @@ public class MissionRequestDto {
             String videoUrl,
             @NotNull(message = "영상 길이를 입력해주세요.(초단위로)")
             Integer videoLength,
-            List<KeywordCreate> keywords,
+            @Valid List<KeywordCreate> keywords,
             String category,
-            List<CreateQuiz> quizzes
+            @Valid List<CreateQuiz> quizzes
     ){}
     public record KeywordCreate(
             String name, //생성형 AI
