@@ -158,7 +158,7 @@ public class MissionController {
             - **SCRAP**: 찜한 미션
             - **COMPLETE**: 성공(SUCCESS)한 미션
             - **RETRY**: 실패(FAIL)했거나, 풀다가 중단한(NONE + 시도횟수>0) 미션
-        - `sort` (선택, 기본값 LATEST):
+        - `condition` (선택, 기본값 LATEST):
             - **LATEST**: 최근 활동(저장/완료/시도) 순
             - **TIME_ASC**: 소요시간 짧은 순
             - **TIME_DESC**: 소요시간 긴 순
