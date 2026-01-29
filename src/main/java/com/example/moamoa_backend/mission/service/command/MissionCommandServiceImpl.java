@@ -239,7 +239,6 @@ public class MissionCommandServiceImpl implements MissionCommandService {
         //case 1 -> 실패 (일부정답 or 모두 오답)
         if(!isAllCorrect){
             memberMission.changeMissionStatus(MissionStatus.FAIL);
-            memberMission.addAttemptCount();
 
             //첫 시도라면 실패했더라도 MISSION 타입으로 월렛히스토리에 기록
             if(isFirstAttempt){
@@ -278,22 +277,19 @@ public class MissionCommandServiceImpl implements MissionCommandService {
         // --- 목표 달성 체크 ---
         int earnedGoalReward = 0;
 
-        long dailyCount = walletHistoryRepository.countByMemberAndTypeBetween(
-                memberId, TransactionType.MISSION_COMPLETE, today.atStartOfDay(), tomorrow.atStartOfDay());
-
-        long weeklyCount = walletHistoryRepository.countByMemberAndTypeBetween(
-                memberId, TransactionType.MISSION_COMPLETE, thisMonday.atStartOfDay(), tomorrow.atStartOfDay());
+        long dailyCount = countMissionCompleteBetween(memberId,today,tomorrow);
+        long weeklyCount = countMissionCompleteBetween(memberId, thisMonday, tomorrow);
 
         if (member.getDailyGoal() != null && dailyCount == member.getDailyGoal()) {
             int reward = member.getDailyGoal() * 5;
             earnedGoalReward += reward;
-            updateWalletAndSaveHistory(wallet, mission, TransactionType.MISSION_COMPLETE, reward, "일간 목표 달성");
+            updateWalletAndSaveHistory(wallet, null, TransactionType.DAILY_REWARD, reward, "일간 목표 달성");
         }
 
         if (member.getWeeklyGoal() != null && weeklyCount == member.getWeeklyGoal()) {
             int reward = member.getWeeklyGoal() * 10;
             earnedGoalReward += reward;
-            updateWalletAndSaveHistory(wallet, mission, TransactionType.MISSION_COMPLETE, reward, "주간 목표 달성");
+            updateWalletAndSaveHistory(wallet, null, TransactionType.WEEKLY_REWARD, reward, "주간 목표 달성");
         }
 
         if (earnedGoalReward > 0) walletHistoryRepository.flush();
