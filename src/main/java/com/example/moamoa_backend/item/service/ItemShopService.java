@@ -22,6 +22,7 @@ import com.example.moamoa_backend.wallet.exception.WalletException;
 import com.example.moamoa_backend.wallet.exception.code.WalletErrorCode;
 import com.example.moamoa_backend.wallet.repository.WalletHistoryRepository;
 import com.example.moamoa_backend.wallet.repository.WalletRepository;
+import com.example.moamoa_backend.wallet.service.query.WalletHistoryQueryService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -43,15 +44,17 @@ public class ItemShopService {
 	private final MemberRepository memberRepository;
 	private final WalletRepository walletRepository;
 	private final WalletHistoryRepository walletHistoryRepository;
+	private final WalletHistoryQueryService walletHistoryQueryService;
 
-    /**
+
+	/**
      * 상점 목록 조회
      * - category: 상위 카테고리(FACE/TOP/BOTTOM/MISC/BACKGROUND)
      * - type(선택): 카테고리 내부 서브타입(HAT/GLASSES/...)
      */
 	public ItemShopListResponseDto getShopItems(Long memberId, ItemCategory category, ItemType type) {
-		Wallet wallet = walletRepository.findByMemberId(memberId)
-			.orElseThrow(() -> new WalletException(WalletErrorCode.WALLET_NOT_FOUND));
+
+		int walletPoint = walletHistoryQueryService.getMyPoint(memberId).point();
 
 		List<ItemType> candidateTypes = category.types();
 
@@ -75,7 +78,7 @@ public class ItemShopService {
 				(a, b) -> a
 			));
 
-		int walletPoint = wallet.getPoint();
+
 
 		List<ItemShopListResponseDto.ItemShopItemResponseDto> responseItems = items.stream()
 			.map(item -> {

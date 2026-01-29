@@ -9,10 +9,7 @@ import com.example.moamoa_backend.member.exception.MemberException;
 import com.example.moamoa_backend.member.exception.code.MemberErrorCode;
 import com.example.moamoa_backend.member.repository.MemberRepository;
 import com.example.moamoa_backend.member.service.MemberSettingService;
-import com.example.moamoa_backend.wallet.entity.Wallet;
-import com.example.moamoa_backend.wallet.exception.WalletException;
-import com.example.moamoa_backend.wallet.exception.code.WalletErrorCode;
-import com.example.moamoa_backend.wallet.repository.WalletRepository;
+import com.example.moamoa_backend.wallet.service.query.WalletHistoryQueryService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -32,18 +29,18 @@ public class HomeService {
 
 	private final MemberRepository memberRepository;
 	private final MemberItemRepository memberItemRepository;
-	private final WalletRepository walletRepository;
 	private final MemberSettingService memberSettingService;
+	private final WalletHistoryQueryService walletHistoryQueryService;
+
 
 	@Transactional(readOnly = true)
 	public HomeResponseDto getHome(Long memberId) {
 		Member member = memberRepository.findById(memberId)
 			.orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
-		Wallet wallet = walletRepository.findByMemberId(memberId)
-			.orElseThrow(() -> new WalletException(WalletErrorCode.WALLET_NOT_FOUND));
-
-		int point = wallet.getPoint();
+		//  변경: 구현된 잔액 조회 서비스 재사용
+		int point = walletHistoryQueryService.getMyPoint(memberId).point();
+		// 만약 Response가 record가 아니라 class면: .getPoint()
 
 		//  다시보지않기 체크했으면 false(팝업 안띄움), 없으면 true(띄움)
 		boolean shouldShowTutorial = memberSettingService.shouldShowPopup(memberId, TUTORIAL_KEY);
