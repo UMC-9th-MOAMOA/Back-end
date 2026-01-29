@@ -186,7 +186,7 @@ public class MissionConverter {
     }
 
     public MissionResponseDto.SearchResponse toSearchResponse(Slice<Mission> missionSlice, Map<Long, MemberMission> myMissionMap){
-        List<MissionResponseDto.RecommendResult> missinDtos = missionSlice.getContent().stream()
+        List<MissionResponseDto.RecommendResult> missonDtos = missionSlice.getContent().stream()
                 .map(mission -> {
                     MemberMission mm = myMissionMap.get(mission.getId());
 
@@ -197,7 +197,7 @@ public class MissionConverter {
                 .collect(Collectors.toList());
 
         return MissionResponseDto.SearchResponse.builder()
-                .missions(missinDtos)
+                .missions(missonDtos)
                 .hasNext(missionSlice.hasNext())
                 .build();
     }
