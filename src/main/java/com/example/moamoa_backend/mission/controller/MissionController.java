@@ -75,7 +75,7 @@ public class MissionController {
             )
     public ApiResponse<MissionResponseDto.StatusResult> updateStatus(
             @PathVariable Long missionId,
-            @RequestBody MissionRequestDto.PatchStatus request,
+            @Valid @RequestBody MissionRequestDto.PatchStatus request,
             @AuthenticationPrincipal UserDetails userDetails
     ){
         Long memberId = Long.parseLong(userDetails.getUsername());
