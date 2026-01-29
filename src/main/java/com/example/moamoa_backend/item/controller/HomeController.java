@@ -1,5 +1,7 @@
 package com.example.moamoa_backend.item.controller;
 
+import com.example.moamoa_backend.item.dto.HomePocketResponseDto;
+import com.example.moamoa_backend.item.service.query.MemberHomeQueryService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 public class HomeController {
 
 	private final HomeService homeService;
+	private final MemberHomeQueryService memberHomeQueryService;
 
 	@Operation(summary = "홈 메인 조회", description = "미션 추천/재도전/주머니 API를 제외한 홈 메인 정보를 조회합니다.")
 	@GetMapping("/home")
@@ -32,5 +35,17 @@ public class HomeController {
 		HomeResponseDto result = homeService.getHome(memberId);
 
 		return ApiResponse.onSuccess(ItemSuccessCode.HOME_OK, result);
+	}
+
+	@Operation(summary = "홈 화면 주머니 조회", description = "오늘/이번주 미션시간, 도토리 잔액, 연속출석, 목표 진행(없으면 null)")
+	@GetMapping("/pocket")
+	public ApiResponse<HomePocketResponseDto.Response> getHomePocket(
+			@AuthenticationPrincipal UserDetails userDetails
+	) {
+		Long memberId = Long.parseLong(userDetails.getUsername());
+		return ApiResponse.onSuccess(
+				ItemSuccessCode.HOME_POCKET_OK,
+				memberHomeQueryService.getHomePocket(memberId)
+		);
 	}
 }

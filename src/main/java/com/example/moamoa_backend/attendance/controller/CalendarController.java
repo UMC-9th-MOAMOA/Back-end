@@ -6,7 +6,7 @@ import com.example.moamoa_backend.attendance.service.query.AttendanceQueryServic
 import com.example.moamoa_backend.global.apiPayload.response.ApiResponse;
 import com.example.moamoa_backend.wallet.dto.WalletHistoryDayResponseDto;
 import com.example.moamoa_backend.wallet.exception.code.WalletSuccessCode;
-import com.example.moamoa_backend.wallet.service.command.WalletHistoryQueryService;
+import com.example.moamoa_backend.wallet.service.query.WalletHistoryQueryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Max;
