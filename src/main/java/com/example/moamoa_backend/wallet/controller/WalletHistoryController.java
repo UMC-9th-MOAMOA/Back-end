@@ -58,7 +58,7 @@ public class WalletHistoryController {
     }
 
     @Operation(summary = "내 도토리 잔액 조회", description = "Wallet.point(도토리 개수)만 반환합니다.")
-    @GetMapping("/me/balance")
+    @GetMapping("/wallet")
     public ApiResponse<WalletPointResponseDto.Response> getMyBalance(
             @AuthenticationPrincipal UserDetails userDetails
     ) {
