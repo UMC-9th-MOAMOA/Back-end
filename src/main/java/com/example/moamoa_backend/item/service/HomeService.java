@@ -8,6 +8,7 @@ import com.example.moamoa_backend.member.entity.Member;
 import com.example.moamoa_backend.member.exception.MemberException;
 import com.example.moamoa_backend.member.exception.code.MemberErrorCode;
 import com.example.moamoa_backend.member.repository.MemberRepository;
+import com.example.moamoa_backend.member.service.MemberSettingService;
 import com.example.moamoa_backend.wallet.entity.Wallet;
 import com.example.moamoa_backend.wallet.exception.WalletException;
 import com.example.moamoa_backend.wallet.exception.code.WalletErrorCode;
@@ -27,9 +28,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class HomeService {
 
+	private static final String TUTORIAL_KEY = "HOME_TUTORIAL";
+
 	private final MemberRepository memberRepository;
 	private final MemberItemRepository memberItemRepository;
 	private final WalletRepository walletRepository;
+	private final MemberSettingService memberSettingService;
 
 	@Transactional(readOnly = true)
 	public HomeResponseDto getHome(Long memberId) {
@@ -40,6 +44,9 @@ public class HomeService {
 			.orElseThrow(() -> new WalletException(WalletErrorCode.WALLET_NOT_FOUND));
 
 		int point = wallet.getPoint();
+
+		//  다시보지않기 체크했으면 false(팝업 안띄움), 없으면 true(띄움)
+		boolean shouldShowTutorial = memberSettingService.shouldShowPopup(memberId, TUTORIAL_KEY);
 
 		// EntityGraph로 item까지 함께 로딩 (N+1 방지)
 		List<MemberItem> equippedAll = memberItemRepository.findByMemberIdAndIsEquippedTrue(memberId);
@@ -56,6 +63,6 @@ public class HomeService {
 				() -> new EnumMap<>(ItemType.class)
 			));
 
-		return HomeResponseDto.of(member.getName(), point, equippedItems);
+		return HomeResponseDto.of(member.getName(), point, shouldShowTutorial, equippedItems);
 	}
 }
