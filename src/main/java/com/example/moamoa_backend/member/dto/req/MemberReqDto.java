@@ -1,5 +1,6 @@
 package com.example.moamoa_backend.member.dto.req;
 
+import com.example.moamoa_backend.member.enums.SettingValue;
 import jakarta.validation.constraints.*;
 
 import java.time.LocalDate;
@@ -33,6 +34,11 @@ public class MemberReqDto {
             LocalDate birthday,
 
             String gender
+    ) {}
+
+    public record SettingRequest(
+            @NotBlank(message = "설정 키는 필수입니다.")
+            String settingKey
     ) {}
 
 }
