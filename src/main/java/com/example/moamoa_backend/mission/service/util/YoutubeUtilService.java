@@ -51,6 +51,7 @@ public class YoutubeUtilService {
         } catch (MissionException e) {
             throw e;
         } catch (Exception e) {
+            log.error("YouTube API 호출 중 예외 발생: {}", e.getMessage(), e);
             throw new MissionException(MissionErrorCode.YOUTUBE_SERVER_ERROR);
         }
     }
