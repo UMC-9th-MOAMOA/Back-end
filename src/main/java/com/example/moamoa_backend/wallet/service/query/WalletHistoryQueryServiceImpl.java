@@ -1,8 +1,9 @@
-package com.example.moamoa_backend.wallet.service.command;
+package com.example.moamoa_backend.wallet.service.query;
 
 
 import com.example.moamoa_backend.mission.entity.QMission;
 import com.example.moamoa_backend.wallet.dto.WalletHistoryDayResponseDto;
+import com.example.moamoa_backend.wallet.dto.WalletPointResponseDto;
 import com.example.moamoa_backend.wallet.entity.QWallet;
 import com.example.moamoa_backend.wallet.entity.QWalletHistory;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -19,6 +20,7 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class WalletHistoryQueryServiceImpl implements WalletHistoryQueryService{
     private final JPAQueryFactory queryFactory;
+    private final QWallet wallet = QWallet.wallet;
 
     @Override
     public WalletHistoryDayResponseDto.Response getDayHistory(Long memberId, LocalDate date) {
@@ -67,5 +69,16 @@ public class WalletHistoryQueryServiceImpl implements WalletHistoryQueryService{
                 .sum();
 
         return new WalletHistoryDayResponseDto.Response(date, items, totalMinutes, totalAcorns);
+    }
+
+    @Override
+    public WalletPointResponseDto.Response getMyPoint(Long memberId) {
+        Integer point = queryFactory
+                .select(wallet.point)
+                .from(wallet)
+                .where(wallet.member.id.eq(memberId))
+                .fetchOne();
+
+        return new WalletPointResponseDto.Response(point == null ? 0 : point);
     }
 }
