@@ -14,14 +14,6 @@ public enum AuthErrorCode implements BaseErrorCode {
         "AUTH400_1",
         "이메일 인증 번호가 일치하지 않습니다."),
 
-    REQUIRED_TERMS_NOT_AGREED(HttpStatus.BAD_REQUEST,
-        "AUTH400_2",
-        "필수 약관에 모두 동의해야 합니다."),
-
-    INVALID_POLICY_ID(HttpStatus.BAD_REQUEST,
-        "AUTH400_3",
-        "존재하지 않는 약관이 포함되어 있습니다."),
-
     // 이메일 검증 성공 이후 회원가입까지 오래걸릴 경우
     VERIFICATION_CODE_EXPIRED(HttpStatus.BAD_REQUEST,
         "AUTH400_4",
@@ -74,7 +66,11 @@ public enum AuthErrorCode implements BaseErrorCode {
 
     ACCOUNT_BANNED(HttpStatus.FORBIDDEN,
             "AUTH403_3",
-            "정지된 계정입니다. 문의사항은 관리자(admin@moamoa.com)에게 연락해주세요."),
+            "정지된 계정입니다. 문의사항은 관리자(moamoamoa2026@gmail.com)에게 연락해주세요."),
+
+    MEMBER_NOT_ACTIVE(HttpStatus.FORBIDDEN,
+            "AUTH403_4",
+            "활성화되지 않은 계정입니다. 고객센터에 문의해주세요."),
 
     // ============= 429 Too Many Requests =============
     IP_RATE_LIMIT_EXCEEDED(HttpStatus.TOO_MANY_REQUESTS,
