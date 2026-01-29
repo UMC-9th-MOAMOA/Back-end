@@ -10,6 +10,15 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(
+        name = "member_mission",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_member_mission_member_mission",
+                        columnNames = {"member_id", "mission_id"}
+                )
+        }
+)
 @Getter
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -32,6 +41,7 @@ public class MemberMission extends BaseEntity {
     @Column(nullable = false)
     private MissionStatus missionStatus;
 
+    @Column(nullable = false)
     @Builder.Default
     private Integer attemptCount = 0;
 
