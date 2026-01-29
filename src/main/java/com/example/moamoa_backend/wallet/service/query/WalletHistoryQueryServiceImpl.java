@@ -79,6 +79,6 @@ public class WalletHistoryQueryServiceImpl implements WalletHistoryQueryService{
                 .where(wallet.member.id.eq(memberId))
                 .fetchOne();
 
-        return new WalletPointResponseDto.Response(point == null ? 0 : point);
+        return new WalletPointResponseDto.Response(point);
     }
 }
