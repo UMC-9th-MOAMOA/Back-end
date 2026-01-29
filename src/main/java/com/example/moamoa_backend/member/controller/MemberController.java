@@ -3,6 +3,7 @@ package com.example.moamoa_backend.member.controller;
 import com.example.moamoa_backend.global.apiPayload.response.ApiResponse;
 import com.example.moamoa_backend.member.dto.req.MemberReqDto;
 import com.example.moamoa_backend.member.dto.res.MemberResDto;
+import com.example.moamoa_backend.member.enums.SettingValue;
 import com.example.moamoa_backend.member.exception.code.MemberSuccessCode;
 import com.example.moamoa_backend.member.service.MemberService;
 import com.example.moamoa_backend.member.service.MemberSettingService;
@@ -59,16 +60,15 @@ public class MemberController {
         return ApiResponse.onSuccess(MemberSuccessCode.MEMBER_UPDATED, null);
     }
 
-    @Operation(summary = "회원 설정 저장", description = "팝업 노출 여부 등 회원 설정을 저장합니다.")
-    @PostMapping("/settings")
+    @Operation(summary = "팝업 다시 보지 않기 설정", description = "특정 팝업에 대해 다시 보지 않기(NEVER_SHOW) 설정을 저장합니다")
+    @PostMapping("/settings/ban")
     public ApiResponse<Void> saveSetting(
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestBody MemberReqDto.SettingRequest request
     ) {
-        memberSettingService.saveSetting(
+        memberSettingService.banPopup(
                 Long.parseLong(userDetails.getUsername()),
-                request.settingKey(),
-                request.settingValue()
+                request.settingKey()
         );
         return ApiResponse.onSuccess(MemberSuccessCode.SETTING_SAVED, null);
     }
