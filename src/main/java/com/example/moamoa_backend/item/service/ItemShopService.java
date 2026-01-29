@@ -30,9 +30,12 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -46,19 +49,18 @@ public class ItemShopService {
 	private final WalletHistoryRepository walletHistoryRepository;
 	private final WalletHistoryQueryService walletHistoryQueryService;
 
-
 	/**
-     * 상점 목록 조회
-     * - category: 상위 카테고리(FACE/TOP/BOTTOM/MISC/BACKGROUND)
-     * - type(선택): 카테고리 내부 서브타입(HAT/GLASSES/...)
-     */
+	 * 상점 목록 조회
+	 * - category: 상위 카테고리(FACE/TOP/BOTTOM/MISC/BACKGROUND)
+	 * - type(선택): 카테고리 내부 서브타입(HAT/GLASSES/...)
+	 */
 	public ItemShopListResponseDto getShopItems(Long memberId, ItemCategory category, ItemType type) {
 
 		int walletPoint = walletHistoryQueryService.getMyPoint(memberId).point();
 
 		List<ItemType> candidateTypes = category.types();
 
-        // (선택) type 필터가 들어오면 category 소속인지 검증
+		// (선택) type 필터가 들어오면 category 소속인지 검증
 		List<ItemType> queryTypes = candidateTypes;
 		if (type != null) {
 			if (!candidateTypes.contains(type)) {
@@ -77,8 +79,6 @@ public class ItemShopService {
 				mi -> mi,
 				(a, b) -> a
 			));
-
-
 
 		List<ItemShopListResponseDto.ItemShopItemResponseDto> responseItems = items.stream()
 			.map(item -> {
@@ -105,10 +105,9 @@ public class ItemShopService {
 		return new ItemShopListResponseDto(type, walletPoint, responseItems);
 	}
 
-
-    /**
-     * 아이템 구매
-     */
+	/**
+	 * 아이템 구매
+	 */
 	@Transactional
 	public ItemPurchaseResponseDto purchase(Long memberId, Long itemId) {
 		Item item = itemRepository.findById(itemId)
@@ -154,11 +153,11 @@ public class ItemShopService {
 		return new ItemPurchaseResponseDto(item.getId(), item.getPrice(), wallet.getPoint());
 	}
 
-    /**
-     * 아바타 착장 변경
-     * - 같은 EquipSlot(=잡화면 MISC)인 기존 착장만 해제
-     * - 잡화는 1개만 착용 가능
-     */
+	/**
+	 * 아바타 착장 변경
+	 * - 같은 EquipSlot(=잡화면 MISC)인 기존 착장만 해제
+	 * - 잡화는 1개만 착용 가능
+	 */
 	@Transactional
 	public AvatarEquipmentResponseDto equip(Long memberId, Long itemId) {
 
@@ -168,30 +167,40 @@ public class ItemShopService {
 		MemberItem target = memberItemRepository.findByMemberIdAndItemId(memberId, itemId)
 			.orElseThrow(() -> new ItemException(ItemErrorCode.ITEM_NOT_OWNED));
 
-        EquipSlot targetSlot = target.getItem().getType().slot();
+		EquipSlot targetSlot = target.getItem().getType().slot();
 
-        // 현재 착용중 전체 조회 후, 같은 슬롯인 것만 해제
-        List<MemberItem> equippedAll = memberItemRepository.findByMemberIdAndIsEquippedTrue(memberId);
+		// 현재 착용중 전체 조회 후, 같은 슬롯인 것만 해제
+		List<MemberItem> equippedAll = memberItemRepository.findByMemberIdAndIsEquippedTrue(memberId);
 
-        for (MemberItem mi : equippedAll) {
-            if (mi.getItem().getType().slot() == targetSlot) {
-                mi.unequip();
-            }
-        }
+		for (MemberItem mi : equippedAll) {
+			if (mi.getItem().getType().slot() == targetSlot) {
+				mi.unequip();
+			}
+		}
 
 		target.equip();
+		// 응답용: 착용 전체 다시 내려주기
 
-        // 응답용: 착용 전체 다시 내려주기
-        List<MemberItem> equippedAfter = memberItemRepository.findByMemberIdAndIsEquippedTrue(memberId);
+		List<MemberItem> equippedAfter = Stream.concat(equippedAll.stream(), Stream.of(target))
+			.filter(MemberItem::isEquipped)
+			.collect(Collectors.toMap(
+				mi -> mi.getItem().getId(),        // itemId 기준
+				Function.identity(),
+				(a, b) -> b,
+				LinkedHashMap::new                 // 순서 유지
+			))
+			.values()
+			.stream()
+			.toList();
 
-        List<AvatarEquipmentResponseDto.EquippedItem> equippedDtos = equippedAfter.stream()
-            .map(mi -> new AvatarEquipmentResponseDto.EquippedItem(
-                mi.getItem().getType(),
-                mi.getItem().getId(),
-                mi.getItem().getImageUrl()
-            ))
-            .toList();
+		List<AvatarEquipmentResponseDto.EquippedItem> equippedDtos = equippedAfter.stream()
+			.map(mi -> new AvatarEquipmentResponseDto.EquippedItem(
+				mi.getItem().getType(),
+				mi.getItem().getId(),
+				mi.getItem().getImageUrl()
+			))
+			.toList();
 
-        return new AvatarEquipmentResponseDto(equippedDtos);
-    }
+		return new AvatarEquipmentResponseDto(equippedDtos);
+	}
 }
