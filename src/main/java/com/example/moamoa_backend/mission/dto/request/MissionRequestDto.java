@@ -22,7 +22,9 @@ public class MissionRequestDto {
             @Valid List<CreateQuiz> quizzes
     ){}
     public record KeywordCreate(
-            String name, //생성형 AI
+            @NotBlank(message = "키워드 이름은 필수입니다.")
+            String name,
+            @NotBlank(message = "키워드 타입은 필수입니다.")
             String type
     ){}
     public record CreateQuiz(
