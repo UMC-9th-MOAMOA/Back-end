@@ -8,8 +8,13 @@ import com.example.moamoa_backend.member.entity.Member;
 import com.example.moamoa_backend.member.exception.MemberException;
 import com.example.moamoa_backend.member.exception.code.MemberErrorCode;
 import com.example.moamoa_backend.member.repository.MemberRepository;
+import com.example.moamoa_backend.wallet.entity.Wallet;
+import com.example.moamoa_backend.wallet.exception.WalletException;
+import com.example.moamoa_backend.wallet.exception.code.WalletErrorCode;
+import com.example.moamoa_backend.wallet.repository.WalletRepository;
 
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,11 +29,17 @@ public class HomeService {
 
 	private final MemberRepository memberRepository;
 	private final MemberItemRepository memberItemRepository;
+	private final WalletRepository walletRepository;
 
 	@Transactional(readOnly = true)
 	public HomeResponseDto getHome(Long memberId) {
 		Member member = memberRepository.findById(memberId)
 			.orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+		Wallet wallet = walletRepository.findByMemberId(memberId)
+			.orElseThrow(() -> new WalletException(WalletErrorCode.WALLET_NOT_FOUND));
+
+		int point = wallet.getPoint();
 
 		// EntityGraph로 item까지 함께 로딩 (N+1 방지)
 		List<MemberItem> equippedAll = memberItemRepository.findByMemberIdAndIsEquippedTrue(memberId);
@@ -45,6 +56,6 @@ public class HomeService {
 				() -> new EnumMap<>(ItemType.class)
 			));
 
-		return HomeResponseDto.of(member.getName(), equippedItems);
+		return HomeResponseDto.of(member.getName(), point, equippedItems);
 	}
 }

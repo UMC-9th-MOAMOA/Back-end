@@ -26,7 +26,7 @@ public class HomeController {
 	private final HomeService homeService;
 	private final MemberHomeQueryService memberHomeQueryService;
 
-	@Operation(summary = "홈 메인 조회", description = "미션 추천/재도전/주머니 API를 제외한 홈 메인 정보를 조회합니다.")
+	@Operation(summary = "홈 메인 조회", description = "사용자 이름/내 도토리 갯수/다람쥐 착장 정보(+배경 정보) 홈 메인 정보를 조회합니다.")
 	@GetMapping("/home")
 	public ApiResponse<HomeResponseDto> getHome(
 		@AuthenticationPrincipal UserDetails userDetails

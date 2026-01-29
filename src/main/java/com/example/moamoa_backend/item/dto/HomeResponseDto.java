@@ -6,6 +6,7 @@ import java.util.Map;
 
 public record HomeResponseDto(
 	String memberName,
+	Integer point,
 	Map<ItemType, EquippedItem> equippedItems
 ) {
 	public record EquippedItem(Long itemId, String name, String imageUrl) {
@@ -14,7 +15,7 @@ public record HomeResponseDto(
 		}
 	}
 
-	public static HomeResponseDto of(String memberName, Map<ItemType, EquippedItem> equippedItems) {
-		return new HomeResponseDto(memberName, equippedItems);
+	public static HomeResponseDto of(String memberName, Integer point, Map<ItemType, EquippedItem> equippedItems) {
+		return new HomeResponseDto(memberName, point, equippedItems);
 	}
 }
