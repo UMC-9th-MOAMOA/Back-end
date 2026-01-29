@@ -45,8 +45,8 @@ public class AuthReqDto {
             String email,
 
             @NotBlank(message = "비밀번호는 필수 입력 값입니다.")
-            @Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*?_]).{8,64}$",
-                    message = "비밀번호는 8~64자 영문, 숫자, 특수문자를 모두 포함해야 합니다.")
+            @Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*?_.])[a-zA-Z0-9!@#$%^&*?_.]{8,64}$",
+                    message = "비밀번호는 8~64자 영문, 숫자, 특수문자(!@#$%^&*?_.)를 모두 포함해야 합니다.")
             String password,
 
             @NotBlank(message = "이름은 필수 입력 값입니다.")

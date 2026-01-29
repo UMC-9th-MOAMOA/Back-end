@@ -104,6 +104,9 @@ public class Member extends BaseEntity {
     @Column(nullable = true)
     private LocalDate birthday;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private Integer profileImage = 1;
 
     /**
      * 목표 설정을 즉시 반영한다.
@@ -157,5 +160,26 @@ public class Member extends BaseEntity {
         if (this.role == Role.ROLE_GUEST) {
             this.role = Role.ROLE_USER;
         }
+    }
+
+    public void changePassword(String newPassword) {
+        this.password = newPassword;
+    }
+
+    public void softDelete() {
+        this.status = MemberStatus.WITHDRAWN;
+        this.deletedAt = LocalDateTime.now();
+    }
+
+    public void updateProfile(
+            Integer profileImage,
+            String name,
+            LocalDate birthday,
+            Gender gender
+    ) {
+        this.profileImage = profileImage;
+        this.name = name;
+        this.birthday = birthday;
+        this.gender = gender;
     }
 }
