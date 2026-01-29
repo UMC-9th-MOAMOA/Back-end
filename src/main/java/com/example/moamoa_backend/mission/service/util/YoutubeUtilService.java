@@ -4,6 +4,7 @@ import com.example.moamoa_backend.mission.exception.MissionException;
 import com.example.moamoa_backend.mission.exception.code.MissionErrorCode;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -14,6 +15,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class YoutubeUtilService {
@@ -39,9 +41,11 @@ public class YoutubeUtilService {
 
             if (response == null || response.items() == null || response.items().isEmpty()) {
                 throw new MissionException(MissionErrorCode.YOUTUBE_VIDEO_NOT_FOUND);
-            }
+
+                }
 
             String isoDuration = response.items().get(0).contentDetails().duration();
+            log.info(" 유튜브 API 호출 성공 ID: {}, 시간: {}", videoId, isoDuration);
             return (int) Duration.parse(isoDuration).getSeconds();
 
         } catch (MissionException e) {
