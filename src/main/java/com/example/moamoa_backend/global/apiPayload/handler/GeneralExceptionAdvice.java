@@ -5,6 +5,7 @@ import com.example.moamoa_backend.global.apiPayload.code.BaseErrorCode;
 import com.example.moamoa_backend.global.apiPayload.code.GeneralErrorCode;
 import com.example.moamoa_backend.global.apiPayload.exception.GeneralException;
 import com.example.moamoa_backend.global.apiPayload.response.ApiResponse;
+import com.example.moamoa_backend.item.exception.code.ItemErrorCode;
 import com.example.moamoa_backend.member.exception.code.MemberErrorCode;
 
 import jakarta.validation.ConstraintViolation;
@@ -67,6 +68,20 @@ public class GeneralExceptionAdvice {
             return ResponseEntity
                 .status(MemberErrorCode.INVALID_SCOPE.getStatus())
                 .body(ApiResponse.onFailure(MemberErrorCode.INVALID_SCOPE, null));
+        }
+
+        //  /items?category=... (ItemCategory enum 파싱 실패)
+        if ("category".equals(e.getName())) {
+            return ResponseEntity
+                .status(ItemErrorCode.ITEM_INVALID_CATEGORY.getStatus())
+                .body(ApiResponse.onFailure(ItemErrorCode.ITEM_INVALID_CATEGORY, null));
+        }
+
+        //  /items?type=... (ItemType enum 파싱 실패)
+        if ("type".equals(e.getName())) {
+            return ResponseEntity
+                .status(ItemErrorCode.ITEM_INVALID_TYPE.getStatus())
+                .body(ApiResponse.onFailure(ItemErrorCode.ITEM_INVALID_TYPE, null));
         }
 
         // scope 외 다른 파라미터 타입 미스매치는 일단 500이 아니라 400으로 내림

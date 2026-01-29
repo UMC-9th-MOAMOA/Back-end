@@ -10,6 +10,7 @@ import com.example.moamoa_backend.item.dto.AvatarEquipmentResponseDto;
 import com.example.moamoa_backend.item.dto.ItemPurchaseRequestDto;
 import com.example.moamoa_backend.item.dto.ItemPurchaseResponseDto;
 import com.example.moamoa_backend.item.dto.ItemShopListResponseDto;
+import com.example.moamoa_backend.item.enums.ItemCategory;
 import com.example.moamoa_backend.item.enums.ItemType;
 import com.example.moamoa_backend.item.exception.code.ItemSuccessCode;
 import com.example.moamoa_backend.item.service.ItemShopService;
@@ -25,15 +26,15 @@ public class ItemController {
 
 	private final ItemShopService itemShopService;
 
-	@Operation(summary = "카테고리별 아이템 목록 조회", description = "아이템 타입별 상점 목록을 조회합니다.")
+	@Operation(summary = "카테고리별 아이템 목록 조회", description = "카테고리(예: MISC)와 (선택)서브타입(type)으로 상점 목록을 조회합니다.")
 	@GetMapping("/items")
 	public ApiResponse<ItemShopListResponseDto> getItems(
 		@AuthenticationPrincipal UserDetails userDetails,
-		@RequestParam ItemType type
+		@RequestParam ItemCategory category,
+		@RequestParam(required = false) ItemType type
 	) {
 		Long memberId = extractMemberId(userDetails);
-		ItemShopListResponseDto result = itemShopService.getShopItems(memberId, type);
-
+		ItemShopListResponseDto result = itemShopService.getShopItems(memberId, category, type);
 		return ApiResponse.onSuccess(ItemSuccessCode.ITEM_LIST_OK, result);
 	}
 
