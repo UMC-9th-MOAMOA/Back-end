@@ -23,6 +23,7 @@ import com.example.moamoa_backend.mission.entity.mapping.MissionSubInterest;
 import com.example.moamoa_backend.mission.repository.MissionKeywordRepository;
 import com.example.moamoa_backend.mission.repository.MissionRepository;
 import com.example.moamoa_backend.mission.repository.MissionSubInterestRepository;
+import com.example.moamoa_backend.mission.service.util.YoutubeUtilService;
 import com.example.moamoa_backend.quiz.entity.Quiz;
 import com.example.moamoa_backend.wallet.entity.Wallet;
 import com.example.moamoa_backend.wallet.entity.WalletHistory;
@@ -50,11 +51,14 @@ public class MissionCommandServiceImpl implements MissionCommandService {
     private final MemberRepository memberRepository;
     private final WalletHistoryRepository walletHistoryRepository;
     private final WalletRepository walletRepository;
+    private final YoutubeUtilService youtubeUtilService;
+
 
     @Transactional
     @Override
     public MissionResponseDto.CreateResult createMission(MissionRequestDto.Create request) {
-        Mission newMission = missionConverter.toEntity(request);
+        int videoDuration = youtubeUtilService.getDurationInSeconds(request.videoUrl());
+        Mission newMission = missionConverter.toEntity(request, videoDuration);
         missionRepository.save(newMission);
 
 

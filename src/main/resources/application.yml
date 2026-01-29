@@ -93,6 +93,11 @@ aws:
     bucket: moamoa-s3-prod-bucket
     public-base-url: https://moamoa-s3-prod-bucket.s3.ap-northeast-2.amazonaws.com
 
+# ============= YouTube =============
+youtube:
+  api:
+    key: ${YOUTUBE_API_KEY}
+
 # ============= Actuator =============
 management:
   endpoints:

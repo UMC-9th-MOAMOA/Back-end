@@ -15,8 +15,6 @@ public class MissionRequestDto {
             String description,
             @NotBlank(message = "영상 URL은 필수입니다.")
             String videoUrl,
-            @NotNull(message = "영상 길이를 입력해주세요.(초단위로)")
-            Integer videoLength,
             @Valid List<KeywordCreate> keywords,
             String category,
             @Valid List<CreateQuiz> quizzes
