@@ -3,6 +3,7 @@ package com.example.moamoa_backend.global.config;
 import com.example.moamoa_backend.auth.handler.OAuth2SuccessHandler;
 import com.example.moamoa_backend.auth.repository.HttpCookieOAuth2AuthorizationRequestRepository;
 import com.example.moamoa_backend.auth.service.CustomOAuth2UserService;
+import com.example.moamoa_backend.global.security.filter.PolicyAgreementFilter;
 import com.example.moamoa_backend.global.security.jwt.JwtAuthFilter;
 import com.example.moamoa_backend.global.security.jwt.JwtAuthenticationEntryPoint;
 import com.example.moamoa_backend.member.enums.Role;
@@ -48,9 +49,20 @@ public class SecurityConfig {
             "/api/v1/auth/recover", // 계정복구 요청
     };
 
-    //로그인 필요X - GET 요청만 가능
+    // 로그인 필요X - GET 요청만 가능
     private final String[] allowGetUris = {
             "/api/v1/policies/**"
+    };
+
+    // 로그인 필요O - Guest는 제한된 요청만 가능
+    private final String[] guestAllowUris = {
+            "/api/v1/auth/**",
+            "/api/v1/policies/**",
+            "/api/v1/members/policy",
+            "/v3/api-docs/**",
+            "/swagger-ui/**",
+            "/swagger-resources/**",
+            "/actuator/health/**"
     };
 
     // 관리자만 접근 가능
@@ -94,7 +106,7 @@ public class SecurityConfig {
                     auth.anyRequest().authenticated();
                 })
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-
+                .addFilterAfter(policyAgreementFilter(), JwtAuthFilter.class)
                 .exceptionHandling(exception -> exception
                 .authenticationEntryPoint(jwtAuthenticationEntryPoint))
 
@@ -142,6 +154,11 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
+    }
+
+    @Bean
+    public PolicyAgreementFilter policyAgreementFilter() {
+        return new PolicyAgreementFilter(guestAllowUris);
     }
 
     // Encoder Bean 등록
