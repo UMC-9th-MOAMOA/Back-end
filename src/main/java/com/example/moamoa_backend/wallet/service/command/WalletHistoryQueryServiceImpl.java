@@ -48,7 +48,8 @@ public class WalletHistoryQueryServiceImpl implements WalletHistoryQueryService{
                 .where(
                         w.member.id.eq(memberId),
                         wh.createdAt.goe(start),
-                        wh.createdAt.lt(end)
+                        wh.createdAt.lt(end),
+                        wh.amount.gt(0)
                 )
                 .orderBy(wh.createdAt.asc())
                 .fetch();

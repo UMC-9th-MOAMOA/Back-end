@@ -41,6 +41,17 @@ public enum WalletErrorCode implements BaseErrorCode {
         HttpStatus.BAD_REQUEST,
         "WALLET_400_4",
         "미션 보상이 아닌 경우 mission을 포함할 수 없습니다."
+    ),
+    ITEM_REQUIRED_FOR_PURCHASE_TYPE(
+            HttpStatus.BAD_REQUEST,
+            "WALLET_400_5",
+            "구매(TransactionType.PURCHASE)는 반드시 item이 필요합니다."
+    ),
+
+    ITEM_NOT_ALLOWED_FOR_NON_PURCHASE_TYPE(
+            HttpStatus.BAD_REQUEST,
+            "WALLET_400_6",
+            "구매가 아닌 경우 item을 포함할 수 없습니다."
     );
 
     private final HttpStatus status;

@@ -12,6 +12,9 @@ public enum TransactionType {
     ATTENDANCE("출석 보상"),
     EVENT("이벤트 지급"),
     REFUND("구매 환불"),
+    DAILY_REWARD("일일 보상"),
+    WEEKLY_REWARD("주간 보상"),
+    ATTENDANCE_STREAK_BONUS("연속 출석 보너스"),
 
     // 포인트 감소 (사용)
     PURCHASE("아이템 구매"),

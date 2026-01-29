@@ -89,6 +89,7 @@ public class AttendanceCommandServiceImpl implements AttendanceCommandService{
                     WalletHistory.create(
                             wallet,
                             null,
+                            null,
                             "출석 보상으로 도토리를 1개 받았다",
                             ATTENDANCE_REWARD,
                             wallet.getPoint(),
@@ -96,17 +97,18 @@ public class AttendanceCommandServiceImpl implements AttendanceCommandService{
                     )
             );
 
-            // ✅ 연속 7일 달성 보너스 +10 (type=ATTENDANCE)
+            // ✅ 연속 7일 달성 보너스 +10 (type=ATTENDANCE_STREAK_BONUS)
             if (completedToday) {
                 wallet.addPoint(STREAK_7_BONUS);
                 walletHistoryRepository.save(
                         WalletHistory.create(
                                 wallet,
                                 null,
+                                null,
                                 "연속 7일 출석 달성 보너스로 도토리를 10개 받았다",
                                 STREAK_7_BONUS,
                                 wallet.getPoint(),
-                                TransactionType.ATTENDANCE
+                                TransactionType.ATTENDANCE_STREAK_BONUS
                         )
                 );
             }
