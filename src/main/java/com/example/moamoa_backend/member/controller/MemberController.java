@@ -5,6 +5,7 @@ import com.example.moamoa_backend.member.dto.req.MemberReqDto;
 import com.example.moamoa_backend.member.dto.res.MemberResDto;
 import com.example.moamoa_backend.member.exception.code.MemberSuccessCode;
 import com.example.moamoa_backend.member.service.MemberService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,6 +19,7 @@ public class MemberController {
 
     private final MemberService memberService;
 
+    @Operation(summary = "비밀번호 변경", description = "로컬 로그인 회원의 비밀번호를 변경합니다.")
     @PatchMapping("/me/password")
     public ApiResponse<Void> changePassword(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -27,6 +29,7 @@ public class MemberController {
         return ApiResponse.onSuccess(MemberSuccessCode.PASSWORD_CHANGED, null);
     }
 
+    @Operation(summary = "회원 탈퇴", description = "회원의 계정을 삭제합니다. (soft delete, 복구가능)")
     @DeleteMapping("/me")
     public ApiResponse<Void> deleteMember(
             @AuthenticationPrincipal UserDetails userDetails
@@ -35,6 +38,7 @@ public class MemberController {
         return ApiResponse.onSuccess(MemberSuccessCode.MEMBER_WITHDRAW, null);
     }
 
+    @Operation(summary = "내 프로필 조회", description = "로그인한 회원의 프로필 정보를 조회합니다.")
     @GetMapping("/me/profile")
     public ApiResponse<MemberResDto.ProfileResponse> getProfile(
             @AuthenticationPrincipal UserDetails userDetails
@@ -43,6 +47,7 @@ public class MemberController {
         return ApiResponse.onSuccess(MemberSuccessCode.PROFILE_FETCHED, response);
     }
 
+    @Operation(summary = "내 프로필 수정", description = "로그인한 회원의 프로필 정보를 수정합니다.")
     @PutMapping("/me/profile")
     public ApiResponse<Void> updateProfile(
             @AuthenticationPrincipal UserDetails userDetails,
