@@ -4,7 +4,6 @@ import com.example.moamoa_backend.global.apiPayload.response.ApiResponse;
 import com.example.moamoa_backend.member.dto.req.MemberReqDto;
 import com.example.moamoa_backend.member.dto.res.MemberResDto;
 import com.example.moamoa_backend.member.exception.code.MemberSuccessCode;
-import com.example.moamoa_backend.member.repository.MemberSettingRepository;
 import com.example.moamoa_backend.member.service.MemberService;
 import com.example.moamoa_backend.member.service.MemberSettingService;
 import io.swagger.v3.oas.annotations.Operation;

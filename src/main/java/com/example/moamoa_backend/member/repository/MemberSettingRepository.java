@@ -8,5 +8,4 @@ import java.util.Optional;
 public interface MemberSettingRepository extends JpaRepository<MemberSetting, Long> {
 
     Optional<MemberSetting> findByMemberIdAndSettingKey(Long memberId, String settingKey);
-    boolean existsByMemberIdAndSettingKey(Long memberId, String settingKey);
 }
