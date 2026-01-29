@@ -55,7 +55,8 @@ public class SecurityConfig {
 
     // 관리자만 접근 가능
     private final String[] adminUris = {
-            "/api/v1/admin/**"
+            "/api/v1/admin/**",
+            "/api/v1/missions/admin"
     };
 
     @Bean

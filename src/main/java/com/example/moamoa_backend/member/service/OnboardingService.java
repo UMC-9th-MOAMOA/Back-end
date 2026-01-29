@@ -6,7 +6,7 @@ import com.example.moamoa_backend.interest.repository.SubInterestRepository;
 import com.example.moamoa_backend.member.dto.OnboardingPatchRequestDto;
 import com.example.moamoa_backend.member.dto.OnboardingResponseDto;
 import com.example.moamoa_backend.member.entity.Member;
-import com.example.moamoa_backend.member.entity.MemberSubInterest;
+import com.example.moamoa_backend.member.entity.mapping.MemberSubInterest;
 import com.example.moamoa_backend.member.enums.GoalRetention;
 import com.example.moamoa_backend.member.enums.OnboardingUpdateScope;
 import com.example.moamoa_backend.member.exception.MemberException;

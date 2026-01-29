@@ -1,14 +1,15 @@
-package com.example.moamoa_backend.mission.entity;
+package com.example.moamoa_backend.mission.entity.mapping;
 
 import com.example.moamoa_backend.global.entity.BaseEntity;
 import com.example.moamoa_backend.interest.entity.SubInterest;
+import com.example.moamoa_backend.mission.entity.Mission;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(
         name = "mission_sub_interest",

@@ -63,7 +63,7 @@ public class AttendanceCommandServiceImpl implements AttendanceCommandService{
             try {
                 attendanceRepository.save(Attendance.create(member, today));
             } catch (DataIntegrityViolationException e) {
-                        // 중복 키 위반인지 확인 (다른 무결성 오류와 구분)
+                // 중복 키 위반인지 확인 (다른 무결성 오류와 구분)
                 if (attendanceRepository.existsByMember_IdAndAttendanceDate(memberId, today)) {
                     throw new AttendanceException(AttendanceErrorCode.ALREADY_ATTENDED);
                 }

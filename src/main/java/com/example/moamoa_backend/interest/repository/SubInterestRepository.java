@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * SubInterest(세부 관심사) Repository
@@ -19,6 +20,7 @@ public interface SubInterestRepository extends JpaRepository<SubInterest, Long> 
 	 */
 	List<SubInterest> findAllByInterest_IdOrderByIdAsc(Long interestId);
 
+    Optional<SubInterest> findByName(String name);
 	/**
 	 * 인터페이스 프로젝션:
 	 * subInterestId가 어느 interestId에 속하는지 (interestId, subId)만 뽑기 위해 사용
