@@ -4,6 +4,7 @@ import com.example.moamoa_backend.auth.dto.oauth.OAuthAttributes;
 import com.example.moamoa_backend.member.entity.Member;
 import com.example.moamoa_backend.member.enums.MemberStatus;
 import com.example.moamoa_backend.member.repository.MemberRepository;
+import com.example.moamoa_backend.wallet.service.command.WalletCommandService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -31,6 +32,7 @@ import java.util.Map;
 public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
 
     private final MemberRepository memberRepository;
+    private final WalletCommandService walletCommandService;
 
     @Override
     @Transactional
@@ -81,6 +83,9 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
             return member;
         }
 
-        return memberRepository.save(attributes.toEntity());
+        Member savedMember = memberRepository.save(attributes.toEntity());
+        walletCommandService.createWallet(savedMember);
+
+        return savedMember;
     }
 }

@@ -1,5 +1,6 @@
 package com.example.moamoa_backend.wallet.repository;
 
+import com.example.moamoa_backend.member.entity.Member;
 import com.example.moamoa_backend.wallet.entity.Wallet;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -14,6 +15,7 @@ import jakarta.persistence.LockModeType;
 @Repository
 public interface WalletRepository extends JpaRepository<Wallet, Long> {
 	Optional<Wallet> findByMemberId(Long memberId);
+    boolean existsByMember(Member member);
 
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
 	@Query("select w from Wallet w where w.member.id = :memberId")
