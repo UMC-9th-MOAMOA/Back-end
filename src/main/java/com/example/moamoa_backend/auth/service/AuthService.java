@@ -15,9 +15,8 @@ import com.example.moamoa_backend.member.enums.Role;
 import com.example.moamoa_backend.member.exception.MemberException;
 import com.example.moamoa_backend.member.exception.code.MemberErrorCode;
 import com.example.moamoa_backend.member.repository.MemberRepository;
-import com.example.moamoa_backend.policy.repository.MemberPolicyRepository;
-import com.example.moamoa_backend.policy.repository.PolicyRepository;
 import com.example.moamoa_backend.policy.service.PolicyService;
+import com.example.moamoa_backend.wallet.service.command.WalletCommandService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -40,10 +39,9 @@ public class AuthService {
     private final RedisUtil redisUtil;
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
-    private final PolicyRepository policyRepository;
-    private final MemberPolicyRepository memberPolicyRepository;
     private final JwtUtil jwtUtil;
     private final PolicyService policyService;
+    private final WalletCommandService walletCommandService;
 
     // 이메일과 보안코드 저장 관련 (예)AuthCode:moamoa@gmail.com : 123456
     private static final String AUTH_CODE_PREFIX = "AuthCode:";
@@ -216,6 +214,9 @@ public class AuthService {
 
         // 약관 동의 내역 저장
         policyService.createPolicyAgreements(savedMember,request.agreedTerms());
+
+        // 지갑 생성
+        walletCommandService.createWallet(savedMember);
 
         //자동 로그인을 위해 토큰 생성 및 Redis에 Refresh Token 저장
         AuthResDto.GeneratedTokenDto tokenDto = generateTokens(savedMember.getId(), savedMember.getRole());
