@@ -17,10 +17,7 @@ public interface MemberItemRepository extends JpaRepository<MemberItem, Long> {
 	Optional<MemberItem> findByMemberIdAndItemId(Long memberId, Long itemId);
 
 	@EntityGraph(attributePaths = "item")
-	List<MemberItem> findByMemberIdAndItem_Type(Long memberId, ItemType type);
-
-	@EntityGraph(attributePaths = "item")
-	List<MemberItem> findByMemberIdAndItem_TypeAndIsEquippedTrue(Long memberId, ItemType type);
+	List<MemberItem> findByMemberIdAndItem_TypeIn(Long memberId, List<ItemType> types);
 
 	@EntityGraph(attributePaths = "item")
 	List<MemberItem> findByMemberIdAndIsEquippedTrue(Long memberId);

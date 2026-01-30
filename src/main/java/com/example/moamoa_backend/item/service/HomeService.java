@@ -8,8 +8,11 @@ import com.example.moamoa_backend.member.entity.Member;
 import com.example.moamoa_backend.member.exception.MemberException;
 import com.example.moamoa_backend.member.exception.code.MemberErrorCode;
 import com.example.moamoa_backend.member.repository.MemberRepository;
+import com.example.moamoa_backend.member.service.MemberSettingService;
+import com.example.moamoa_backend.wallet.service.query.WalletHistoryQueryService;
 
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,13 +25,25 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class HomeService {
 
+	private static final String TUTORIAL_KEY = "HOME_TUTORIAL";
+
 	private final MemberRepository memberRepository;
 	private final MemberItemRepository memberItemRepository;
+	private final MemberSettingService memberSettingService;
+	private final WalletHistoryQueryService walletHistoryQueryService;
 
-	@Transactional(readOnly = true)
+
+	@Transactional
 	public HomeResponseDto getHome(Long memberId) {
 		Member member = memberRepository.findById(memberId)
 			.orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+		//  변경: 구현된 잔액 조회 서비스 재사용
+		int point = walletHistoryQueryService.getMyPoint(memberId).point();
+		// 만약 Response가 record가 아니라 class면: .getPoint()
+
+		//  다시보지않기 체크했으면 false(팝업 안띄움), 없으면 true(띄움)
+		boolean shouldShowTutorial = memberSettingService.checkAndInitPopup(memberId, TUTORIAL_KEY);
 
 		// EntityGraph로 item까지 함께 로딩 (N+1 방지)
 		List<MemberItem> equippedAll = memberItemRepository.findByMemberIdAndIsEquippedTrue(memberId);
@@ -45,6 +60,6 @@ public class HomeService {
 				() -> new EnumMap<>(ItemType.class)
 			));
 
-		return HomeResponseDto.of(member.getName(), equippedItems);
+		return HomeResponseDto.of(member.getName(), point, shouldShowTutorial, equippedItems);
 	}
 }

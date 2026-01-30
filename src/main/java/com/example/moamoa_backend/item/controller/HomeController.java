@@ -8,8 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.moamoa_backend.auth.exception.AuthException;
-import com.example.moamoa_backend.auth.exception.code.AuthErrorCode;
+
 import com.example.moamoa_backend.global.apiPayload.response.ApiResponse;
 import com.example.moamoa_backend.item.dto.HomeResponseDto;
 import com.example.moamoa_backend.item.exception.code.ItemSuccessCode;
@@ -26,7 +25,7 @@ public class HomeController {
 	private final HomeService homeService;
 	private final MemberHomeQueryService memberHomeQueryService;
 
-	@Operation(summary = "홈 메인 조회", description = "미션 추천/재도전/주머니 API를 제외한 홈 메인 정보를 조회합니다.")
+	@Operation(summary = "홈 메인 조회", description = "사용자 이름/내 도토리 갯수/다람쥐 착장 정보(+배경 정보) 홈 메인 정보를 조회합니다.")
 	@GetMapping("/home")
 	public ApiResponse<HomeResponseDto> getHome(
 		@AuthenticationPrincipal UserDetails userDetails

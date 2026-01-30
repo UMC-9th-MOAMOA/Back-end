@@ -5,6 +5,8 @@ import com.example.moamoa_backend.item.dto.ItemPurchaseResponseDto;
 import com.example.moamoa_backend.item.dto.ItemShopListResponseDto;
 import com.example.moamoa_backend.item.entity.Item;
 import com.example.moamoa_backend.item.entity.MemberItem;
+import com.example.moamoa_backend.item.enums.EquipSlot;
+import com.example.moamoa_backend.item.enums.ItemCategory;
 import com.example.moamoa_backend.item.enums.ItemType;
 import com.example.moamoa_backend.item.exception.ItemException;
 import com.example.moamoa_backend.item.exception.code.ItemErrorCode;
@@ -20,168 +22,185 @@ import com.example.moamoa_backend.wallet.exception.WalletException;
 import com.example.moamoa_backend.wallet.exception.code.WalletErrorCode;
 import com.example.moamoa_backend.wallet.repository.WalletHistoryRepository;
 import com.example.moamoa_backend.wallet.repository.WalletRepository;
+import com.example.moamoa_backend.wallet.service.query.WalletHistoryQueryService;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ItemShopService {
 
-    private final ItemRepository itemRepository;
-    private final MemberItemRepository memberItemRepository;
-    private final MemberRepository memberRepository;
-    private final WalletRepository walletRepository;
-    private final WalletHistoryRepository walletHistoryRepository;
+	private final ItemRepository itemRepository;
+	private final MemberItemRepository memberItemRepository;
+	private final MemberRepository memberRepository;
+	private final WalletRepository walletRepository;
+	private final WalletHistoryRepository walletHistoryRepository;
+	private final WalletHistoryQueryService walletHistoryQueryService;
 
-    /**
-     * 상점 목록 조회
-     * - 조회는 락 걸 필요 없음(UX용 정보만 내려주면 됨)
-     * - owned/equipped/affordable 계산을 위해
-     * 1) 지갑 포인트 조회
-     * 2) 보유 아이템 조회(EntityGraph로 item 함께 로딩)
-     */
-    public ItemShopListResponseDto getShopItems(Long memberId, ItemType type) {
-        Wallet wallet = walletRepository.findByMemberId(memberId)
-                .orElseThrow(() -> new WalletException(WalletErrorCode.WALLET_NOT_FOUND));
+	/**
+	 * 상점 목록 조회
+	 * - category: 상위 카테고리(FACE/TOP/BOTTOM/MISC/BACKGROUND)
+	 * - type(선택): 카테고리 내부 서브타입(HAT/GLASSES/...)
+	 */
+	public ItemShopListResponseDto getShopItems(Long memberId, ItemCategory category, ItemType type) {
 
-        List<Item> items = itemRepository.findByType(type);
+		int walletPoint = walletHistoryQueryService.getMyPoint(memberId).point();
 
-        // EntityGraph로 item까지 함께 로딩 (ownedMap 만들 때 N+1 방지)
-        List<MemberItem> owned = memberItemRepository.findByMemberIdAndItem_Type(memberId, type);
+		List<ItemType> candidateTypes = category.types();
 
-        Map<Long, MemberItem> ownedMap = owned.stream()
-                .collect(Collectors.toMap(
-                        mi -> mi.getItem().getId(),
-                        mi -> mi,
-                        (a, b) -> a
-                ));
+		// (선택) type 필터가 들어오면 category 소속인지 검증
+		List<ItemType> queryTypes = candidateTypes;
+		if (type != null) {
+			if (!candidateTypes.contains(type)) {
+				throw new ItemException(ItemErrorCode.ITEM_INVALID_CATEGORY_TYPE);
+			}
+			queryTypes = List.of(type);
+		}
+		List<Item> items = itemRepository.findByTypeIn(queryTypes);
 
-        int walletPoint = wallet.getPoint();
+		// EntityGraph로 item까지 함께 로딩 (ownedMap 만들 때 N+1 방지)
+		List<MemberItem> owned = memberItemRepository.findByMemberIdAndItem_TypeIn(memberId, queryTypes);
 
-        List<ItemShopListResponseDto.ItemShopItemResponseDto> responseItems = items.stream()
-                .map(item -> {
-                    MemberItem memberItem = ownedMap.get(item.getId());
-                    boolean ownedFlag = memberItem != null;
-                    boolean equippedFlag = ownedFlag && memberItem.isEquipped();
-                    boolean affordableFlag = item.isOnSale() && !ownedFlag && walletPoint >= item.getPrice();
+		Map<Long, MemberItem> ownedMap = owned.stream()
+			.collect(Collectors.toMap(
+				mi -> mi.getItem().getId(),
+				mi -> mi,
+				(a, b) -> a
+			));
 
-                    return new ItemShopListResponseDto.ItemShopItemResponseDto(
-                            item.getId(),
-                            item.getName(),
-                            item.getPrice(),
-                            item.getImageUrl(),
-                            item.isOnSale(),
-                            ownedFlag,
-                            equippedFlag,
-                            affordableFlag
-                    );
-                })
-                .toList();
+		List<ItemShopListResponseDto.ItemShopItemResponseDto> responseItems = items.stream()
+			.map(item -> {
+				MemberItem memberItem = ownedMap.get(item.getId());
+				boolean ownedFlag = memberItem != null;
+				boolean equippedFlag = ownedFlag && memberItem.isEquipped();
+				boolean affordableFlag = item.isOnSale() && !ownedFlag && walletPoint >= item.getPrice();
 
-        return new ItemShopListResponseDto(type, walletPoint, responseItems);
-    }
+				return new ItemShopListResponseDto.ItemShopItemResponseDto(
+					item.getId(),
+					category, //상위 카테고리
+					item.getType(), //서브 타입
+					item.getName(),
+					item.getPrice(),
+					item.getImageUrl(),
+					item.isOnSale(),
+					ownedFlag,
+					equippedFlag,
+					affordableFlag
+				);
+			})
+			.toList();
 
-    /**
-     * 아이템 구매
-     * <p>
-     * 동시성/정합성 전략:
-     * 1) Wallet row를 PESSIMISTIC_WRITE로 락 선점 → 같은 회원의 구매 요청을 직렬화
-     * 2) MemberItem 테이블의 uk_member_item(member_id, item_id) 유니크 제약으로 최종 중복 방어
-     * <p>
-     * 중요:
-     * - 유니크 위반(DataIntegrityViolationException)은 save 시점이 아니라 flush/commit 시점에 발생할 수 있음
-     * - 따라서 try/catch 안에서 확정적으로 잡으려면 saveAndFlush() 또는 flush()가 필요
-     */
-    @Transactional
-    public ItemPurchaseResponseDto purchase(Long memberId, Long itemId) {
-        Item item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new ItemException(ItemErrorCode.ITEM_NOT_FOUND));
+		return new ItemShopListResponseDto(type, walletPoint, responseItems);
+	}
 
-        if (!item.isOnSale()) {
-            throw new ItemException(ItemErrorCode.ITEM_NOT_ON_SALE);
-        }
+	/**
+	 * 아이템 구매
+	 */
+	@Transactional
+	public ItemPurchaseResponseDto purchase(Long memberId, Long itemId) {
+		Item item = itemRepository.findById(itemId)
+			.orElseThrow(() -> new ItemException(ItemErrorCode.ITEM_NOT_FOUND));
 
-        // (동시성 방지) 동일 member의 지갑 row를 락으로 선점
-        Wallet wallet = walletRepository.findByMemberIdForUpdate(memberId)
-                .orElseThrow(() -> new WalletException(WalletErrorCode.WALLET_NOT_FOUND));
+		if (!item.isOnSale()) {
+			throw new ItemException(ItemErrorCode.ITEM_NOT_ON_SALE);
+		}
 
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+		// (동시성 방지) 동일 member의 지갑 row를 락으로 선점
+		Wallet wallet = walletRepository.findByMemberIdForUpdate(memberId)
+			.orElseThrow(() -> new WalletException(WalletErrorCode.WALLET_NOT_FOUND));
 
-        // 검증 + 차감은 Wallet 도메인이 책임(부족하면 WalletException 발생)
-        wallet.usePoint(item.getPrice());
+		Member member = memberRepository.findById(memberId)
+			.orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
-        try {
-            // (중복 구매 최종 방어) uk_member_item 위반을 try/catch 내부에서 확정적으로 감지하기 위해 flush 수행
-            memberItemRepository.saveAndFlush(MemberItem.create(member, item));
-        } catch (DataIntegrityViolationException e) {
-            /**
-             * uk_member_item(unique member_id + item_id) 위반 등으로 중복 구매가 확정된 경우.
-             * @Transactional 이므로 예외가 던져지면 전체 롤백되어
-             * wallet.usePoint()로 차감된 point도 함께 롤백된다.
-             */
-            throw new ItemException(ItemErrorCode.ITEM_ALREADY_OWNED);
-        }
+		// 검증 + 차감은 Wallet 도메인이 책임(부족하면 WalletException 발생)
+		wallet.usePoint(item.getPrice());
 
-        // 구매 히스토리 기록(정책: 구매는 amount 음수)
-        walletHistoryRepository.save(
-                WalletHistory.forPurchase(
-                        wallet,
-                        item,                  // ✅ 추가: FK 연결
-                        item.getPrice(),
-                        wallet.getPoint(),
-                        "아이템 구매: " + item.getName()
-                )
-        );
+		try {
+			// (중복 구매 최종 방어) uk_member_item 위반을 try/catch 내부에서 확정적으로 감지하기 위해 flush 수행
+			memberItemRepository.saveAndFlush(MemberItem.create(member, item));
+		} catch (DataIntegrityViolationException e) {
+			/**
+			 * uk_member_item(unique member_id + item_id) 위반 등으로 중복 구매가 확정된 경우.
+			 * @Transactional 이므로 예외가 던져지면 전체 롤백되어
+			 * wallet.usePoint()로 차감된 point도 함께 롤백된다.
+			 */
+			throw new ItemException(ItemErrorCode.ITEM_ALREADY_OWNED);
+		}
 
-        return new ItemPurchaseResponseDto(item.getId(), item.getPrice(), wallet.getPoint());
-    }
+		// 구매 히스토리 기록(정책: 구매는 amount 음수)
+		walletHistoryRepository.save(
+			WalletHistory.forPurchase(
+				wallet,
+				item,                  // ✅ 추가: FK 연결
+				item.getPrice(),
+				wallet.getPoint(),
+				"아이템 구매: " + item.getName()
+			)
+		);
 
-    /**
-     * 아바타 착장 변경
-     * - target(요청 item)을 장착
-     * - 같은 타입의 기존 장착 아이템은 모두 해제
-     * - 최종 장착 목록을 반환
-     */
-    @Transactional
-    public AvatarEquipmentResponseDto equip(Long memberId, Long itemId) {
+		return new ItemPurchaseResponseDto(item.getId(), item.getPrice(), wallet.getPoint());
+	}
 
-        memberRepository.findByIdForUpdate(memberId)
-                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+	/**
+	 * 아바타 착장 변경
+	 * - 같은 EquipSlot(=잡화면 MISC)인 기존 착장만 해제
+	 * - 잡화는 1개만 착용 가능
+	 */
+	@Transactional
+	public AvatarEquipmentResponseDto equip(Long memberId, Long itemId) {
 
-        MemberItem target = memberItemRepository.findByMemberIdAndItemId(memberId, itemId)
-                .orElseThrow(() -> new ItemException(ItemErrorCode.ITEM_NOT_OWNED));
+		memberRepository.findByIdForUpdate(memberId)
+			.orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
-        ItemType type = target.getItem().getType();
+		MemberItem target = memberItemRepository.findByMemberIdAndItemId(memberId, itemId)
+			.orElseThrow(() -> new ItemException(ItemErrorCode.ITEM_NOT_OWNED));
 
-        // 같은 타입 기존 장착 아이템 모두 해제
-        List<MemberItem> equippedSameType = memberItemRepository
-                .findByMemberIdAndItem_TypeAndIsEquippedTrue(memberId, type);
+		EquipSlot targetSlot = target.getItem().getType().slot();
 
-        for (MemberItem mi : equippedSameType) {
-            mi.unequip();
-        }
+		// 현재 착용중 전체 조회 후, 같은 슬롯인 것만 해제
+		List<MemberItem> equippedAll = memberItemRepository.findByMemberIdAndIsEquippedTrue(memberId);
 
-        target.equip();
+		for (MemberItem mi : equippedAll) {
+			if (mi.getItem().getType().slot() == targetSlot) {
+				mi.unequip();
+			}
+		}
 
-        // 장착 전체 반환 (EntityGraph로 item까지 함께 로딩)
-        List<MemberItem> equippedAll = memberItemRepository.findByMemberIdAndIsEquippedTrue(memberId);
+		target.equip();
+		// 응답용: 착용 전체 다시 내려주기
 
-        List<AvatarEquipmentResponseDto.EquippedItem> equippedDtos = equippedAll.stream()
-                .map(mi -> new AvatarEquipmentResponseDto.EquippedItem(
-                        mi.getItem().getType(),
-                        mi.getItem().getId(),
-                        mi.getItem().getImageUrl()
-                ))
-                .toList();
+		List<MemberItem> equippedAfter = Stream.concat(equippedAll.stream(), Stream.of(target))
+			.filter(MemberItem::isEquipped)
+			.collect(Collectors.toMap(
+				mi -> mi.getItem().getId(),        // itemId 기준
+				Function.identity(),
+				(a, b) -> b,
+				LinkedHashMap::new                 // 순서 유지
+			))
+			.values()
+			.stream()
+			.toList();
 
-        return new AvatarEquipmentResponseDto(equippedDtos);
-    }
+		List<AvatarEquipmentResponseDto.EquippedItem> equippedDtos = equippedAfter.stream()
+			.map(mi -> new AvatarEquipmentResponseDto.EquippedItem(
+				mi.getItem().getType(),
+				mi.getItem().getId(),
+				mi.getItem().getImageUrl()
+			))
+			.toList();
+
+		return new AvatarEquipmentResponseDto(equippedDtos);
+	}
 }

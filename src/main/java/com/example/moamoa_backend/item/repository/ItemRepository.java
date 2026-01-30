@@ -9,5 +9,5 @@ import java.util.List;
 
 @Repository
 public interface ItemRepository extends JpaRepository<Item, Long> {
-	List<Item> findByType(ItemType type);
+	List<Item> findByTypeIn(List<ItemType> types); //  추가
 }
