@@ -16,6 +16,9 @@ public class WalletCommandServiceImpl implements WalletCommandService {
 
 
     public void createWallet(Member member) {
+        if (walletRepository.existsByMember(member)){
+            return;
+        }
         Wallet newWallet = Wallet.create(member);
         walletRepository.save(newWallet);
     }
