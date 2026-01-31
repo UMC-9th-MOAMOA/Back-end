@@ -66,7 +66,7 @@ public class MemberController {
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestBody MemberReqDto.SettingRequest request
     ) {
-        memberSettingService.banPopup(
+        memberSettingService.dismissPopup(
                 Long.parseLong(userDetails.getUsername()),
                 request.settingKey()
         );

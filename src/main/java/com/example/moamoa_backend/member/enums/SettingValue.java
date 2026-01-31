@@ -1,7 +1,10 @@
 package com.example.moamoa_backend.member.enums;
 
-//
+/**
+ * 회원 설정 값
+ * - 데이터 없음: 팝업 표시
+ * - NEVER_SHOW: 팝업 미표시
+ */
 public enum SettingValue {
-    SHOWN,      // 한 번 봄 (닫기)
-    NEVER_SHOW  // 다시 보지 않기
+    NEVER_SHOW
 }
