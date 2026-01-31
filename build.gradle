@@ -101,6 +101,12 @@ dependencies {
     implementation platform("software.amazon.awssdk:bom:2.25.61")
     implementation "software.amazon.awssdk:s3"
 
+    /* ===============================
+    * csv 파일 읽기
+    * =============================== */
+    implementation 'org.apache.commons:commons-csv:1.10.0'
+    implementation 'org.flywaydb:flyway-core'
+
 }
 
 tasks.named('test') {
