@@ -4,6 +4,7 @@ import com.example.moamoa_backend.auth.handler.OAuth2SuccessHandler;
 import com.example.moamoa_backend.auth.repository.HttpCookieOAuth2AuthorizationRequestRepository;
 import com.example.moamoa_backend.auth.service.CustomOAuth2UserService;
 import com.example.moamoa_backend.global.security.filter.PolicyAgreementFilter;
+import com.example.moamoa_backend.global.security.jwt.JwtAccessDeniedHandler;
 import com.example.moamoa_backend.global.security.jwt.JwtAuthFilter;
 import com.example.moamoa_backend.global.security.jwt.JwtAuthenticationEntryPoint;
 import com.example.moamoa_backend.member.enums.Role;
@@ -17,6 +18,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.ExceptionTranslationFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -24,6 +26,16 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 
+/**
+ * Spring Security 설정
+ *
+ * 필터 체인 순서:
+ * JwtAuthFilter → ExceptionTranslationFilter → PolicyAgreementFilter → AuthorizationFilter
+ *
+ * 예외 처리:
+ * - 인증 실패(401) → JwtAuthenticationEntryPoint
+ * - 인가 실패(403) → JwtAccessDeniedHandler
+ */
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -31,22 +43,23 @@ public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
     private final HttpCookieOAuth2AuthorizationRequestRepository cookieAuthorizationRequestRepository;
 
     // 로그인 필요X - 모두 접근 가능
     private final String[] allowUris = {
-            "/api/v1/auth/signup", // 회원가입
-            "/api/v1/auth/login", //로그인
-            "/api/v1/auth/refresh", // 재발급
-            "/api/v1/auth/email/send-verification", // 이메일 전송
-            "/api/v1/auth/email/verify", // 이메일 인증
-            "/api/v1/auth/oauth2/token", // 소셜 로그인 후 토큰 발급
-            "/api/v1/auth/social/**", // 소셜 로그인 요청
-            "/login/**", // 소셜 로그인 이후 돌아옴
-            "/actuator/health/**", // 헬스체크
-            "/api/v1/auth/recover", // 계정복구 요청
+            "/api/v1/auth/signup",
+            "/api/v1/auth/login",
+            "/api/v1/auth/refresh",
+            "/api/v1/auth/email/send-verification",
+            "/api/v1/auth/email/verify",
+            "/api/v1/auth/oauth2/token",
+            "/api/v1/auth/social/**",
+            "/login/**",
+            "/actuator/health/**",
+            "/api/v1/auth/recover",
     };
 
     // 로그인 필요X - GET 요청만 가능
@@ -54,10 +67,10 @@ public class SecurityConfig {
             "/api/v1/policies/**"
     };
 
-    // 로그인 필요O - Guest는 제한된 요청만 가능
+    // 로그인 필요O - GUEST도 접근 가능 (정책 동의 등)
     private final String[] guestAllowUris = {
             "/api/v1/auth/**",
-            "/api/v1/policies/**", // 약관 조회 및 동의 내역 수정
+            "/api/v1/policies/**",
             "/v3/api-docs/**",
             "/swagger-ui/**",
             "/swagger-resources/**",
@@ -72,46 +85,39 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // CSRF 비활성화
                 .csrf(AbstractHttpConfigurer::disable)
-
-                // 기본 로그인 폼 및 HTTP Basic 인증 비활성화
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
 
-                // JWT 사용으로 stateless 설정
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
 
-                //CORS 설정 연결
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-                // URL별 권한 설정
                 .authorizeHttpRequests(auth -> {
-                    // Swagger 및 공용 경로
                     auth.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-resources/**").permitAll();
                     auth.requestMatchers(allowUris).permitAll();
-
-                    // GET 요청에 대해서만 모든 사용자에게 허용
                     auth.requestMatchers(HttpMethod.GET, allowGetUris).permitAll();
 
-                    // 관리자 전용 경로
                     if (adminUris.length > 0) {
                         auth.requestMatchers(adminUris).hasAuthority(Role.ROLE_ADMIN.name());
                     }
 
-                    // 나머지 모든 요청
                     auth.anyRequest().authenticated();
                 })
+
+                // 필터 등록: JwtAuthFilter → (ExceptionTranslationFilter) → PolicyAgreementFilter
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterAfter(policyAgreementFilter(), JwtAuthFilter.class)
+                .addFilterAfter(policyAgreementFilter(), ExceptionTranslationFilter.class)
+
+                // 예외 핸들러 등록
                 .exceptionHandling(exception -> exception
-                .authenticationEntryPoint(jwtAuthenticationEntryPoint))
+                        .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                        .accessDeniedHandler(jwtAccessDeniedHandler)
+                )
 
-                //
                 .oauth2Login(oauth2 -> oauth2
-
                         .authorizationEndpoint(endpoint -> endpoint
                                 .baseUri("/api/v1/auth/social")
                                 .authorizationRequestRepository(cookieAuthorizationRequestRepository)
@@ -122,7 +128,6 @@ public class SecurityConfig {
                         .successHandler(oAuth2SuccessHandler)
                 );
 
-
         return http.build();
     }
 
@@ -130,9 +135,8 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // 프론트엔드 주소 허용 (localhost:3000 등)
         configuration.setAllowedOrigins(Arrays.asList(
-                "http://localhost:3000",       // 로컬 테스트용
+                "http://localhost:3000",
                 "https://moamoa.io.kr",
                 "https://www.moamoa.io.kr",
                 "https://moamoamoa.netlify.app",
@@ -141,13 +145,8 @@ public class SecurityConfig {
                 "https://localhost:5173"
         ));
 
-        // 허용할 HTTP 메서드
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-
-        // 모든 헤더 허용
         configuration.setAllowedHeaders(Arrays.asList("*"));
-
-        // 쿠키/인증 정보 포함 허용
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -160,7 +159,6 @@ public class SecurityConfig {
         return new PolicyAgreementFilter(guestAllowUris);
     }
 
-    // Encoder Bean 등록
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
