@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Date;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -78,9 +79,8 @@ public class MemberHomeQueryServiceImpl implements MemberHomeQueryService{
                 .join(mm.mission, mission)
                 .where(
                         mm.member.id.eq(memberId),
-                        mm.missionStatus.eq(MissionStatus.SUCCESS),
-                        mm.rewardAt.goe(todayStart),
-                        mm.rewardAt.lt(tomorrowStart)
+                        mm.createdAt.goe(todayStart),
+                        mm.createdAt.lt(tomorrowStart)
                 )
                 .fetchOne();
 
@@ -96,9 +96,8 @@ public class MemberHomeQueryServiceImpl implements MemberHomeQueryService{
                 .join(mm.mission, mission)
                 .where(
                         mm.member.id.eq(memberId),
-                        mm.missionStatus.eq(MissionStatus.SUCCESS),
-                        mm.rewardAt.goe(thisWeekStart),
-                        mm.rewardAt.lt(nextWeekStart)
+                        mm.createdAt.goe(thisWeekStart),
+                        mm.createdAt.lt(nextWeekStart)
                 )
                 .fetchOne();
 
@@ -126,8 +125,9 @@ public class MemberHomeQueryServiceImpl implements MemberHomeQueryService{
 
         if (m.getDailyGoal() != null) {
 
-            DateTemplate<LocalDate> rewardDate =
-                    Expressions.dateTemplate(LocalDate.class, "date({0})", mm.rewardAt);
+            DateTemplate<Date> rewardDate =
+                    Expressions.dateTemplate(Date.class, "date({0})", mm.rewardAt);
+
             NumberExpression<Long> countExpr = mm.id.count();
 
             List<Tuple> tuples = queryFactory
@@ -145,10 +145,11 @@ public class MemberHomeQueryServiceImpl implements MemberHomeQueryService{
 
             Map<LocalDate, Long> thisWeekMap = new HashMap<>();
             for (Tuple t : tuples) {
-                thisWeekMap.put(t.get(rewardDate), t.get(countExpr));
+                Date sqlDate = t.get(rewardDate);          // java.sql.Date로 받기
+                LocalDate localDate = sqlDate.toLocalDate(); // LocalDate로 변환
+                thisWeekMap.put(localDate, t.get(countExpr));
             }
 
-            // ✅ 월~일 7칸: 미래도 0으로 채움
             List<Long> thisWeekDaily = new ArrayList<>(7);
             long thisWeekTotal = 0;
 

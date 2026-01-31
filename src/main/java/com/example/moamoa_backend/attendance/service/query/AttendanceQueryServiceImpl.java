@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Date;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
@@ -62,9 +63,9 @@ public class AttendanceQueryServiceImpl implements AttendanceQueryService{
         LocalDateTime endAt = endDateExclusive.atStartOfDay();
 
         // MySQL date(createdAt)
-        var createdDateExpr = Expressions.dateTemplate(LocalDate.class, "date({0})", wh.createdAt);
+        var createdDateExpr = Expressions.dateTemplate(Date.class, "date({0})", wh.createdAt);
 
-        List<LocalDate> missionRewardDates = queryFactory
+        List<Date> missionRewardSqlDates = queryFactory
                 .select(createdDateExpr)
                 .from(wh)
                 .join(wh.wallet, w)
@@ -78,7 +79,8 @@ public class AttendanceQueryServiceImpl implements AttendanceQueryService{
                 .orderBy(createdDateExpr.asc())
                 .fetch();
 
-        List<Integer> missionRewardDays = missionRewardDates.stream()
+        List<Integer> missionRewardDays = missionRewardSqlDates.stream()
+                .map(Date::toLocalDate)
                 .map(LocalDate::getDayOfMonth)
                 .distinct()
                 .toList();
