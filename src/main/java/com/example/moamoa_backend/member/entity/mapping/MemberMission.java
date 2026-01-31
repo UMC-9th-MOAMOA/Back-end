@@ -68,4 +68,8 @@ public class MemberMission extends BaseEntity {
         this.attemptCount +=1;
     }
 
+    public void recordRewardAt(){
+        this.rewardAt = LocalDateTime.now();
+    }
+
 }
