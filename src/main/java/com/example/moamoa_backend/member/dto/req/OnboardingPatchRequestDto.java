@@ -1,4 +1,4 @@
-package com.example.moamoa_backend.member.dto;
+package com.example.moamoa_backend.member.dto.req;
 
 import java.util.List;
 

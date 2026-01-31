@@ -32,22 +32,22 @@ public enum MemberSuccessCode implements BaseSuccessCode {
     MEMBER_UPDATE_ONBOARDING(HttpStatus.OK,
         "MEMBER200_6",
         "온보딩 수정에 성공했습니다."),
-
-    MEMBER_GET_DAILY_GOAL_RESULT(HttpStatus.OK,
-        "MEMBER200_7",
-        "일간 목표 결과 조회에 성공했습니다."),
-
-    MEMBER_GET_WEEKLY_GOAL_RESULT(HttpStatus.OK,
-        "MEMBER200_8",
-        "주간 목표 결과 조회에 성공했습니다."),
-
     PASSWORD_CHANGED(HttpStatus.OK,
             "MEMBER200_9",
             "비밀번호가 성공적으로 변경되었습니다."),
 
     SETTING_SAVED(HttpStatus.OK,
             "MEMBER200_10",
-            "설정이 저장되었습니다.");
+            "설정이 저장되었습니다."),
+
+    MEMBER_GET_GOAL_POPUPS(HttpStatus.OK,
+        "MEMBER200_7",
+        "목표 팝업 조회에 성공했습니다."),
+
+    MEMBER_MARK_GOAL_POPUP_SHOWN(HttpStatus.OK,
+        "MEMBER200_8",
+        "목표 팝업 확인 처리에 성공했습니다.");
+
 
     private final HttpStatus status;
     private final String code;
