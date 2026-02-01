@@ -34,6 +34,10 @@ public enum AuthSuccessCode implements BaseSuccessCode {
             "AUTH200_6",
             "계정이 복구되었습니다."),
 
+    PASSWORD_RESET_SUCCESS(HttpStatus.OK,
+            "AUTH200_7",
+            "비밀번호가 성공적으로 변경되었습니다."),
+
     // ============= 201 Created =============
     SIGNUP_SUCCESS(HttpStatus.CREATED,
             "AUTH201_1",

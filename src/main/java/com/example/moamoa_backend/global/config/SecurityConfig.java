@@ -50,16 +50,28 @@ public class SecurityConfig {
 
     // 로그인 필요X - 모두 접근 가능
     private final String[] allowUris = {
+            // 가입, 로그인, 탈퇴복구, Refresh
             "/api/v1/auth/signup",
             "/api/v1/auth/login",
+            "/api/v1/auth/recover",
             "/api/v1/auth/refresh",
-            "/api/v1/auth/email/send-verification",
+
+            // 비밀번호 초기화
+            "/api/v1/auth/password-reset/send-code",
+            "/api/v1/auth/password-reset/verify",
+            "/api/v1/auth/password-reset",
+
+            // 회원가입 이메일 인증
+            "/api/v1/auth/email/send-code",
             "/api/v1/auth/email/verify",
+
             "/api/v1/auth/oauth2/token",
             "/api/v1/auth/social/**",
             "/login/**",
+
+            // 헬스체크
             "/actuator/health/**",
-            "/api/v1/auth/recover",
+
     };
 
     // 로그인 필요X - GET 요청만 가능

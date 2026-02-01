@@ -101,4 +101,22 @@ public class AuthReqDto {
             String code
     ){}
 
+    /**
+     * 비밀번호 초기화 요청
+     * 1. 이메일로 인증번호 전송
+     * 2. 인증번호 검증
+     * 3. 검증을 통해 발급받은 토큰과 함께 새 비밀번호 제출
+     */
+    public record PasswordResetDto(
+            @NotBlank(message = "토큰은 필수 입력 값입니다.")
+            String token,
+
+            @NotBlank(message = "새 비밀번호는 필수 입력 값입니다.")
+            @Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*?_.])[a-zA-Z0-9!@#$%^&*?_.]{8,64}$",
+                    message = "비밀번호는 8~64자 영문, 숫자, 특수문자(!@#$%^&*?_.)를 모두 포함해야 합니다.")
+            String newPassword,
+
+            @NotBlank(message = "새 비밀번호 확인은 필수 입력 값입니다.")
+            String newPasswordCheck
+    ){}
 }

@@ -28,4 +28,12 @@ public class AuthResDto {
             Long accessTokenExpiresIn
     ) {}
 
+    /**
+     * 비밀번호 변경 토큰
+     * - 이메일 인증 성공시 발급되며 비밀번호 초기화에 사용
+     */
+    public record PasswordResetTokenDto(
+            String resetToken
+    ) {}
+
 }
