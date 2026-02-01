@@ -94,7 +94,6 @@ public enum AuthErrorCode implements BaseErrorCode {
             "AUTH403_4",
             "활성화되지 않은 계정입니다. 고객센터에 문의해주세요."),
 
-    // AuthErrorCode 또는 MemberErrorCode에 추가
     POLICY_NOT_AGREED(HttpStatus.FORBIDDEN,
             "AUTH403_5",
             "아직 정책에 동의하지 않은 회원입니다. 정책 동의 후 이용해주세요."),
