@@ -1,5 +1,7 @@
 package com.example.moamoa_backend.member.service;
 
+import com.example.moamoa_backend.auth.exception.AuthException;
+import com.example.moamoa_backend.auth.exception.code.AuthErrorCode;
 import com.example.moamoa_backend.global.util.RedisUtil;
 import com.example.moamoa_backend.member.dto.req.MemberReqDto;
 import com.example.moamoa_backend.member.dto.res.MemberResDto;
@@ -36,23 +38,22 @@ public class MemberService {
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
         if(member.getProvider() != Provider.LOCAL){
-            throw new MemberException(MemberErrorCode.SOCIAL_LOGIN_MEMBER);
+            throw new AuthException(AuthErrorCode.SOCIAL_LOGIN_PASSWORD_CHANGE_NOT_ALLOWED);
         }
-
 
         // 현재 비밀번호 검증
         if (!passwordEncoder.matches(request.currentPassword(), member.getPassword())) {
-            throw new MemberException(MemberErrorCode.PASSWORD_NOT_MATCH);
+            throw new AuthException(AuthErrorCode.PASSWORD_NOT_MATCH);
         }
 
         // 새 비밀번호 확인 일치 검증
         if (!request.newPassword().equals(request.newPasswordCheck())) {
-            throw new MemberException(MemberErrorCode.PASSWORD_CONFIRM_NOT_MATCH);
+            throw new AuthException(AuthErrorCode.PASSWORD_CONFIRM_MISMATCH);
         }
 
         // 기존 비밀번호와 새 비밀번호 동일 여부 검증
         if (passwordEncoder.matches(request.newPassword(), member.getPassword())) {
-            throw new MemberException(MemberErrorCode.SAME_AS_OLD_PASSWORD);
+            throw new AuthException(AuthErrorCode.SAME_AS_OLD_PASSWORD);
         }
 
         // 비밀번호 변경

@@ -14,6 +14,14 @@ public enum AuthErrorCode implements BaseErrorCode {
         "AUTH400_1",
         "이메일 인증 번호가 일치하지 않습니다."),
 
+    PASSWORD_NOT_MATCH(HttpStatus.BAD_REQUEST,
+            "AUTH400_2",
+            "현재 비밀번호가 일치하지 않습니다."),
+
+    SOCIAL_LOGIN_PASSWORD_CHANGE_NOT_ALLOWED(HttpStatus.BAD_REQUEST,
+            "AUTH400_3",
+            "소셜 로그인 회원은 비밀번호를 변경할 수 없습니다."),
+
     // 이메일 검증 성공 이후 회원가입까지 오래걸릴 경우
     VERIFICATION_CODE_EXPIRED(HttpStatus.BAD_REQUEST,
         "AUTH400_4",
@@ -53,6 +61,7 @@ public enum AuthErrorCode implements BaseErrorCode {
             "AUTH400_12",
             "기존 비밀번호와 동일한 비밀번호로 변경할 수 없습니다."),
 
+
     // ============= 401 Unauthorized =============
     LOGIN_FAILED(HttpStatus.UNAUTHORIZED,
         "AUTH401_1",
@@ -66,6 +75,7 @@ public enum AuthErrorCode implements BaseErrorCode {
     INVALID_OAUTH_CODE(HttpStatus.UNAUTHORIZED,
         "AUTH401_3",
         "유효하지 않거나 만료된 소셜 로그인 코드입니다."),
+
 
     // ============= 403 Forbidden =============
     ACCESS_DENIED(HttpStatus.FORBIDDEN,
@@ -89,10 +99,12 @@ public enum AuthErrorCode implements BaseErrorCode {
             "AUTH403_5",
             "아직 정책에 동의하지 않은 회원입니다. 정책 동의 후 이용해주세요."),
 
+
     // ============= 429 Too Many Requests =============
     IP_RATE_LIMIT_EXCEEDED(HttpStatus.TOO_MANY_REQUESTS,
         "AUTH429_1",
         "비정상적인 요청 감지로 1시간 동안 인증이 제한됩니다."),
+
 
     // ============= 500 Internal Server Error =============
     EMAIL_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR,
