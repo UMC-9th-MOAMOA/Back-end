@@ -27,6 +27,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.security.SecureRandom;
+import java.util.UUID;
 
 
 @Slf4j
@@ -70,6 +71,16 @@ public class AuthService {
     private static final long AUTH_IP_BAN_SEC = 3600L;
 
     private static final int AUTH_CODE_LENGTH = 6; // 인증코드 6자리 설정
+
+
+    // 비밀번호 재설정 코드 관련 상수
+    private static final String PASSWORD_RESET_CODE_PREFIX = "PasswordResetCode:";
+    private static final String PASSWORD_RESET_FAIL_PREFIX = "PasswordResetFail:";
+    private static final String PASSWORD_RESET_BLOCK_PREFIX = "PasswordResetBlock:";
+    private static final String PASSWORD_RESET_TOKEN_PREFIX = "PasswordResetToken:";
+    private static final long PASSWORD_RESET_CODE_EXPIRE_SEC = 180L; // 3분
+    private static final long PASSWORD_RESET_TOKEN_EXPIRE_SEC = 300L; // 5분
+
 
     // 이메일 인증번호 전송
     public void sendEmailAuthCode(String email, String clientIp) {
@@ -131,8 +142,6 @@ public class AuthService {
 
         // 기존 실패 횟수 초기화 (새 코드를 전송했기 떄문)
         redisUtil.deleteData(AUTH_CODE_FAIL_PREFIX + email);
-
-
     }
 
     // 이메일 인증번호 검증
@@ -251,6 +260,152 @@ public class AuthService {
 
         // 4. 토큰 발급 및 Redis 저장
         return generateTokens(member.getId(), member.getRole());
+    }
+
+
+    /**
+     * 비밀번호 재설정 코드 발송
+     */
+    public void sendPasswordResetCode(String email, String clientIp) {
+        // 회원 존재 여부 확인 (LOCAL 계정만)
+        // 보안: 존재 여부와 관계없이 동일한 응답 반환 (이메일 열거 공격 방지)
+        boolean memberExists = memberRepository.findByProviderAndProviderId(Provider.LOCAL, email).isPresent();
+
+        // 30초 쿨다운 체크
+        if (redisUtil.getData(PASSWORD_RESET_BLOCK_PREFIX + email) != null) {
+            throw new AuthException(AuthErrorCode.EMAIL_SEND_BLOCKED);
+        }
+
+        // IP BAN 체크
+        String ipKey = AUTH_IP_PREFIX + clientIp;
+        String banStatus = redisUtil.getData(ipKey + ":BAN");
+        if (banStatus != null) {
+            throw new AuthException(AuthErrorCode.IP_RATE_LIMIT_EXCEEDED);
+        }
+
+        // 현재 카운트 확인
+        String currentCountStr = redisUtil.getData(ipKey);
+        Long currentIpCount = (currentCountStr != null) ? Long.parseLong(currentCountStr) : 0;
+
+        // IP 시도횟수 초과했는지 체크
+        if (currentIpCount >= MAX_IP_REQUESTS) {
+            redisUtil.deleteData(ipKey);
+            redisUtil.setDataExpire(ipKey + ":BAN", "BLOCKED", AUTH_IP_BAN_SEC);
+
+            log.warn("IP banned for 1 hour: {}", clientIp);
+            throw new AuthException(AuthErrorCode.IP_RATE_LIMIT_EXCEEDED);
+        }
+
+        // 회원이 존재할 때만 실제 이메일 발송
+        if (memberExists) {
+            String authCode = createAuthCode();
+
+            try {
+                MimeMessage message = createPasswordResetEmailForm(email, authCode);
+                javaMailSender.send(message);
+            } catch (MessagingException e) {
+                log.error("Password reset email send failed for {}: {}", maskEmail(email), e.getMessage());
+                throw new AuthException(AuthErrorCode.EMAIL_SEND_FAILED);
+            }
+
+            // Redis 저장 (이메일 + 인증코드, 3분)
+            redisUtil.setDataExpire(PASSWORD_RESET_CODE_PREFIX + email, authCode, PASSWORD_RESET_CODE_EXPIRE_SEC);
+
+            // 기존 실패 횟수 초기화
+            redisUtil.deleteData(PASSWORD_RESET_FAIL_PREFIX + email);
+        }
+
+        // IP 카운트 증가 (회원 존재 여부와 관계없이)
+        Long newCount = redisUtil.increment(ipKey);
+        if (newCount != null && newCount == 1) {
+            redisUtil.setExpire(ipKey, AUTH_IP_EXPIRE_SEC);
+        }
+
+        // 재전송 방지 플래그 저장 (회원 존재 여부와 관계없이 동일하게 처리)
+        redisUtil.setDataExpire(PASSWORD_RESET_BLOCK_PREFIX + email, "BLOCKED", EMAIL_SEND_BLOCK_SEC);
+    }
+
+    /**
+     * 비밀번호 재설정 코드 검증
+     * 검증 성공 시 비밀번호 변경에 사용할 토큰 반환
+     */
+    public String verifyPasswordResetCode(String email, String code) {
+        String codeKey = PASSWORD_RESET_CODE_PREFIX + email;
+        String failCountKey = PASSWORD_RESET_FAIL_PREFIX + email;
+        String storedCode = redisUtil.getData(codeKey);
+
+        // 데이터 없음 -> 만료되었거나 요청한 적 없음
+        if (storedCode == null) {
+            throw new AuthException(AuthErrorCode.INVALID_OR_EXPIRED_CODE);
+        }
+
+        // 인증번호 불일치
+        if (!storedCode.equals(code)) {
+            Long failCount = redisUtil.increment(failCountKey);
+
+            // 첫 실패면 만료시간 설정
+            if (failCount != null && failCount == 1) {
+                redisUtil.setExpire(failCountKey, PASSWORD_RESET_CODE_EXPIRE_SEC);
+            }
+
+            // 최대 시도 횟수 초과
+            if (failCount >= MAX_AUTH_ATTEMPTS) {
+                redisUtil.deleteData(codeKey);
+                redisUtil.deleteData(failCountKey);
+                throw new AuthException(AuthErrorCode.VERIFICATION_ATTEMPTS_EXCEEDED);
+            }
+
+            throw new AuthException(AuthErrorCode.VERIFICATION_CODE_INVALID);
+        }
+
+        // 성공: 코드 삭제 & 비밀번호 변경용 토큰 발급
+        redisUtil.deleteData(codeKey);
+        redisUtil.deleteData(failCountKey);
+
+        // UUID 토큰 생성 후 Redis 저장
+        String resetToken = UUID.randomUUID().toString();
+
+        // 이메일로 회원 조회해서 memberId 저장
+        Member member = memberRepository.findByProviderAndProviderId(Provider.LOCAL, email)
+                .orElseThrow(() -> new AuthException(AuthErrorCode.INVALID_OR_EXPIRED_CODE));
+
+        redisUtil.setDataExpire(PASSWORD_RESET_TOKEN_PREFIX + resetToken, String.valueOf(member.getId()), PASSWORD_RESET_TOKEN_EXPIRE_SEC);
+
+        return resetToken;
+    }
+
+    /**
+     * 비밀번호 재설정
+     */
+    @Transactional
+    public void resetPassword(AuthReqDto.PasswordResetDto request) {
+        // 비밀번호 확인 일치 검증
+        if (!request.newPassword().equals(request.newPasswordCheck())) {
+            throw new AuthException(AuthErrorCode.PASSWORD_CONFIRM_MISMATCH);
+        }
+
+        // 토큰으로 memberId 조회
+        String tokenKey = PASSWORD_RESET_TOKEN_PREFIX + request.token();
+        String memberIdStr = redisUtil.getData(tokenKey);
+
+        if (memberIdStr == null) {
+            throw new AuthException(AuthErrorCode.INVALID_OR_EXPIRED_CODE);
+        }
+
+        // 회원 조회
+        Member member = memberRepository.findById(Long.valueOf(memberIdStr))
+                .orElseThrow(() -> new AuthException(AuthErrorCode.INVALID_OR_EXPIRED_CODE));
+
+        // 기존 비밀번호와 동일한지 체크
+        if (passwordEncoder.matches(request.newPassword(), member.getPassword())) {
+            throw new AuthException(AuthErrorCode.SAME_AS_OLD_PASSWORD);
+        }
+
+        // 비밀번호 변경
+        member.changePassword(passwordEncoder.encode(request.newPassword()));
+
+        // 토큰 삭제 (일회용)
+        redisUtil.deleteData(tokenKey);
     }
 
     /**
@@ -419,4 +574,29 @@ public class AuthService {
         return tokenDto;
     }
 
+    /**
+     * 비밀번호 재설정 이메일 폼 생성
+     */
+    private MimeMessage createPasswordResetEmailForm(String email, String authCode) throws MessagingException {
+        MimeMessage message = javaMailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+        helper.setTo(email);
+        helper.setSubject("[MoaMoa] 비밀번호 재설정 인증 번호입니다.");
+        helper.setText(
+                "<div style='margin:20px;'>" +
+                        "<h1>안녕하세요 MoaMoa 입니다.</h1>" +
+                        "<br>" +
+                        "<p>아래 인증번호를 입력해주세요.</p>" +
+                        "<br>" +
+                        "<div align='center' style='border:1px solid black; font-family:verdana;'>" +
+                        "<h3 style='color:blue;'>비밀번호 재설정 인증 번호</h3>" +
+                        "<div style='font-size:130%'>" + authCode + "</div>" +
+                        "</div>" +
+                        "<br/>" +
+                        "</div>",
+                true
+        );
+        return message;
+    }
 }

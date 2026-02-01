@@ -41,6 +41,18 @@ public enum AuthErrorCode implements BaseErrorCode {
             "AUTH400_9",
             "복구할 수 없는 계정입니다."),
 
+    PASSWORD_CONFIRM_MISMATCH(HttpStatus.BAD_REQUEST,
+            "AUTH400_10",
+            "새 비밀번호와 비밀번호 확인이 일치하지 않습니다."),
+
+    INVALID_OR_EXPIRED_CODE(HttpStatus.BAD_REQUEST,
+            "AUTH400_11",
+            "유효하지 않거나 만료된 인증 코드입니다."),
+
+    SAME_AS_OLD_PASSWORD(HttpStatus.BAD_REQUEST,
+            "AUTH400_12",
+            "기존 비밀번호와 동일한 비밀번호로 변경할 수 없습니다."),
+
     // ============= 401 Unauthorized =============
     LOGIN_FAILED(HttpStatus.UNAUTHORIZED,
         "AUTH401_1",
