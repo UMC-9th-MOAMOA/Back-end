@@ -22,6 +22,7 @@ public class GoalMaintenanceService {
 
 	private final MemberRepository memberRepository;
 	private final GoalResultService goalResultService;
+	private static final ZoneId KST = ZoneId.of("Asia/Seoul");
 
 	/**
 	 * 목표 상태(예약 적용/만료)를 즉시 반영
@@ -37,7 +38,7 @@ public class GoalMaintenanceService {
 	// 하루 마감 직후(00:01)에 전일/전주 결과 확정 및 목표 반영
 	@Scheduled(cron = "0 1 0 * * *", zone = "Asia/Seoul")
 	public void processDueGoals() {
-		LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
+		LocalDate today = LocalDate.now(KST);
 		// 전일 일간 목표 결과 확정
 		goalResultService.recordDailyResults(today.minusDays(1));
 		// 월요일이면 전주(일요일 종료) 주간 목표 결과 확정

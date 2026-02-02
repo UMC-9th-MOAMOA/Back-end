@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -29,6 +30,7 @@ public class OnboardingService {
 	private final MemberSubInterestRepository memberSubInterestRepository;
 	private final SubInterestRepository subInterestRepository;
 	private final GoalMaintenanceService goalMaintenanceService;
+	private static final ZoneId KST = ZoneId.of("Asia/Seoul");
 
 
 	/**
@@ -47,7 +49,7 @@ public class OnboardingService {
 
 		Member member = memberRepository.findById(memberId)
 			.orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
-		LocalDate today = LocalDate.now();
+		LocalDate today = LocalDate.now(KST);
 		// 요청 시점에 예약 적용/만료를 우선 반영
 		goalMaintenanceService.applyGoalStateIfNeeded(member, today);
 
@@ -102,7 +104,7 @@ public class OnboardingService {
 		Member member = memberRepository.findById(memberId)
 			.orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 		// 조회 시점에도 목표 상태를 최신으로 맞춘다.
-		goalMaintenanceService.applyGoalStateIfNeeded(member, LocalDate.now());
+		goalMaintenanceService.applyGoalStateIfNeeded(member, LocalDate.now(KST));
 
 		return switch (scope) {
 			case ALL -> toOnboardingResponse(loadSelections(memberId), member);

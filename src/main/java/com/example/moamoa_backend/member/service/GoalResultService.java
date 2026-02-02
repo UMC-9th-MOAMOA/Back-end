@@ -31,6 +31,7 @@ public class GoalResultService {
 	private final GoalResultRepository goalResultRepository;
 	private final MemberRepository memberRepository;
 	private final WalletHistoryRepository walletHistoryRepository;
+	private static final ZoneId KST = ZoneId.of("Asia/Seoul");
 	/**
 	 *   “목표 달성/실패 팝업” 조회 API용
 	 * - 홈 진입 시점에 호출하면 됨
@@ -41,7 +42,7 @@ public class GoalResultService {
 	 */
 	@Transactional
 	public GoalPopupResponseDto getGoalPopups(Long memberId) {
-		LocalDate today = LocalDate.now();
+		LocalDate today = LocalDate.now(KST);
 		LocalDate yesterday = today.minusDays(1);
 		LocalDate lastWeekEnd = today.with(TemporalAdjusters.previous(DayOfWeek.SUNDAY)); // 지난 주 일요일
 
@@ -85,7 +86,7 @@ public class GoalResultService {
 		GoalResult gr = goalResultRepository.findByIdAndMemberId(goalResultId, memberId)
 			.orElseThrow(() -> new MemberException(MemberErrorCode.GOAL_RESULT_NOT_FOUND));
 
-		gr.markPopupShown(LocalDateTime.now());
+		gr.markPopupShown(LocalDateTime.now(KST));
 	}
 
 
@@ -137,7 +138,7 @@ public class GoalResultService {
 		if (member.getDailyGoal() == null) return Optional.empty();
 
 		// 오늘/미래 날짜는 FAIL 확정 금지 → 어제까지만 생성 허용
-		LocalDate yesterday = LocalDate.now().minusDays(1);
+		LocalDate yesterday = LocalDate.now(KST).minusDays(1);
 		if (goalDate.isAfter(yesterday)) return Optional.empty();
 
 		int target = member.getDailyGoal();
@@ -162,7 +163,7 @@ public class GoalResultService {
 		if (member.getWeeklyGoal() == null) return Optional.empty();
 
 		// 이번 주는 아직 끝나지 않았으니 FAIL 확정 금지 → 지난 주 일요일까지만 생성 허용
-		LocalDate lastSunday = LocalDate.now().with(TemporalAdjusters.previous(DayOfWeek.SUNDAY));
+		LocalDate lastSunday = LocalDate.now(KST).with(TemporalAdjusters.previous(DayOfWeek.SUNDAY));
 		if (weekEndDate.isAfter(lastSunday)) return Optional.empty();
 
 		int target = member.getWeeklyGoal();
