@@ -70,6 +70,7 @@ public class MissionResponseDto {
     public record RecommendResult(
        Long missionId,
        String title,
+       String description,
        int durationMinutes,
        String category, //대분류
        int quizCount,
