@@ -48,4 +48,6 @@ public interface MemberRepository extends JpaRepository<Member,Long> {
         where m.weeklyGoal is not null
         """)
     List<Member> findMembersWithWeeklyGoal();
+
+    boolean existsByIdAndOnboardingCompletedTrue(Long id);
 }
