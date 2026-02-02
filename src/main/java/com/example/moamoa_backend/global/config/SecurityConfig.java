@@ -3,7 +3,7 @@ package com.example.moamoa_backend.global.config;
 import com.example.moamoa_backend.auth.handler.OAuth2SuccessHandler;
 import com.example.moamoa_backend.auth.repository.HttpCookieOAuth2AuthorizationRequestRepository;
 import com.example.moamoa_backend.auth.service.CustomOAuth2UserService;
-import com.example.moamoa_backend.global.security.filter.PolicyAgreementFilter;
+import com.example.moamoa_backend.global.security.filter.MemberSetupFilter;
 import com.example.moamoa_backend.global.security.jwt.JwtAccessDeniedHandler;
 import com.example.moamoa_backend.global.security.jwt.JwtAuthFilter;
 import com.example.moamoa_backend.global.security.jwt.JwtAuthenticationEntryPoint;
@@ -33,7 +33,7 @@ import java.util.Arrays;
  * Spring Security 설정
  *
  * 필터 체인 순서:
- * JwtAuthFilter → ExceptionTranslationFilter → PolicyAgreementFilter → AuthorizationFilter
+ * JwtAuthFilter → ExceptionTranslationFilter → MemberSetupFilter → AuthorizationFilter
  *
  * 예외 처리:
  * - 인증 실패(401) → JwtAuthenticationEntryPoint
@@ -83,23 +83,16 @@ public class SecurityConfig {
 		"/api/v1/policies/**"
 	};
 
-	// 로그인 필요O - GUEST도 접근 가능 (정책 동의 등)
-	private final String[] guestAllowUris = {
-		"/api/v1/auth/**",
-		"/api/v1/policies/**",
-		"/v3/api-docs/**",
-		"/swagger-ui/**",
-		"/swagger-resources/**",
-	};
-
-	private final String[] onboardingAllowUris = {
-		"/api/v1/members/me/onboarding", // GET/PATCH 온보딩 진행
-		"/api/v1/interests/**",          // 온보딩에서 관심사 조회 필요하면
-		"/api/v1/auth/**",               // 토큰 재발급/로그아웃 등 막히면 곤란
-		"/v3/api-docs/**",
-		"/swagger-ui/**",
-		"/swagger-resources/**"
-	};
+    // 로그인 필요O - 초기 설정(정책동의, 온보딩) 완료 전에도 접근 가능
+    private final String[] setupAllowUris = {
+            "/api/v1/auth/**",
+            "/api/v1/policies/**",
+            "/api/v1/members/me/onboarding",
+            "/api/v1/interests/**",
+            "/v3/api-docs/**",
+            "/swagger-ui/**",
+            "/swagger-resources/**"
+    };
 
 	// 관리자만 접근 가능
 	private final String[] adminUris = {
@@ -132,9 +125,9 @@ public class SecurityConfig {
 				auth.anyRequest().authenticated();
 			})
 
-			// 필터 등록: JwtAuthFilter → (ExceptionTranslationFilter) → PolicyAgreementFilter
+            // 필터 순서: JwtAuthFilter → (ExceptionTranslationFilter) → MemberSetupFilter
 			.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-			.addFilterAfter(policyAgreementFilter(), ExceptionTranslationFilter.class)
+			.addFilterAfter(memberSetupFilter(), ExceptionTranslationFilter.class)
 
 			// 예외 핸들러 등록
 			.exceptionHandling(exception -> exception
@@ -180,10 +173,9 @@ public class SecurityConfig {
 	}
 
 	@Bean
-	public PolicyAgreementFilter policyAgreementFilter() {
-		return new PolicyAgreementFilter(guestAllowUris, onboardingAllowUris, memberRepository);
+	public MemberSetupFilter memberSetupFilter() {
+		return new MemberSetupFilter(setupAllowUris, memberRepository);
     }
-
 
 	@Bean
 	public BCryptPasswordEncoder passwordEncoder() {

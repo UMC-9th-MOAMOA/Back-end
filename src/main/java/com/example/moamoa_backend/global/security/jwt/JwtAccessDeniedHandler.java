@@ -22,8 +22,10 @@ import java.io.IOException;
  *
  * 처리 케이스:
  * - USER가 ADMIN 전용 API 호출 → ACCESS_DENIED
- * - GUEST가 정책 동의 전 일반 API 호출 → POLICY_NOT_AGREED
+ * - 정책 미동의 사용자가 일반 API 호출 → POLICY_NOT_AGREED
+ * - 온보딩 미완료 사용자가 일반 API 호출 → ONBOARDING_NOT_COMPLETED
  */
+
 @Slf4j
 @Component
 @RequiredArgsConstructor

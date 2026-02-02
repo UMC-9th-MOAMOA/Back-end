@@ -82,7 +82,7 @@ public class OAuthAttributes {
                 .name(name)
                 .provider(provider)
                 .providerId(providerId)
-                .role(Role.ROLE_GUEST)
+                .role(Role.ROLE_USER)
                 .status(MemberStatus.ACTIVE)
                 .build();
     }

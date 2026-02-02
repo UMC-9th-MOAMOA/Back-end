@@ -49,5 +49,10 @@ public interface MemberRepository extends JpaRepository<Member,Long> {
         """)
     List<Member> findMembersWithWeeklyGoal();
 
+    /**
+     * @param id
+     * @return 온보딩 완료, 정책동의 완료 여부
+     */
     boolean existsByIdAndOnboardingCompletedTrue(Long id);
+    boolean existsByIdAndPolicyAgreedTrue(Long id);
 }

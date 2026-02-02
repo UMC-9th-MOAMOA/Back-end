@@ -168,7 +168,7 @@ public class PolicyService {
 
         // TODO: 관심사 분리 필요 - PolicyService에서 Member 상태 변경은 부적절하다는 피드백
         //       Facade 패턴 등을 활용하여 상위 레이어에서 처리하도록 리팩토링 예정
-        member.promoteToUser();
+        member.completePolicyAgreement();
     }
 
 
