@@ -176,6 +176,7 @@ public class MissionConverter {
         return MissionResponseDto.RecommendResult.builder()
                 .missionId(mission.getId())
                 .title(mission.getTitle())
+                .description(mission.getDescription())
                 .durationMinutes(mission.getDurationMinutes())
                 .category(categoryName)
                 .quizCount(mission.getQuizzes().size())

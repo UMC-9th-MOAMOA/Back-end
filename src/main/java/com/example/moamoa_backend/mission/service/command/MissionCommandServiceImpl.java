@@ -246,6 +246,9 @@ public class MissionCommandServiceImpl implements MissionCommandService {
 
             //첫 시도라면 실패했더라도 MISSION 타입으로 월렛히스토리에 기록
             if(isFirstAttempt){
+                if(earnedScore>0){
+                    memberMission.recordRewardAt();
+                }
                 String desc = (earnedScore > 0) ? "참여(부분점수)" : "참여(0점)";
 
                 updateWalletAndSaveHistory(wallet,mission,TransactionType.MISSION,earnedScore,mission.getTitle() + desc);
