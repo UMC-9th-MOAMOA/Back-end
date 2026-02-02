@@ -317,6 +317,8 @@ public class OnboardingService {
 				.toList();
 			memberSubInterestRepository.saveAll(mappings);
 		}
+		// 관심사 저장 성공 시 온보딩 완료로 처리 (목표 설정은 선택)
+		member.completeOnboarding();
 	}
 
 	/**
