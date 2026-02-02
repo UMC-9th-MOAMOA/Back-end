@@ -31,6 +31,10 @@ public class PolicyService {
     private final MemberPolicyRepository memberPolicyRepository;
     private final MemberRepository memberRepository;
 
+    /**
+     * 약관 상세 조회 (내용 포함)
+     * @return 활성화된 약관 목록 (필수 우선 정렬)
+     */
     public List<PolicyResDto.DetailDto> getDetailPolicies() {
         List<Policy> policies = policyRepository.findAllByIsActiveTrueOrderByIsMandatoryDescIdAsc();
 
@@ -44,6 +48,10 @@ public class PolicyService {
                 .toList();
     }
 
+    /**
+     * 약관 간단 조회 (내용 미포함)
+     * @return 활성화된 약관 목록 (필수 우선 정렬)
+     */
     public List<PolicyResDto.SimpleDto> getSimplePolicies() {
         List<Policy> policies = policyRepository.findAllByIsActiveTrueOrderByIsMandatoryDescIdAsc();
 
@@ -57,7 +65,10 @@ public class PolicyService {
     }
 
     /**
-     * 약관 동의여부 생성 (회원가입)
+     * 약관 동의 생성 (회원가입 시)
+     *
+     * @param member 가입하는 회원
+     * @param requests 약관 동의 요청 목록
      */
     @Transactional
     public void createPolicyAgreements(Member member, List<PolicyReqDto.AgreementDto> requests) {
@@ -91,7 +102,10 @@ public class PolicyService {
     }
 
     /**
-     * 약관 동의여부 수정 (가입이후)
+     * 약관 동의 수정 (가입 이후)
+     *
+     * @param memberId 회원 ID
+     * @param requests 약관 동의 요청 목록
      */
     @Transactional
     public void updatePolicyAgreements(Long memberId, List<PolicyReqDto.AgreementDto> requests) {
@@ -152,13 +166,18 @@ public class PolicyService {
             memberPolicyRepository.saveAll(toSave);
         }
 
+        // TODO: 관심사 분리 필요 - PolicyService에서 Member 상태 변경은 부적절하다는 피드백
+        //       Facade 패턴 등을 활용하여 상위 레이어에서 처리하도록 리팩토링 예정
         member.promoteToUser();
     }
 
-    // -- Helper Methods --
+
+    // ======================= Helper Methods =======================
+
 
     /**
-     * 필수 약관 동의하지 않거나 누락여부 체크
+     * 필수 약관 동의 여부 검증
+     * @throws PolicyException 필수 약관 미동의 시
      */
     private void validateMandatoryPolicies(List<Policy> allPolicies, Map<Long, Boolean> requestMap) {
         List<Policy> mandatoryPolicies = allPolicies.stream()
@@ -174,7 +193,8 @@ public class PolicyService {
     }
 
     /**
-     * 해당 정책 존재여부 체크
+     * 요청된 약관 ID 존재 여부 검증
+     * @throws PolicyException 존재하지 않는 약관 ID 포함 시
      */
     private void validatePolicyIds(List<Policy> allPolicies, Set<Long> requestedPolicyIds) {
         Set<Long> validIds = allPolicies.stream()
@@ -191,7 +211,8 @@ public class PolicyService {
     }
 
     /**
-     * 중복된 약관 ID 체크
+     * 중복 약관 ID 검증
+     * @throws PolicyException 중복된 약관 ID 포함 시
      */
     private void validateDuplicatePolicyIds(List<PolicyReqDto.AgreementDto> requests) {
         Set<Long> policyIds = new HashSet<>();

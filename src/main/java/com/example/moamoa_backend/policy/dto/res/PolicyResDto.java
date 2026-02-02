@@ -1,9 +1,6 @@
 package com.example.moamoa_backend.policy.dto.res;
 
-
 import lombok.Builder;
-
-import java.time.LocalDateTime;
 
 /**
  * 정책 관련 Response DTO
