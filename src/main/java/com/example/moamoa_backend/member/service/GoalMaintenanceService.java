@@ -2,6 +2,7 @@ package com.example.moamoa_backend.member.service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 
@@ -34,9 +35,9 @@ public class GoalMaintenanceService {
 
 	@Transactional
 	// 하루 마감 직후(00:01)에 전일/전주 결과 확정 및 목표 반영
-	@Scheduled(cron = "0 1 0 * * *")
+	@Scheduled(cron = "0 1 0 * * *", zone = "Asia/Seoul")
 	public void processDueGoals() {
-		LocalDate today = LocalDate.now();
+		LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
 		// 전일 일간 목표 결과 확정
 		goalResultService.recordDailyResults(today.minusDays(1));
 		// 월요일이면 전주(일요일 종료) 주간 목표 결과 확정
