@@ -81,9 +81,14 @@ public class MissionCommandServiceImpl implements MissionCommandService {
 
             List<MissionKeyword> missionKeywords = request.keywords().stream()
                     .map(k -> {
-                        KeywordType type = (k.type() != null)
-                                ? KeywordType.valueOf(k.type())
-                                : KeywordType.KEYWORD;
+                        KeywordType type;
+                        try {
+                            type = (k.type() != null)
+                                    ? KeywordType.valueOf(k.type())
+                                    : KeywordType.KEYWORD;
+                        } catch (IllegalArgumentException e) {
+                            throw new MissionException(MissionErrorCode.INVALID_KEYWORD_TYPE);
+                        }
 
                         Keyword keyword = keywordRepository.findByNameAndKeywordType(k.name(), type)
                                 .orElseGet(() -> keywordRepository.save(
