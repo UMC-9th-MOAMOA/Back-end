@@ -108,6 +108,18 @@ public class Member extends BaseEntity {
     @Builder.Default
     private Integer profileImage = 1;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean onboardingCompleted = false;
+
+    /**
+     * 온보딩 완료 처리
+     */
+    public void completeOnboarding() {
+        if (Boolean.TRUE.equals(this.onboardingCompleted)) return; // 이미 완료면 스킵
+        this.onboardingCompleted = true;
+    }
+
     /**
      * 목표 설정을 즉시 반영한다.
      * - dailyGoal이 null이면 목표 OFF 처리(관련 필드 초기화)
