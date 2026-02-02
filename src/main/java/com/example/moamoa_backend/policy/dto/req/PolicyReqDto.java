@@ -11,7 +11,7 @@ import java.util.List;
 public class PolicyReqDto {
 
     /**
-     * 약관 동의 목록 요청 (List Wrapper)
+     * 약관 동의 목록
      */
     public record AgreementListDto(
             @NotNull
@@ -19,7 +19,7 @@ public class PolicyReqDto {
     ) {}
 
     /**
-     * 개별 약관 동의 요청
+     * 개별 약관 동의
      */
     public record AgreementDto(
             @NotNull(message = "약관 ID는 필수입니다.")
