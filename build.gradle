@@ -105,7 +105,12 @@ dependencies {
     * csv 파일 읽기
     * =============================== */
     implementation 'org.apache.commons:commons-csv:1.10.0'
+
+    /* ===============================
+   * Flyway
+   * =============================== */
     implementation 'org.flywaydb:flyway-core'
+    implementation 'org.flywaydb:flyway-mysql'
 
 }
 
