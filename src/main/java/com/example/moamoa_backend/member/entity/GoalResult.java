@@ -1,6 +1,7 @@
 package com.example.moamoa_backend.member.entity;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import com.example.moamoa_backend.global.entity.BaseEntity;
 import com.example.moamoa_backend.member.enums.GoalResultStatus;
@@ -59,6 +60,9 @@ public class GoalResult extends BaseEntity {
 	@Column(name = "goal_status", nullable = false, length = 20)
 	private GoalResultStatus status;
 
+	@Column(name = "popup_shown_at")
+	private LocalDateTime popupShownAt;
+
 	private GoalResult(
 		Member member,
 		GoalResultType goalType,
@@ -93,5 +97,11 @@ public class GoalResult extends BaseEntity {
 		GoalResultStatus status
 	) {
 		return new GoalResult(member, GoalResultType.WEEKLY, goalDate, targetCount, achievedCount, status);
+	}
+
+	public void markPopupShown(LocalDateTime shownAt) {
+		if (this.popupShownAt == null) {
+			this.popupShownAt = shownAt;
+		}
 	}
 }

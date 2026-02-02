@@ -16,4 +16,7 @@ public interface GoalResultRepository extends JpaRepository<GoalResult, Long> {
 		GoalResultType goalType,
 		LocalDate goalDate
 	);
+
+	// popupShown 처리 시 소유자 검증
+	Optional<GoalResult> findByIdAndMemberId(Long id, Long memberId);
 }

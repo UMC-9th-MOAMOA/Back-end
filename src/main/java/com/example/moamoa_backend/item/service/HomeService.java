@@ -40,7 +40,6 @@ public class HomeService {
 
 		//  변경: 구현된 잔액 조회 서비스 재사용
 		int point = walletHistoryQueryService.getMyPoint(memberId).point();
-		// 만약 Response가 record가 아니라 class면: .getPoint()
 
 		//  다시보지않기 체크했으면 false(팝업 안띄움), 없으면 true(띄움)
 		boolean shouldShowTutorial = memberSettingService.shouldShowPopup(memberId, TUTORIAL_KEY);

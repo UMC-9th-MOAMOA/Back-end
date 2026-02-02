@@ -123,7 +123,7 @@ public class AttendanceCommandServiceImpl implements AttendanceCommandService{
     }
 
     private int calculateNewStreak(AttendanceStreak streak, LocalDate today) {
-        LocalDate yesterday = today.minusDays(1);
+        LocalDate yesterday = LocalDate.now(KST).minusDays(1);
 
         if (streak.getLastCompletedDate() != null && streak.getLastCompletedDate().equals(yesterday)) {
             return 1;

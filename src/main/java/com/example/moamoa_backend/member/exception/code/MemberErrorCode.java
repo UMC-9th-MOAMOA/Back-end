@@ -40,7 +40,11 @@ public enum MemberErrorCode implements BaseErrorCode {
     // 409 Conflict
     EMAIL_ALREADY_EXISTS(HttpStatus.CONFLICT,
             "MEMBER409_1",
-            "이미 사용 중인 이메일입니다.");
+            "이미 사용 중인 이메일입니다."),
+
+    GOAL_RESULT_NOT_FOUND(HttpStatus.NOT_FOUND,
+        "GOAL_RESULT_404",
+        "목표 결과가 존재하지 않습니다.");
 
     private final HttpStatus status;
     private final String code;
