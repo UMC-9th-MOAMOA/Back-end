@@ -557,27 +557,32 @@ public class AuthService {
      * 임시 코드(OAuthCode)를 검증하고 AccessToken을 반환
      * 소셜 로그인에서 accessToken 최초 발급 시 사용
      */
-    public AuthResDto.TokenDto exchangeAuthCode(String code) {
+    public AuthResDto.LoginResultDto exchangeOAuthCode(String code) {
         // 1. Redis Key 생성
         String redisKey = "OAUTH_CODE:" + code;
 
         // 2. Redis 조회 및 파기
-        String accessToken = redisUtil.getAndDeleteData(redisKey);
+        String memberIdStr = redisUtil.getAndDeleteData(redisKey);
 
         // 3. 검증
-        if (accessToken == null) {
+        if (memberIdStr == null) {
             throw new AuthException(AuthErrorCode.INVALID_OAUTH_CODE);
         }
 
-        AuthResDto.TokenDto tokenDto = AuthResDto.TokenDto.builder()
-                .grantType("Bearer")
-                .accessToken(accessToken)
-                .accessTokenExpiresIn(jwtUtil.getAccessTokenValidity())
+        // 회원 조회
+        Long memberId = Long.parseLong(memberIdStr);
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        // 토큰 발급
+        AuthResDto.GeneratedTokenDto generatedTokenDto = generateTokens(member.getId(), member.getRole());
+
+        // 로그인 응답 반환
+        return AuthResDto.LoginResultDto.builder()
+                .generatedToken(generatedTokenDto)
+                .onboardingCompleted(member.getOnboardingCompleted())
+                .policyAgreed(member.getPolicyAgreed())
                 .build();
-
-
-        // 4. 토큰 반환
-        return tokenDto;
     }
 
     /**

@@ -77,22 +77,9 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             return;
         }
 
-        // JWT 토큰 발급
-        String accessToken = jwtUtil.createAccessToken(member.getId(), String.valueOf(member.getRole()));
-        String refreshToken = jwtUtil.createRefreshToken(member.getId());
-
-        // Refresh Token Redis 저장
-        long refreshTokenExpireSeconds = refreshTokenValidityMs / 1000;
-        String redisKey = "RT:" + member.getId();
-        redisUtil.setDataExpire(redisKey, refreshToken, refreshTokenExpireSeconds);
-
-        // Refresh Token 쿠키 설정
-        ResponseCookie cookie = (createCookie("refreshToken", refreshToken, refreshTokenExpireSeconds));
-        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-
         // 임시 코드 생성 및 Redis 저장 (30초 유효)
         String authCode = UUID.randomUUID().toString();
-        redisUtil.setDataExpire("OAUTH_CODE:" + authCode, accessToken, 30);
+        redisUtil.setDataExpire("OAUTH_CODE:" + authCode, String.valueOf(member.getId()), 30);
 
         // 프론트엔드로 리다이렉트 (임시 코드 전달)
         String targetUrl = UriComponentsBuilder.fromUriString(frontUrl + "/oauth/callback")
@@ -102,18 +89,4 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
 
-    /**
-     * HttpOnly 쿠키 생성
-     * TODO: AuthController 쿠키 생성 로직과 통합 필요
-     */
-    private ResponseCookie createCookie(String key, String value, long maxAgeSeconds) {
-        return ResponseCookie.from(key, value)
-                .path("/")
-                .sameSite("None")
-                .httpOnly(true)
-                .secure(true)
-                .maxAge(maxAgeSeconds)
-                .build();
-
-    }
 }
