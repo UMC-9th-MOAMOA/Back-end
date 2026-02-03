@@ -70,13 +70,13 @@ public class AuthController {
     @Operation(summary = "일반 로그인 API", description = "이메일과 비밀번호로 로그인하여 Access/Refresh Token을 발급받습니다.")
     @SecurityRequirements(value = {})
     @PostMapping("/login")
-    public ApiResponse<AuthResDto.TokenDto> login(
+    public ApiResponse<AuthResDto.LoginResponseDto> login(
             @RequestBody @Valid AuthReqDto.LoginDto request,
             HttpServletResponse response
     ) {
-        AuthResDto.GeneratedTokenDto generatedTokenDto = authService.login(request);
-        setRefreshTokenCookie(response, generatedTokenDto.refreshToken());
-        return ApiResponse.onSuccess(AuthSuccessCode.LOGIN_SUCCESS, AuthConverter.toTokenDto(generatedTokenDto));
+        AuthResDto.LoginResultDto result = authService.login(request);
+        setRefreshTokenCookie(response, result.generatedToken().refreshToken());
+        return ApiResponse.onSuccess(AuthSuccessCode.LOGIN_SUCCESS, AuthConverter.toLoginResponseDto(result));
     }
 
     @Operation(summary = "토큰 재발급 API", description = "Refresh Token을 이용하여 Access Token과 Refresh Token을 재발급(RTR)받습니다.")
@@ -105,8 +105,13 @@ public class AuthController {
     @Operation(summary = "소셜로그인 초기 토큰 발급 API", description = "소셜 로그인 이후 redirect URL의 code 파라미터를 이용해 accessToken을 발급받습니다.")
     @SecurityRequirements(value = {})
     @PostMapping("/oauth2/token")
-    public ApiResponse<AuthResDto.TokenDto> getAccessToken(@RequestBody @Valid AuthReqDto.OAuthLoginReqDto request) {
-        return ApiResponse.onSuccess(AuthSuccessCode.LOGIN_SUCCESS, authService.exchangeAuthCode(request.code()));
+    public ApiResponse<AuthResDto.LoginResponseDto> exchangeOAuthToken(
+            @RequestBody @Valid AuthReqDto.OAuthLoginReqDto request,
+            HttpServletResponse response
+    ) {
+        AuthResDto.LoginResultDto loginResultDto = authService.exchangeOAuthCode(request.code());
+        setRefreshTokenCookie(response, loginResultDto.generatedToken().refreshToken());
+        return ApiResponse.onSuccess(AuthSuccessCode.LOGIN_SUCCESS, AuthConverter.toLoginResponseDto(loginResultDto));
     }
 
     @Operation(summary = "계정복구 요청", description = "삭제 요청된 회원에 대한 복구를 진행합니다.")
