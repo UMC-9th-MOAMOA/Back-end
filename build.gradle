@@ -18,33 +18,20 @@ bootJar {
     archiveFileName = "app.jar"
 }
 
-
 repositories {
     mavenCentral()
 }
 
 dependencies {
     /* ===============================
-     * Core Spring Boot
+     * Core Spring Boot & Database
      * =============================== */
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
-    /* ===============================
-     * Database
-     * =============================== */
     runtimeOnly 'com.mysql:mysql-connector-j'
 
     /* ===============================
-     * Lombok
-     * =============================== */
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
-
-    /* ===============================
-     * QueryDSL - OpenFeign 포크 (최신 버전, 활발한 개발)
+     * QueryDSL (OpenFeign Fork)
      * =============================== */
     implementation "io.github.openfeign.querydsl:querydsl-jpa:7.1"
     implementation "io.github.openfeign.querydsl:querydsl-core:7.1"
@@ -53,87 +40,49 @@ dependencies {
     annotationProcessor "jakarta.annotation:jakarta.annotation-api"
 
     /* ===============================
-     * Swagger (OpenAPI) - Spring Boot 4.0 지원
+     * Flyway & CSV
      * =============================== */
+    implementation("org.springframework.boot:spring-boot-starter-flyway")
+    implementation("org.flywaydb:flyway-mysql")
+    implementation 'org.apache.commons:commons-csv:1.10.0'
+
+    /* ===============================
+     * Others (Lombok, Swagger, Security, etc.)
+     * =============================== */
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.1'
-
-    /* ===============================
-     * Validation
-     * =============================== */
     implementation 'org.springframework.boot:spring-boot-starter-validation'
-
-    /* ===============================
-     * Security
-     * =============================== */
     implementation 'org.springframework.boot:spring-boot-starter-security'
-    testImplementation 'org.springframework.security:spring-security-test'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
-    /* ===============================
-     * JWT
-     * =============================== */
+    // JWT
     implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.3'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.3'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
-    /* ===============================
-     * OAuth2
-     * =============================== */
-    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
-
-    /* ===============================
-     * Redis
-     * =============================== */
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-
-    /* ===============================
-     * 이메일 전송 (JavaMail / SMTP)
-     * =============================== */
-    implementation 'org.springframework.boot:spring-boot-starter-mail'
-    
-    /* ===============================
-     * Actuator (Health Check)
-     * =============================== */
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    /* ===============================
-     * S3
-     * =============================== */
+    // S3
     implementation platform("software.amazon.awssdk:bom:2.25.61")
     implementation "software.amazon.awssdk:s3"
 
-    /* ===============================
-    * csv 파일 읽기
-    * =============================== */
-    implementation 'org.apache.commons:commons-csv:1.10.0'
-
-    /* ===============================
-   * Flyway
-   * =============================== */
-    implementation 'org.flywaydb:flyway-core'
-    implementation 'org.flywaydb:flyway-mysql'
-
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'org.springframework.security:spring-security-test'
 }
 
 tasks.named('test') {
     useJUnitPlatform()
 }
 
-// QueryDSL 관련 설정
-// generated/querydsl 폴더 생성 & 삽입
-def querydslDir = layout.buildDirectory.dir("generated/querydsl").get().asFile
 
-// 소스 세트에 생성 경로 추가 (구체적인 경로 지정)
-sourceSets {
-    main.java.srcDirs += [ querydslDir ]
-}
-
-// 컴파일 시 생성 경로 지정
 tasks.withType(JavaCompile).configureEach {
-    options.generatedSourceOutputDirectory.set(querydslDir)
+    options.getGeneratedSourceOutputDirectory().set(file(layout.buildDirectory.dir("generated/sources/annotationProcessor/java/main")))
 }
 
-// clean 태스크에 생성 폴더 삭제 로직 추가
-clean.doLast {
-    file(querydslDir).deleteDir()
+clean {
+    delete file(layout.buildDirectory.dir("generated/sources/annotationProcessor/java/main"))
 }
-
