@@ -1,6 +1,7 @@
 package com.example.moamoa_backend.keyword.repository;
 
 import com.example.moamoa_backend.keyword.entity.Keyword;
+import com.example.moamoa_backend.keyword.enums.KeywordType;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -10,4 +11,6 @@ public interface KeywordRepository extends JpaRepository<Keyword, Long> {
     Optional<Keyword>findByName(String name);
 
     List<Keyword> findTop5ByNameContaining(String name);
+
+    Optional<Keyword> findByNameAndKeywordType(String name, KeywordType keywordType);
 }

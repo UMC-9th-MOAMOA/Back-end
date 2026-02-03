@@ -12,7 +12,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -29,7 +28,20 @@ public class MissionController {
     private final MissionQueryService missionQueryService;
 
     @PostMapping("/admin")
-    @Operation(summary = "미션 등록 API(관리자용)", description = "영상 정보와 퀴즈를 입력하면 도토리와 소요시간이 자동 계산되어 등록됩니다.")
+    @Operation(
+            summary = "미션 등록 API(관리자용)",
+            description = """
+            관리자가 새로운 미션을 등록하는 API입니다.
+            
+            **[기능 상세]**
+            - **영상 길이 자동 계산**: 입력된 유튜브 URL을 분석해 영상 시간(초)과 소요 시간(분)을 서버가 자동으로 저장합니다.
+            - **보상 자동 계산**: 등록된 퀴즈의 타입별 배점에 따라 총 보상(도토리)이 자동으로 합산됩니다.
+            
+            **[주의사항]**
+            - **카테고리**: 반드시 '카테고리 코드표'의 소분류 한글명을 정확히 입력해야 매핑됩니다. (ex: "경제의 흐름")
+            - **퀴즈 옵션**: OX는 `["O", "X"]`, 단답형은 `[]` 빈 배열을 준수해주세요.
+            """
+    )
     public ApiResponse<MissionResponseDto.CreateResult> createMission(
             @RequestBody @Valid MissionRequestDto.Create request
             ){

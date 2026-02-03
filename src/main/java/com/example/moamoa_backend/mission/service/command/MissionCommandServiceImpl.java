@@ -35,6 +35,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 
 @Service
@@ -54,31 +55,59 @@ public class MissionCommandServiceImpl implements MissionCommandService {
     private final YoutubeUtilService youtubeUtilService;
 
 
+    /**
+     * [관리자용] 미션 생성 메서드
+     * 1. 유튜브 API로 영상 길이 조회 및 유효성 검증
+     * 2. 미션 및 퀴즈 엔티티 생성 및 저장
+     * 3. 키워드 처리 (존재하면 매핑, 없으면 생성 후 매핑)
+     * 4. 카테고리(SubInterest) 연결
+     *
+     * @param request 미션 생성 요청 DTO (제목, URL, 퀴즈 등)
+     * @return 생성된 미션 요약 정보 (ID, 총 리워드, 소요시간)
+     * @throws MissionException 유효하지 않은 URL, 유튜브 API 오류, 카테고리 없음
+     */
     @Transactional
     @Override
     public MissionResponseDto.CreateResult createMission(MissionRequestDto.Create request) {
+
         int videoDuration = youtubeUtilService.getDurationInSeconds(request.videoUrl());
+
         Mission newMission = missionConverter.toEntity(request, videoDuration);
         missionRepository.save(newMission);
 
 
         //키워드 이미 있으면 연결, 없으면 테이블에 생성
-        if (request.keywords() != null) {
-            request.keywords().forEach(keywordDto -> {
-                KeywordType type = (keywordDto.type()!=null)
-                        ? KeywordType.valueOf(keywordDto.type()) : KeywordType.KEYWORD;
+        if (request.keywords() != null && !request.keywords().isEmpty()) {
 
-                Keyword keyword = keywordRepository.findByName(keywordDto.name())
-                        .orElseGet(() -> keywordRepository.save(Keyword.builder().name(keywordDto.name()).keywordType(type).build()));
+            List<MissionKeyword> missionKeywords = request.keywords().stream()
+                    .map(k -> {
+                        KeywordType type;
+                        try {
+                            type = (k.type() != null)
+                                    ? KeywordType.valueOf(k.type())
+                                    : KeywordType.KEYWORD;
+                        } catch (IllegalArgumentException e) {
+                            throw new MissionException(MissionErrorCode.INVALID_KEYWORD_TYPE);
+                        }
 
-                MissionKeyword missionKeyword = MissionKeyword.builder()
-                        .mission(newMission)
-                        .keyword(keyword)
-                        .build();
+                        Keyword keyword = keywordRepository.findByNameAndKeywordType(k.name(), type)
+                                .orElseGet(() -> keywordRepository.save(
+                                        Keyword.builder()
+                                                .name(k.name())
+                                                .keywordType(type)
+                                                .build()
+                                ));
 
-                missionKeywordRepository.save(missionKeyword);
-            });
+                        return MissionKeyword.builder()
+                                .mission(newMission)
+                                .keyword(keyword)
+                                .build();
+                    })
+                    .toList();
+
+            missionKeywordRepository.saveAll(missionKeywords);
         }
+
         if (request.category() != null) {
             SubInterest subInterest = subInterestRepository.findByName(request.category())
                     .orElseThrow(() -> new MissionException(MissionErrorCode.CATEGORY_NOT_FOUND));
@@ -236,7 +265,7 @@ public class MissionCommandServiceImpl implements MissionCommandService {
             memberMissionRepository.save(memberMission);
         }
 
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
         LocalDate tomorrow = today.plusDays(1);
         LocalDate thisMonday = today.with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY));
 
