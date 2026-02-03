@@ -58,7 +58,7 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            set -euo pipefail # 스크립트 도중 에러 발생 시 즉시 중단
+            set -euo pipefail 
             cd ~/app
 
             # 환경변수 설정: docker-compose.yml 내부의 ${APP_TAG}에 주입됨
