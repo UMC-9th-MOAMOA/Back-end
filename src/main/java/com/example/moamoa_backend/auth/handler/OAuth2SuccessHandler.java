@@ -48,6 +48,23 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     @Value("${jwt.refresh-token-validity}")
     private Long refreshTokenValidityMs;
 
+    /**
+     * Handles successful OAuth2 authentication by resolving the authenticated user, validating provider and account status,
+     * issuing a short-lived authorization code stored in Redis, and redirecting the client to the frontend callback URL
+     * carrying that code as a query parameter.
+     *
+     * The method:
+     * - Verifies the OAuth provider is supported.
+     * - Loads the corresponding Member by provider and providerId.
+     * - If the member is banned, redirects to the frontend callback with an "ACCOUNT_BANNED" error.
+     * - Otherwise generates a UUID-based auth code, stores "OAUTH_CODE:{code}" -> "{memberId}" in Redis with a 30-second TTL,
+     *   and redirects to "{frontUrl}/oauth/callback?code={authCode}".
+     *
+     * @param request the HTTP request
+     * @param response the HTTP response used for sending redirects
+     * @param authentication the Spring Security authentication containing the OAuth2User principal
+     * @throws IOException if an input/output error occurs while sending the redirect
+     */
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
 

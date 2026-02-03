@@ -237,8 +237,12 @@ public class AuthService {
     }
 
     /**
-     * 로그인 (Local)
-     */
+         * Authenticate a local user and issue access and refresh tokens.
+         *
+         * @param request login credentials containing `email` and `password`
+         * @return a LoginResultDto containing the generated tokens and user state flags (`onboardingCompleted`, `policyAgreed`)
+         * @throws AuthException if authentication fails (invalid credentials), if the account is withdrawn, or if the account is banned
+         */
     @Transactional
     public AuthResDto.LoginResultDto login(AuthReqDto.LoginDto request) {
         // 1. 이메일로 회원 조회
@@ -554,8 +558,12 @@ public class AuthService {
     }
 
     /**
-     * 임시 코드(OAuthCode)를 검증하고 AccessToken을 반환
-     * 소셜 로그인에서 accessToken 최초 발급 시 사용
+     * Exchange a one-time OAuth code for authentication tokens and the user's login state.
+     *
+     * @param code the temporary OAuth code previously issued for this authentication flow
+     * @return a LoginResultDto containing the generated access/refresh tokens and the user's onboarding and policy agreement flags
+     * @throws AuthException   if the provided OAuth code is invalid or expired
+     * @throws MemberException if the member associated with the code cannot be found
      */
     public AuthResDto.LoginResultDto exchangeOAuthCode(String code) {
         // 1. Redis Key 생성

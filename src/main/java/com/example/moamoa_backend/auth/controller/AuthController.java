@@ -67,6 +67,13 @@ public class AuthController {
         return ApiResponse.onSuccess(AuthSuccessCode.SIGNUP_SUCCESS, AuthConverter.toTokenDto(generatedTokenDto));
     }
 
+    /**
+     * Authenticates a user with email and password and issues authentication tokens.
+     *
+     * @param request the login credentials (email and password)
+     * @param response the HTTP response used to set the refresh token cookie
+     * @return an ApiResponse containing a LoginResponseDto with the issued access token and related authentication information
+     */
     @Operation(summary = "일반 로그인 API", description = "이메일과 비밀번호로 로그인하여 Access/Refresh Token을 발급받습니다.")
     @SecurityRequirements(value = {})
     @PostMapping("/login")
@@ -79,6 +86,14 @@ public class AuthController {
         return ApiResponse.onSuccess(AuthSuccessCode.LOGIN_SUCCESS, AuthConverter.toLoginResponseDto(result));
     }
 
+    /**
+     * Reissues access and refresh tokens using the provided refresh token.
+     *
+     * Sets a Secure, HttpOnly refreshToken cookie on the response with the newly issued refresh token.
+     *
+     * @param refreshToken the refresh token extracted from the `refreshToken` cookie
+     * @return an ApiResponse containing the newly issued access and refresh tokens wrapped in a TokenDto
+     */
     @Operation(summary = "토큰 재발급 API", description = "Refresh Token을 이용하여 Access Token과 Refresh Token을 재발급(RTR)받습니다.")
     @SecurityRequirements(value = {})
     @PostMapping("/refresh")
@@ -102,6 +117,16 @@ public class AuthController {
         return ApiResponse.onSuccess(AuthSuccessCode.LOGOUT_SUCCESS, null);
     }
 
+    /**
+     * Exchange an OAuth2 authorization code for authentication tokens and set the refresh token cookie.
+     *
+     * Exchanges the authorization `code` supplied in the request for an access token (and related login data),
+     * writes the refresh token into an HttpOnly, Secure cookie on the response, and returns a login response DTO.
+     *
+     * @param request the OAuth login request containing the authorization `code`
+     * @param response the HTTP response used to set the refresh token cookie
+     * @return the login response DTO containing the issued access token and related authentication data
+     */
     @Operation(summary = "소셜로그인 초기 토큰 발급 API", description = "소셜 로그인 이후 redirect URL의 code 파라미터를 이용해 accessToken을 발급받습니다.")
     @SecurityRequirements(value = {})
     @PostMapping("/oauth2/token")
@@ -114,6 +139,13 @@ public class AuthController {
         return ApiResponse.onSuccess(AuthSuccessCode.LOGIN_SUCCESS, AuthConverter.toLoginResponseDto(loginResultDto));
     }
 
+    /**
+     * Restores a previously deleted account and issues authentication tokens.
+     *
+     * @param request login credentials used to identify and recover the account
+     * @param response servlet response used to set the refresh-token cookie
+     * @return an ApiResponse containing an AuthResDto.TokenDto with the access token; the refresh token is also set as an HttpOnly cookie on the response
+     */
     @Operation(summary = "계정복구 요청", description = "삭제 요청된 회원에 대한 복구를 진행합니다.")
     @SecurityRequirements(value = {})
     @PostMapping("/recover")

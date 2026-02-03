@@ -8,8 +8,10 @@ import com.example.moamoa_backend.auth.dto.res.AuthResDto;
 public class AuthConverter {
 
     /**
-     * 토큰 응답 변환
-     * 내부 DTO → 응답 DTO 변환 (Refresh Token 제외)
+     * Converts an internal GeneratedTokenDto into an API TokenDto response, excluding any refresh token.
+     *
+     * @param generatedDto the internal DTO containing token details to expose in the response
+     * @return the response DTO containing grant type, access token, and access token expiry information
      */
     public static AuthResDto.TokenDto toTokenDto(AuthResDto.GeneratedTokenDto generatedDto) {
         return AuthResDto.TokenDto.builder()
@@ -20,8 +22,13 @@ public class AuthConverter {
     }
 
     /**
-     * 로그인 응답 변환
-     * 내부 DTO → 응답 DTO 변환 (Refresh Token 제외)
+     * Converts an internal login result DTO into a login response DTO for API responses.
+     *
+     * The resulting DTO contains the access token (excluding any refresh token) and the
+     * user's onboarding and policy-agreement flags.
+     *
+     * @param loginResultDto the internal login result containing the generated token and user flags
+     * @return an AuthResDto.LoginResponseDto with `token`, `onboardingCompleted`, and `policyAgreed` populated
      */
     public static AuthResDto.LoginResponseDto toLoginResponseDto(AuthResDto.LoginResultDto loginResultDto) {
         return AuthResDto.LoginResponseDto.builder()
