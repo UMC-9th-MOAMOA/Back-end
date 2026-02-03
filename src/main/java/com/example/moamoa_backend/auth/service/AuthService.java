@@ -240,7 +240,7 @@ public class AuthService {
      * 로그인 (Local)
      */
     @Transactional
-    public AuthResDto.GeneratedTokenDto login(AuthReqDto.LoginDto request) {
+    public AuthResDto.LoginResultDto login(AuthReqDto.LoginDto request) {
         // 1. 이메일로 회원 조회
         Member member = memberRepository.findByProviderAndProviderId(Provider.LOCAL, request.email())
                 .orElseThrow(() -> new AuthException(AuthErrorCode.LOGIN_FAILED));
@@ -259,7 +259,13 @@ public class AuthService {
         }
 
         // 4. 토큰 발급 및 Redis 저장
-        return generateTokens(member.getId(), member.getRole());
+        AuthResDto.GeneratedTokenDto generatedTokenDto = generateTokens(member.getId(), member.getRole());
+
+        return AuthResDto.LoginResultDto.builder()
+                .generatedToken(generatedTokenDto)
+                .onboardingCompleted(member.getOnboardingCompleted())
+                .policyAgreed(member.getPolicyAgreed())
+                .build();
     }
 
 

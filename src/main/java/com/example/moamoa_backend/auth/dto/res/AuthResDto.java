@@ -36,4 +36,26 @@ public class AuthResDto {
             String resetToken
     ) {}
 
+    /**
+     * 로그인 응답 (내부 전달용)
+     * - 온보딩 여부와 정책 동의 여부를 포함해 프론트 라우팅에 사용
+     */
+    @Builder
+    public record LoginResultDto(
+            GeneratedTokenDto generatedToken,
+            Boolean onboardingCompleted,
+            Boolean policyAgreed
+    ) {}
+
+    /**
+     * 로그인 응답 (외부 전달용)
+     * - 온보딩 여부와 정책 동의 여부를 포함해 프론트 라우팅에 사용
+     */
+    @Builder
+    public record LoginResponseDto(
+            TokenDto token,
+            Boolean onboardingCompleted,
+            Boolean policyAgreed
+    ) {}
+
 }

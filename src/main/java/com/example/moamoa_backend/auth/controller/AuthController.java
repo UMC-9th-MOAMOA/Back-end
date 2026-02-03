@@ -70,13 +70,13 @@ public class AuthController {
     @Operation(summary = "일반 로그인 API", description = "이메일과 비밀번호로 로그인하여 Access/Refresh Token을 발급받습니다.")
     @SecurityRequirements(value = {})
     @PostMapping("/login")
-    public ApiResponse<AuthResDto.TokenDto> login(
+    public ApiResponse<AuthResDto.LoginResponseDto> login(
             @RequestBody @Valid AuthReqDto.LoginDto request,
             HttpServletResponse response
     ) {
-        AuthResDto.GeneratedTokenDto generatedTokenDto = authService.login(request);
-        setRefreshTokenCookie(response, generatedTokenDto.refreshToken());
-        return ApiResponse.onSuccess(AuthSuccessCode.LOGIN_SUCCESS, AuthConverter.toTokenDto(generatedTokenDto));
+        AuthResDto.LoginResultDto result = authService.login(request);
+        setRefreshTokenCookie(response, result.generatedToken().refreshToken());
+        return ApiResponse.onSuccess(AuthSuccessCode.LOGIN_SUCCESS, AuthConverter.toLoginResponseDto(result));
     }
 
     @Operation(summary = "토큰 재발급 API", description = "Refresh Token을 이용하여 Access Token과 Refresh Token을 재발급(RTR)받습니다.")
