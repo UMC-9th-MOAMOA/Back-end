@@ -2,7 +2,7 @@ name: CD - Deploy to EC2 (Docker Compose v2)
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main" ] # main 브랜치에 푸시될 때 자동으로 실행
 
 jobs:
   build_push_deploy:
@@ -14,28 +14,33 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # 1. 빌드 환경 설정 (Java 21)
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "21"
-          cache: gradle
+          cache: gradle # 빌드 속도 향상을 위한 그래들 캐싱
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      # 2. 스프링 부트 빌드 (테스트 제외하여 프리티어 빌드 속도 확보)
       - name: Build bootJar (app.jar)
         run: ./gradlew clean bootJar -x test --no-daemon
 
+      # 3. 도커 빌드 준비 (Buildx 사용)
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      # 4. 도커 허브 로그인 (Secrets에 저장된 정보 활용)
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
+      # 5. 이미지 빌드 및 푸시 (최신본인 latest와 버전 관리를 위한 sha 태그 동시 생성)
       - name: Build & Push Docker image (latest + sha)
         run: |
           IMAGE="${{ secrets.DOCKER_HUB_USERNAME }}/moamoa-backend"
@@ -45,6 +50,7 @@ jobs:
           docker push "${IMAGE}:latest"
           docker push "${IMAGE}:${SHA_TAG}"
 
+      # 6. EC2 원격 배포 단계
       - name: Deploy on EC2 (docker compose pull/up + healthcheck)
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -52,41 +58,45 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            set -euo pipefail
+            set -euo pipefail # 스크립트 도중 에러 발생 시 즉시 중단
             cd ~/app
 
+            # 환경변수 설정: docker-compose.yml 내부의 ${APP_TAG}에 주입됨
             APP_TAG="${{ github.sha }}"
             APP_TAG="${APP_TAG:0:7}"
             export APP_TAG
 
+            # 새 이미지 내려받기 및 컨테이너 재시작 (.env 파일의 설정값 주입)
             docker compose -f docker-compose.yml --env-file .env pull
             docker compose -f docker-compose.yml --env-file .env up -d
 
+            # 7. 배포 후 상태 확인 (Actuator Health Check)
             echo "Waiting for actuator health..."
             ok=false
 
-            for i in $(seq 1 30); do
+            for i in $(seq 1 30); do # 최대 30회(약 60초) 재시도
               code=$(curl -s -o /tmp/health.json -w "%{http_code}" \
                 --connect-timeout 2 --max-time 5 \
                 http://localhost:8080/actuator/health || true)
 
+              # HTTP 200 응답과 "UP" 상태 확인
               if [ "$code" = "200" ] && grep -q '"status":"UP"' /tmp/health.json; then
                 echo "Health OK: $(cat /tmp/health.json)"
                 ok=true
                 break
               fi
 
-              echo "Not ready yet (code=$code) retry $i/30... body=$(cat /tmp/health.json 2>/dev/null || true)"
+              echo "Not ready yet (code=$code) retry $i/30..."
               sleep 2
             done
 
+            # 헬스체크 실패 시 로그 출력 후 배포 실패 처리
             if [ "$ok" != "true" ]; then
               echo "Health check FAILED. Showing logs..."
               docker compose -f docker-compose.yml logs --tail=200 || true
-              # 컨테이너명 고정이면 이것도 추가로
               docker logs --tail 200 moamoa-app || true
               exit 1
             fi
 
+            # 사용하지 않는 이전 이미지들 삭제 (EC2 용량 관리)
             docker image prune -af || true
-      
