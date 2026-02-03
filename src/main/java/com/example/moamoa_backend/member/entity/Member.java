@@ -112,6 +112,10 @@ public class Member extends BaseEntity {
     @Builder.Default
     private Boolean onboardingCompleted = false;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean policyAgreed = false;
+
     /**
      * 온보딩 완료 처리
      */
@@ -168,10 +172,8 @@ public class Member extends BaseEntity {
         this.deletedAt = null;
     }
 
-    public void promoteToUser() {
-        if (this.role == Role.ROLE_GUEST) {
-            this.role = Role.ROLE_USER;
-        }
+    public void completePolicyAgreement() {
+        this.policyAgreed = true;
     }
 
     public void changePassword(String newPassword) {
