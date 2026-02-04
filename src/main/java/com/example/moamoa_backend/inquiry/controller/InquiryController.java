@@ -41,7 +41,7 @@ public class InquiryController {
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @ModelAttribute InquiryFormDTO.Create form
     ) {
-        Long memberId = extractMemberId(userDetails);
+        Long memberId = Long.parseLong(userDetails.getUsername());
 
         // ✅ 기존 서비스 시그니처 유지: DTO + files
         InquiryRequestDTO.Create request = new InquiryRequestDTO.Create(
@@ -71,7 +71,7 @@ public class InquiryController {
             @RequestParam(required = false) String cursorCreatedAt,
             @RequestParam(required = false) Long cursorId
     ) {
-        Long memberId = extractMemberId(userDetails);
+        Long memberId = Long.parseLong(userDetails.getUsername());
 
         InquiryQueryReqDto.MyInquiryList cond = new InquiryQueryReqDto.MyInquiryList(
                 period, category, answerStatus, size, cursorCreatedAt, cursorId
@@ -90,7 +90,7 @@ public class InquiryController {
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable @NotNull Long inquiryId
     ) {
-        Long memberId = extractMemberId(userDetails);
+        Long memberId = Long.parseLong(userDetails.getUsername());
 
         InquiryDetailResDto.MyInquiryDetail result =
                 inquiryQueryService.getMyInquiryDetail(memberId, inquiryId);
@@ -119,14 +119,4 @@ public class InquiryController {
 
     }
 
-    private Long extractMemberId(UserDetails userDetails) {
-        if (userDetails == null || userDetails.getUsername() == null) {
-            throw new IllegalStateException("인증 정보가 없습니다.");
-        }
-        try {
-            return Long.valueOf(userDetails.getUsername());
-        } catch (NumberFormatException e) {
-            throw new IllegalStateException("토큰의 사용자 식별자(username)가 숫자 memberId 형식이 아닙니다.");
-        }
-    }
 }
