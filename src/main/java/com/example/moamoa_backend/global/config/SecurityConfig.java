@@ -153,14 +153,15 @@ public class SecurityConfig {
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
 
-		configuration.setAllowedOrigins(Arrays.asList(
+		configuration.setAllowedOriginPatterns(Arrays.asList(
 			"http://localhost:3000",
 			"https://moamoa.io.kr",
 			"https://www.moamoa.io.kr",
 			"https://moamoamoa.netlify.app",
 			"https://api.moamoa.io.kr",
 			"http://localhost:5173",
-			"https://localhost:5173"
+			"https://localhost:5173",
+                "https://*--moamoamoa.netlify.app"
 		));
 
 		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
