@@ -1,7 +1,7 @@
 package com.example.moamoa_backend.member.service;
 
-import com.example.moamoa_backend.interest.exception.InterestException;
 import com.example.moamoa_backend.interest.exception.code.InterestErrorCode;
+import com.example.moamoa_backend.member.exception.code.MemberErrorCode;
 import com.example.moamoa_backend.interest.repository.SubInterestRepository;
 import com.example.moamoa_backend.member.dto.req.OnboardingPatchRequestDto;
 import com.example.moamoa_backend.member.dto.res.OnboardingResponseDto;
@@ -10,10 +10,11 @@ import com.example.moamoa_backend.member.entity.mapping.MemberSubInterest;
 import com.example.moamoa_backend.member.enums.GoalRetention;
 import com.example.moamoa_backend.member.enums.OnboardingUpdateScope;
 import com.example.moamoa_backend.member.exception.MemberException;
-import com.example.moamoa_backend.member.exception.code.MemberErrorCode;
 import com.example.moamoa_backend.member.repository.MemberRepository;
 import com.example.moamoa_backend.member.repository.MemberSubInterestRepository;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,7 +33,6 @@ public class OnboardingService {
 	private final GoalMaintenanceService goalMaintenanceService;
 	private static final ZoneId KST = ZoneId.of("Asia/Seoul");
 
-
 	/**
 	 * 온보딩 수정 API
 	 * - 엔드포인트는 하나로 유지하고, scope로 "무엇을 수정할지"만 분기한다.
@@ -45,14 +45,14 @@ public class OnboardingService {
 	 * 응답은 항상 최신 상태(ALL)로 내려줘서 프론트 동기화에 유리하게 구성
 	 */
 	@Transactional
-	public OnboardingResponseDto patchOnboarding(Long memberId, OnboardingUpdateScope scope, OnboardingPatchRequestDto req) {
+	public OnboardingResponseDto patchOnboarding(Long memberId, OnboardingUpdateScope scope,
+		OnboardingPatchRequestDto req) {
 
 		Member member = memberRepository.findById(memberId)
 			.orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 		LocalDate today = LocalDate.now(KST);
 		// 요청 시점에 예약 적용/만료를 우선 반영
 		goalMaintenanceService.applyGoalStateIfNeeded(member, today);
-
 
 		return switch (scope) {
 			case ALL -> {
@@ -119,25 +119,19 @@ public class OnboardingService {
 
 	private void requireSelections(List<OnboardingPatchRequestDto.Selection> selections) {
 		if (selections == null || selections.isEmpty()) {
-			throw new InterestException(InterestErrorCode.ONBOARDING_SELECTION_REQUIRED);
-		}
-	}
-
-	private void requireGoal(Integer goal) {
-		if (goal == null) {
-			throw new InterestException(InterestErrorCode.ONBOARDING_GOAL_REQUIRED);
+			throw new MemberException(MemberErrorCode.ONBOARDING_SELECTION_REQUIRED);
 		}
 	}
 
 	private void requireGoalRetention(GoalRetention retention) {
 		if (retention == null) {
-			throw new InterestException(InterestErrorCode.ONBOARDING_GOAL_RETENTION_REQUIRED);
+			throw new MemberException(MemberErrorCode.ONBOARDING_GOAL_RETENTION_REQUIRED);
 		}
 	}
 
 	private void validateGoalRange(Integer goal) {
 		if (goal < 0 || goal > 5) {
-			throw new InterestException(InterestErrorCode.ONBOARDING_GOAL_OUT_OF_RANGE);
+			throw new MemberException(MemberErrorCode.ONBOARDING_GOAL_OUT_OF_RANGE);
 		}
 	}
 
@@ -145,13 +139,13 @@ public class OnboardingService {
 	 * ALL scope에서는 goal이 null일 수 있으므로, 값이 있을 때만 범위 검증
 	 */
 	private void validateGoalRangeIfPresent(Integer goal) {
-		if (goal != null) validateGoalRange(goal);
+		if (goal != null)
+			validateGoalRange(goal);
 	}
-
 
 	private void validateGoalRetentionIfPresent(Integer goal, GoalRetention retention) {
 		if (goal == null && retention != null) {
-			throw new InterestException(InterestErrorCode.ONBOARDING_GOAL_RETENTION_INVALID);
+			throw new MemberException(MemberErrorCode.ONBOARDING_GOAL_RETENTION_INVALID);
 		}
 	}
 
@@ -199,13 +193,15 @@ public class OnboardingService {
 			&& Objects.equals(member.getGoalRetention(), retention);
 	}
 
-	private boolean isSamePendingSetting(Member member, Integer dailyGoal, GoalRetention retention, LocalDate applyDate) {
+	private boolean isSamePendingSetting(Member member, Integer dailyGoal, GoalRetention retention,
+		LocalDate applyDate) {
 		return Objects.equals(member.getPendingDailyGoal(), dailyGoal)
 			&& Objects.equals(member.getPendingGoalRetention(), retention)
 			&& Objects.equals(member.getPendingApplyDate(), applyDate);
 	}
 
-	private OnboardingResponseDto toOnboardingResponse(List<OnboardingResponseDto.Selection> selections, Member member) {
+	private OnboardingResponseDto toOnboardingResponse(List<OnboardingResponseDto.Selection> selections,
+		Member member) {
 		return toOnboardingResponse(selections, member == null ? null : member.getDailyGoal(), member);
 	}
 
@@ -238,19 +234,18 @@ public class OnboardingService {
 	 */
 	private void updateMemberInterestsSmartSync(Member member, List<OnboardingPatchRequestDto.Selection> selections) {
 
-
 		// 0) NPE 방지 + 기본 형태 검증 (stream 전에 null 요소 검증)
 		if (selections == null || selections.isEmpty() || selections.stream().anyMatch(Objects::isNull)) {
-			throw new InterestException(InterestErrorCode.ONBOARDING_SELECTION_REQUIRED);
+			throw new MemberException(MemberErrorCode.ONBOARDING_SELECTION_REQUIRED);
 		}
 
 		// 1) selection 구조 검증 + null subId 방지
 		for (OnboardingPatchRequestDto.Selection sel : selections) {
 			if (sel.interestId() == null || sel.subInterestIds() == null || sel.subInterestIds().isEmpty()) {
-				throw new InterestException(InterestErrorCode.ONBOARDING_SELECTION_REQUIRED);
+				throw new MemberException(MemberErrorCode.ONBOARDING_SELECTION_REQUIRED);
 			}
 			if (sel.subInterestIds().stream().anyMatch(Objects::isNull)) {
-				throw new InterestException(InterestErrorCode.ONBOARDING_SELECTION_REQUIRED);
+				throw new MemberException(MemberErrorCode.ONBOARDING_SELECTION_REQUIRED);
 			}
 		}
 
@@ -260,7 +255,7 @@ public class OnboardingService {
 			.collect(Collectors.toSet());
 
 		if (requestedSubIds.isEmpty()) {
-			throw new InterestException(InterestErrorCode.ONBOARDING_SELECTION_REQUIRED);
+			throw new MemberException(MemberErrorCode.ONBOARDING_SELECTION_REQUIRED);
 		}
 
 		// 3) DB에서 (interestId, subId)만 조회하여
@@ -271,7 +266,7 @@ public class OnboardingService {
 
 		// 요청한 subIds 중 DB에 없는 값이 있으면 조회 개수가 줄어든다
 		if (pairs.size() != requestedSubIds.size()) {
-			throw new InterestException(InterestErrorCode.SUB_INTEREST_NOT_FOUND);
+			throw new MemberException(InterestErrorCode.SUB_INTEREST_NOT_FOUND);
 		}
 
 		// subId -> interestId 매핑 구성(검증 시 Map lookup으로 처리)
@@ -286,7 +281,7 @@ public class OnboardingService {
 			for (Long subId : sel.subInterestIds()) {
 				Long actualInterestId = subIdToInterestId.get(subId);
 				if (!Objects.equals(sel.interestId(), actualInterestId)) {
-					throw new InterestException(InterestErrorCode.SUB_INTEREST_MISMATCH_INTEREST);
+					throw new MemberException(InterestErrorCode.SUB_INTEREST_MISMATCH_INTEREST);
 				}
 			}
 		}

@@ -44,6 +44,8 @@ public class GoalResultService {
 	public GoalPopupResponseDto getGoalPopups(Long memberId) {
 		LocalDate today = LocalDate.now(KST);
 		LocalDate yesterday = today.minusDays(1);
+
+
 		LocalDate lastWeekEnd = today.with(TemporalAdjusters.previous(DayOfWeek.SUNDAY)); // 지난 주 일요일
 
 		List<GoalPopupResponseDto.Popup> popups = new ArrayList<>();
