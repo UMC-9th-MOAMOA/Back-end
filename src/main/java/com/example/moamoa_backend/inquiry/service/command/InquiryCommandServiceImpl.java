@@ -56,7 +56,7 @@ public class InquiryCommandServiceImpl implements InquiryCommandService {
                     String url = s3UploadService.upload(file, "inquiries");
                     if (url != null) uploadedUrls.add(url);
                 } catch (IOException e) {
-                    throw new RuntimeException("S3 업로드에 실패했습니다.", e);
+                    throw new InquiryException(InquiryErrorCode.IMAGE_UPLOAD_FAILED);
                 }
             }
         }
@@ -111,7 +111,7 @@ public class InquiryCommandServiceImpl implements InquiryCommandService {
                     inquiry.getAnswerImages().add(img);
 
                 } catch (IOException e) {
-                    throw new RuntimeException("S3 업로드에 실패했습니다.", e);
+                    throw new InquiryException(InquiryErrorCode.IMAGE_UPLOAD_FAILED);
                 }
             }
         }
