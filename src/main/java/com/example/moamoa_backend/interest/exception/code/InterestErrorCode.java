@@ -23,38 +23,6 @@ public enum InterestErrorCode implements BaseErrorCode {
 		HttpStatus.BAD_REQUEST,
 		"INTEREST400_1",
 		"세부 관심사가 대분류 관심사에 속하지 않습니다."
-	),
-
-	ONBOARDING_SELECTION_REQUIRED(
-		HttpStatus.BAD_REQUEST,
-		"ONBOARDING400_1",
-		"관심사는 최소 1개 이상 선택해야 합니다."
-	),
-	ONBOARDING_GOAL_REQUIRED(
-		HttpStatus.BAD_REQUEST,
-		"ONBOARDING400_3",
-		"일일 목표는 필수 입력입니다."
-	),
-	ONBOARDING_GOAL_OUT_OF_RANGE(
-		HttpStatus.BAD_REQUEST,
-		"ONBOARDING400_4",
-		"일일 목표는 0~5 사이여야 합니다."
-	),
-
-	INVALID_SCOPE(
-		HttpStatus.BAD_REQUEST,
-		"ONBOARDING400_5",
-		"scope 값이 올바르지 않습니다."
-	),
-	ONBOARDING_GOAL_RETENTION_REQUIRED(
-		HttpStatus.BAD_REQUEST,
-		"ONBOARDING400_6",
-		"목표 유지 기간은 필수 입력입니다."
-	),
-	ONBOARDING_GOAL_RETENTION_INVALID(
-		HttpStatus.BAD_REQUEST,
-		"ONBOARDING400_7",
-		"목표 유지 기간 입력이 올바르지 않습니다."
 	);
 
 	private final HttpStatus status;
