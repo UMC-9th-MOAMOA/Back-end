@@ -2,9 +2,13 @@ package com.example.moamoa_backend.member.entity;
 
 import com.example.moamoa_backend.global.entity.BaseEntity;
 import com.example.moamoa_backend.member.enums.*;
+import com.example.moamoa_backend.member.exception.MemberException;
+import com.example.moamoa_backend.member.exception.code.MemberErrorCode;
+
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -131,9 +135,15 @@ public class Member extends BaseEntity {
      */
     public void applyGoalSetting(Integer dailyGoal, GoalRetention retention, LocalDate startDate) {
 
-        if (dailyGoal != null && retention != null && startDate == null) {
-                   throw new IllegalArgumentException("startDate는 retention 설정 시 필수입니다.");
-                }
+        // retention을 쓰는 경우 startDate(월요일) 필수
+        if (dailyGoal != null && retention != null) {
+            if (startDate == null) {
+                throw new MemberException(MemberErrorCode.GOAL_APPLY_DATE_REQUIRED);
+            }
+            if (startDate.getDayOfWeek() != DayOfWeek.MONDAY) {
+                throw new MemberException(MemberErrorCode.GOAL_APPLY_DATE_MUST_BE_MONDAY);
+            }
+        }
 
         if (dailyGoal == null) {
             this.dailyGoal = null;
@@ -153,6 +163,15 @@ public class Member extends BaseEntity {
      * 목표 변경을 다음 주 적용으로 예약한다.
      */
     public void scheduleGoalSetting(Integer dailyGoal, GoalRetention retention, LocalDate applyDate) {
+
+        // applyDate는 "월요일"이어야 한다
+        if (applyDate == null) {
+            throw new MemberException(MemberErrorCode.GOAL_APPLY_DATE_REQUIRED);
+        }
+        if (applyDate.getDayOfWeek() != DayOfWeek.MONDAY) {
+            throw new MemberException(MemberErrorCode.GOAL_APPLY_DATE_MUST_BE_MONDAY);
+        }
+
         this.pendingDailyGoal = dailyGoal;
         this.pendingGoalRetention = retention;
         this.pendingApplyDate = applyDate;
