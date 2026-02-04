@@ -4,6 +4,7 @@ import com.example.moamoa_backend.global.apiPayload.code.GeneralSuccessCode;
 import com.example.moamoa_backend.global.apiPayload.response.ApiResponse;
 import com.example.moamoa_backend.inquiry.dto.*;
 import com.example.moamoa_backend.inquiry.enums.InquiryCategory;
+import com.example.moamoa_backend.inquiry.exception.code.InquirySuccessCode;
 import com.example.moamoa_backend.inquiry.service.command.InquiryCommandService;
 import com.example.moamoa_backend.inquiry.service.query.InquiryQueryService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -52,7 +53,8 @@ public class InquiryController {
         InquiryResponseDTO.CreateResult result =
                 inquiryCommandService.create(memberId, request, form.images());
 
-        return ApiResponse.onSuccess(GeneralSuccessCode.CREATED, result);
+        return ApiResponse.onSuccess(InquirySuccessCode.INQUIRY_CREATE_SUCCESS, result);
+
     }
 
     @Operation(
@@ -78,7 +80,8 @@ public class InquiryController {
         InquiryQueryResDto.MyInquiryList result =
                 inquiryQueryService.getMyInquiries(memberId, cond);
 
-        return ApiResponse.onSuccess(GeneralSuccessCode.OK, result);
+        return ApiResponse.onSuccess(InquirySuccessCode.INQUIRY_LIST_SUCCESS, result);
+
     }
 
     @Operation(summary = "나의 문의 상세 조회", description = "회원이 본인이 작성한 1:1 문의 상세(문의/답변/이미지)를 조회합니다. (JWT 필요)")
@@ -92,7 +95,8 @@ public class InquiryController {
         InquiryDetailResDto.MyInquiryDetail result =
                 inquiryQueryService.getMyInquiryDetail(memberId, inquiryId);
 
-        return ApiResponse.onSuccess(GeneralSuccessCode.OK, result);
+        return ApiResponse.onSuccess(InquirySuccessCode.INQUIRY_DETAIL_SUCCESS, result);
+
     }
 
     @Operation(summary = "문의 답변 등록", description = "multipart/form-data 폼 객체로 답변 + 답변 이미지 파일을 업로드합니다. (관리자 JWT 필요)")
@@ -110,7 +114,9 @@ public class InquiryController {
         InquiryAnswerResponseDto.CreateResult result =
                 inquiryCommandService.answer(inquiryId, request, form.images());
 
-        return ApiResponse.onSuccess(GeneralSuccessCode.CREATED, result);
+        return ApiResponse.onSuccess(InquirySuccessCode.INQUIRY_ANSWER_CREATE_SUCCESS, result);
+
+
     }
 
     private Long extractMemberId(UserDetails userDetails) {
