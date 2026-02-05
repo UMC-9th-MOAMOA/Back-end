@@ -123,6 +123,11 @@ public class MissionCommandServiceImpl implements MissionCommandService {
         return missionConverter.toCreateResult(newMission);
     }
 
+
+    /**
+     * 미션 영상 시청 완료 처리
+     * - 미션 도전을 위한 필수 선행 조건 (시청 완료 -> true)
+     */
     @Transactional
     @Override
     public MissionResponseDto.WatchResult updateMissionWatchStatus(Long memberId, Long missionId) {
@@ -136,80 +141,60 @@ public class MissionCommandServiceImpl implements MissionCommandService {
             memberMission = missionConverter.toMemberMission(member, mission);
             memberMissionRepository.save(memberMission);
         } else {
+            if(!memberMission.isContentWatched()){
             memberMission.changeIsContentWatched(true);
+            }
         }
 
         return missionConverter.toWatchResult(memberMission);
     }
 
+    /**
+     * 미션 상태 변경 (도전, 찜, 포기)
+     * - 복잡한 상태 전이 로직을 담당
+     * - SUCCESS 상태로는 변경 불가 (정답 제출로만 가능)
+     */
     @Transactional
     @Override
     public MissionResponseDto.StatusResult updateMissionStatus(Long memberId, Long missionId, MissionRequestDto.PatchStatus request) {
 
+        //오타 체크
         MissionStatus missionStatus;
         try {
             missionStatus = MissionStatus.valueOf(request.status());
         } catch (IllegalArgumentException e) {
+            throw new MissionException(MissionErrorCode.INVALID_MISSION_STATUS_PARAM);
+        }
+
+        //SUCCESS로 변경 시도 차단
+        if(missionStatus == MissionStatus.SUCCESS){
             throw new MissionException(MissionErrorCode.INVALID_MISSION_STATUS);
         }
 
         Mission mission = missionRepository.findById(missionId).orElseThrow(() -> new MissionException(MissionErrorCode.MISSION_NOT_FOUND));
         MemberMission memberMission = memberMissionRepository.findByMemberIdAndMissionId(memberId, missionId).orElse(null);
 
+        if(missionStatus == MissionStatus.NONE){
+            boolean isScrapCancel = (memberMission !=null && memberMission.getMissionStatus() == MissionStatus.SCRAP);
+            if(!isScrapCancel){
+                if(memberMission==null || !memberMission.isContentWatched()){
+                throw new MissionException(MissionErrorCode.MISSION_VIDEO_NOT_WATCHED);
+                }
+            }
+        }
         //멤버 미션 기록이 없을 때 -> 영상 안 보고 찜만 누른거
         if (memberMission == null) {
-            Member member = memberRepository.findById(memberId).orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
-
-            memberMission = missionConverter.toMemberMission(member, mission, missionStatus);
-
-            memberMissionRepository.save(memberMission);
-        }
+            if(missionStatus==MissionStatus.FAIL){
+                throw new MissionException(MissionErrorCode.MISSION_NOT_STARTED);
+            }
+            return createInitialMemberMission(memberId,mission,missionStatus);
+            }
 
         //MemberMission에 데이터(기록)이 이미 있을 때 (재도전, 찜, 포기)
-        else {
-            //그만두기 FAIL 요청 -> 재도전 리스트로
-            if (missionStatus == MissionStatus.FAIL) {
-
-                //시작도 안했는데 포기하는거 불가
-                if (memberMission.getAttemptCount() == 0) {
-                    throw new MissionException(MissionErrorCode.MISSION_NOT_STARTED);
-                }
-
-                //이미 성공한 미션을 FAIL로 바꿀 수 없게 방어 -> SUCCESS인 미션도 문제 풀려고 다시 풀 수 있으니까
-                if (memberMission.getMissionStatus() != MissionStatus.SUCCESS) {
-                    memberMission.changeMissionStatus(MissionStatus.FAIL);
-                }
-            }
-
-            //찜하기 SCRAP 요청 -> 찜 리스트로
-            else if (missionStatus == MissionStatus.SCRAP) {
-                //이미 성공한 미션은 찜 상태로 바꿀 수 없음!
-                if (memberMission.getMissionStatus() != MissionStatus.SUCCESS) {
-                    memberMission.changeMissionStatus(MissionStatus.SCRAP);
-                }
-            }
-
-            //도전 시작/ 재도전/ 찜 취소 -> NONE 요청
-            else if (missionStatus == MissionStatus.NONE) {
-
-                //상황 1. 찜 취소인 경우
-                if (memberMission.getMissionStatus() == MissionStatus.SCRAP) {
-
-                    //이전에 도전했던 기록(FAIL)이 있는지 확인
-                    if (memberMission.getAttemptCount() > 0) {
-
-                        //기록이 있으면 FAIL 상태로 복구
-                        memberMission.changeMissionStatus(MissionStatus.FAIL);
-                    } else {
-                        memberMission.changeMissionStatus(MissionStatus.NONE);
-                    }
-                }
-                //상황 2. 도전 시작/ 재도전인 경우 -> 시도횟수 +1
-                else {
-                    memberMission.addAttemptCount();
-                }
-
-            }
+        switch (missionStatus) {
+            case FAIL -> handleFailRequest(memberMission);
+            case SCRAP -> handleScrapRequest(memberMission);
+            case NONE -> handleNoneRequest(memberMission);
         }
         return missionConverter.toStatusResult(memberMission);
     }
@@ -337,6 +322,55 @@ public class MissionCommandServiceImpl implements MissionCommandService {
                 (int) weeklyCount, (member.getWeeklyGoal() != null && weeklyCount >= member.getWeeklyGoal())
         );
 
+    }
+
+    // [신규 생성] 기록이 아예 없을 때
+    private MissionResponseDto.StatusResult createInitialMemberMission(Long memberId, Mission mission, MissionStatus status) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        MemberMission newMission = missionConverter.toMemberMission(member, mission, status);
+        memberMissionRepository.save(newMission);
+
+        return missionConverter.toStatusResult(newMission);
+    }
+
+    // [포기 요청] FAIL 로직
+    private void handleFailRequest(MemberMission memberMission) {
+        // 시작도 안 했는데(0회) 포기할 순 없음
+        if (memberMission.getAttemptCount() == 0) {
+            throw new MissionException(MissionErrorCode.MISSION_NOT_STARTED);
+        }
+
+        // 성공한 미션은 FAIL로 상태 변경 불가
+        if (memberMission.getMissionStatus() != MissionStatus.SUCCESS) {
+            memberMission.changeMissionStatus(MissionStatus.FAIL);
+        }
+    }
+
+    // [찜 요청] SCRAP 로직
+    private void handleScrapRequest(MemberMission memberMission) {
+        // 성공한 미션은 SCRAP으로 상태 변경 불가
+        if (memberMission.getMissionStatus() != MissionStatus.SUCCESS) {
+            memberMission.changeMissionStatus(MissionStatus.SCRAP);
+        }
+    }
+
+    // [도전/재도전/찜취소 요청] NONE 로직
+    private void handleNoneRequest(MemberMission memberMission) {
+        // 상황 A: 찜 취소인 경우 (SCRAP -> NONE/FAIL)
+        if (memberMission.getMissionStatus() == MissionStatus.SCRAP) {
+            if (memberMission.getAttemptCount() > 0) {
+                memberMission.changeMissionStatus(MissionStatus.FAIL);
+            } else {
+                memberMission.changeMissionStatus(MissionStatus.NONE);
+            }
+        }
+        // 상황 B: 재도전 (그 외 상태 -> 시도횟수만 증가)
+        else {
+            // 성공한 미션이어도 시도 횟수는 증가시킴
+            memberMission.addAttemptCount();
+        }
     }
 
     //카운트 조회

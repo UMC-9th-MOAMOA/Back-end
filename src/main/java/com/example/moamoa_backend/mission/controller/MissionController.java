@@ -8,6 +8,7 @@ import com.example.moamoa_backend.mission.dto.response.MissionResponseDto;
 import com.example.moamoa_backend.mission.service.command.MissionCommandService;
 import com.example.moamoa_backend.mission.service.query.MissionQueryService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +38,11 @@ public class MissionController {
             - **영상 길이 자동 계산**: 입력된 유튜브 URL을 분석해 영상 시간(초)과 소요 시간(분)을 서버가 자동으로 저장합니다.
             - **보상 자동 계산**: 등록된 퀴즈의 타입별 배점에 따라 총 보상(도토리)이 자동으로 합산됩니다.
             
+            **[키워드 타입 가이드]**
+            - **SITUATION**: 추천상황 
+            - **SKILL**: 획득스킬 
+            - **KEYWORD**: 일반 키워드 
+                                
             **[주의사항]**
             - **카테고리**: 반드시 '카테고리 코드표'의 소분류 한글명을 정확히 입력해야 매핑됩니다. (ex: "경제의 흐름")
             - **퀴즈 옵션**: OX는 `["O", "X"]`, 단답형은 `[]` 빈 배열을 준수해주세요.
@@ -64,7 +70,21 @@ public class MissionController {
     }
 
     @PostMapping("/{missionId}/watch")
-    @Operation(summary = "미션 영상 시청 완료 API", description = "영상을 끝까지 시청했을 때 호출합니다.")
+    @Operation(
+            summary = "미션 영상 시청 완료 (필수)",
+            description = """
+                    영상을 끝까지 시청했을 때 호출합니다.
+                    
+                    **[중요]**
+                    - 이 API를 호출하여 **시청 완료(`isContentWatched=true`)** 상태가 되어야만,
+                    - **`PATCH /missions/{id}/status` (도전하기)** API를 호출할 수 있습니다.
+                    - (안 그러면 400 에러 뜸)
+                    """
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "시청 완료 처리 성공 (이제 도전 가능)"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "미션 정보를 찾을 수 없음")
+    })
     public ApiResponse<MissionResponseDto.WatchResult> updateWatchStatus(
             @PathVariable Long missionId,
             @AuthenticationPrincipal UserDetails userDetails
@@ -78,13 +98,28 @@ public class MissionController {
     @PatchMapping("/{missionId}/status")
     @Operation(
             summary = "미션 상태 변경 (도전하기/찜/포기)",
-            description = "미션의 상태를 변경합니다. 요청하는 `status` 값에 따라 동작이 다릅니다.\n\n" +
-                    "1. **NONE (도전/찜 취소)**:\n" +
-                    "   - 기본적으로 **시도 횟수가 +1 증가**합니다 (입장료 선불).\n" +
-                    "   - 단, **현재 상태가 'SCRAP(찜)'인 경우**에는 **찜 취소**로 간주하여 **횟수가 증가하지 않습니다.**\n\n" +
-                    "2. **SCRAP (찜하기)**: 찜 리스트로 이동합니다.\n" +
-                    "3. **FAIL (포기)**: 재도전 리스트로 이동합니다."
+            description = """
+                    미션의 상태를 변경합니다. 유저의 현재 상태와 요청 값에 따라 동작이 달라집니다.
+                    
+                    | 요청 상태 (`status`) | 동작 설명 | 비고 |
+                    | :--- | :--- | :--- |
+                    | **NONE** | **도전하기 / 재도전 / 찜 취소** | 기본적으로 시도 횟수가 1 증가합니다. <br> 단, `찜(SCRAP)` 상태에서 취소하는 경우엔 횟수가 늘지 않습니다. |
+                    | **SCRAP** | **찜하기** | 미션을 찜 보관함으로 이동시킵니다. (성공한 미션은 불가) |
+                    | **FAIL** | **포기하기** | 미션을 포기하고 재도전 리스트로 보냅니다. (시작 전에는 불가) |
+                    
+                    **[주의사항]**
+                    - `SUCCESS`(성공) 상태로는 이 API로 변경할 수 없습니다. (정답 제출 API 사용)
+                    """
             )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "상태 변경 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "실패 이유:\n" +
+                    "- `MISSION400_2`: 잘못된 파라미터\n" +
+                    "- `MISSION400_3`: 시작 전 포기 시도\n" +
+                    "- `MISSION400_4`: 유효하지 않은 상태값 파라미터\n" +
+                    "- `MISSION400_7`: 영상 시청하지 않고 도전 시도"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "미션 정보를 찾을 수 없음")
+    })
     public ApiResponse<MissionResponseDto.StatusResult> updateStatus(
             @PathVariable Long missionId,
             @Valid @RequestBody MissionRequestDto.PatchStatus request,

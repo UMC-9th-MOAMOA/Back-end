@@ -31,7 +31,25 @@ public class MissionRequestDto {
             @NotBlank(message = "카테고리는 필수입니다.")
             String category,
 
-            @Schema(description = "퀴즈 리스트 (최소 1개 이상)")
+            @Schema(
+                    description = "퀴즈 리스트 (최소 1개 이상). OX, 객관식, 단답형 혼합 가능",
+                    example = """
+                    [
+                      {
+                        "question": "HTTP 프로토콜은 상태를 유지하지 않는(Stateless) 특성이 있다.",
+                        "type": "OX",
+                        "answer": "O",
+                        "options": ["O", "X"]
+                      },
+                      {
+                        "question": "다음 중 관계형 데이터베이스(RDBMS)가 아닌 것은?",
+                        "type": "MULTIPLE",
+                        "answer": "MongoDB",
+                        "options": ["MySQL", "Oracle", "MongoDB", "PostgreSQL"]
+                      }
+                    ]
+                    """
+            )
             @NotNull(message = "퀴즈는 필수입니다.")
             @Size(min = 1, message = "퀴즈는 최소 1개 이상 등록해야 합니다.")
             @Valid List<CreateQuiz> quizzes
@@ -62,28 +80,18 @@ public class MissionRequestDto {
             String answer,
 
             @Schema(
-                    description = "퀴즈 리스트 (최소 1개 이상). OX와 객관식(MULTIPLE), 단답형(SHORT)을 섞어서 등록할 수 있습니다.",
-                    example = """
-                    [
-                      {
-                        "question": "HTTP 프로토콜은 상태를 유지하지 않는(Stateless) 특성이 있다.",
-                        "type": "OX",
-                        "answer": "O",
-                        "options": ["O", "X"]
-                      },
-                      {
-                        "question": "다음 중 관계형 데이터베이스(RDBMS)가 아닌 것은?",
-                        "type": "MULTIPLE",
-                        "answer": "MongoDB",
-                        "options": ["MySQL", "Oracle", "MongoDB", "PostgreSQL"]
-                      }
-                    ]
-                    """
+                    description = "객관식 보기 리스트. OX는 [\"O\", \"X\"], 단답형은 [] 빈 배열",
+                    example = "[\"O\", \"X\"]"
             )
             List<String> options
             ){}
 
     public record PatchStatus(
+            @Schema(
+                    description = "변경할 상태값 (NONE, SCRAP, FAIL 중 택 1)",
+                    example = "NONE",
+                    allowableValues = {"NONE", "SCRAP", "FAIL"}
+            )
             @NotBlank(message = "상태값은 필수입니다.")
             String status
     ){}
