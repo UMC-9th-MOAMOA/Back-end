@@ -95,7 +95,10 @@ public class MissionController {
             )
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "상태 변경 성공"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 상태값 요청 (오타, 혹은 SUCCESS로 변경 시도 등)"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "실패 이유:\n" +
+                    "- `MISSION400_2`: 잘못된 파라미터\n" +
+                    "- `MISSION400_3`: 시작 전 포기 시도\n" +
+                    "- `MISSION400_7`: 영상 시청하지 않고 도전 시도"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "미션 정보를 찾을 수 없음")
     })
     public ApiResponse<MissionResponseDto.StatusResult> updateStatus(
