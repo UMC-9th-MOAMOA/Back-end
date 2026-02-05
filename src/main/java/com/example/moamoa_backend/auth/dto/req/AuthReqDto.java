@@ -75,6 +75,7 @@ public class AuthReqDto {
                     .provider(Provider.LOCAL)
                     .providerId(email)
                     .status(MemberStatus.ACTIVE)
+                    .policyAgreed(true) // 로컬 회원가입은 회원가입시 필수 정책 동의에 대한 검증이 포함됨
                     .build();
         }
     }
