@@ -368,7 +368,6 @@ public class MissionCommandServiceImpl implements MissionCommandService {
         }
         // 상황 B: 재도전 (그 외 상태 -> 시도횟수만 증가)
         else {
-            // 주의: 여기서 상태를 변경하지 않음 (기존 로직 유지)
             // 성공한 미션이어도 시도 횟수는 증가시킴
             memberMission.addAttemptCount();
         }
