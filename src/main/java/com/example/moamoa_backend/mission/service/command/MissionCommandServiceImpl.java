@@ -175,8 +175,11 @@ public class MissionCommandServiceImpl implements MissionCommandService {
         MemberMission memberMission = memberMissionRepository.findByMemberIdAndMissionId(memberId, missionId).orElse(null);
 
         if(missionStatus == MissionStatus.NONE){
-            if(memberMission==null || !memberMission.isContentWatched()){
+            boolean isScrapCancel = (memberMission !=null && memberMission.getMissionStatus() == MissionStatus.SCRAP);
+            if(!isScrapCancel){
+                if(memberMission==null || !memberMission.isContentWatched()){
                 throw new MissionException(MissionErrorCode.MISSION_VIDEO_NOT_WATCHED);
+                }
             }
         }
         //멤버 미션 기록이 없을 때 -> 영상 안 보고 찜만 누른거
