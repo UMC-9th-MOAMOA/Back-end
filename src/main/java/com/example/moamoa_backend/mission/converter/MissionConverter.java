@@ -57,7 +57,6 @@ public class MissionConverter {
 
         Mission mission = Mission.builder()
                 .title(request.title())
-                .description(request.description())
                 .videoUrl(request.videoUrl())
                 .durationMinutes(durationMinutes)
                 .videoLength(videoDuration)
@@ -84,7 +83,6 @@ public class MissionConverter {
         return MissionResponseDto.MissionDetail.builder()
                 .missionId(mission.getId())
                 .title(mission.getTitle())
-                .description(mission.getDescription())
                 .videoUrl(mission.getVideoUrl())
                 .durationMinutes(mission.getDurationMinutes())
                 .interest(interestName)
@@ -176,7 +174,6 @@ public class MissionConverter {
         return MissionResponseDto.RecommendResult.builder()
                 .missionId(mission.getId())
                 .title(mission.getTitle())
-                .description(mission.getDescription())
                 .durationMinutes(mission.getDurationMinutes())
                 .category(categoryName)
                 .quizCount(mission.getQuizzes().size())

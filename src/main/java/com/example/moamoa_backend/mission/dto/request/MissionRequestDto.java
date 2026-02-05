@@ -17,9 +17,6 @@ public class MissionRequestDto {
             @NotBlank(message="제목은 필수입니다.")
             String title,
 
-            @Schema(description = "미션 설명", example = "CS 지식, 이 정도는 알고 가야 면접관이 좋아합니다.")
-            String description,
-
             @Schema(description = "유튜브 영상 URL (공유 링크 또는 브라우저 링크)", example = "https://www.youtube.com/watch?v=LJDHYWewzUw")
             @NotBlank(message = "영상 URL은 필수입니다.")
             String videoUrl,
