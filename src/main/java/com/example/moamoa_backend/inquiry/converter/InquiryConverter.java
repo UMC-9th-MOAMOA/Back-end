@@ -21,6 +21,7 @@ public class InquiryConverter {
                 .category(request.category())
                 .title(request.title())
                 .content(request.content())
+                .termsAgreed(request.termsAgreed())
                 .isSecret(true)                 // ✅ 항상 비공개
                 .status(InquiryStatus.WAITING)  // ✅ 최초 답변대기
                 .answer(null)

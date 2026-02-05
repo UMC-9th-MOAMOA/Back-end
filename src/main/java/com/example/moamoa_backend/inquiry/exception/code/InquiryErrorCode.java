@@ -19,6 +19,12 @@ public enum InquiryErrorCode implements BaseErrorCode {
             HttpStatus.INTERNAL_SERVER_ERROR,
             "INQUIRY500_1",
                     "이미지 업로드 중 오류가 발생했습니다."
+    ),
+
+    TERMS_NOT_AGREED(
+            HttpStatus.FORBIDDEN,
+        "INQUIRY403_1",
+                "약관 동의 후 문의 등록이 가능합니다."
     );
     private final HttpStatus status;
     private final String code;

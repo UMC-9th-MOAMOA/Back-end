@@ -11,6 +11,7 @@ public class InquiryRequestDTO {
     public record Create(
             @NotNull InquiryCategory category,
             @NotBlank @Size(max = 20) String title,
-            @NotBlank @Size(max = 2000) String content
+            @NotBlank @Size(max = 2000) String content,
+            @NotNull Boolean termsAgreed
     ) {}
 }

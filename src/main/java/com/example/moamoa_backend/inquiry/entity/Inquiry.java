@@ -46,6 +46,9 @@ public class Inquiry extends BaseEntity {
     @Column(nullable = false)
     private boolean isSecret;
 
+    @Column(nullable = false)
+    private boolean termsAgreed;
+
     //createdAt = 질문일시
 
     // 질문 이미지
