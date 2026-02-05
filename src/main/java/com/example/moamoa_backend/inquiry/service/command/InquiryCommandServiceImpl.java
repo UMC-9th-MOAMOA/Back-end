@@ -40,6 +40,10 @@ public class InquiryCommandServiceImpl implements InquiryCommandService {
     @Override
     public InquiryResponseDTO.CreateResult create(Long memberId, InquiryRequestDTO.Create request, List<MultipartFile> images) {
 
+        if (request.termsAgreed() == null || !request.termsAgreed()) {
+            throw new InquiryException(InquiryErrorCode.TERMS_NOT_AGREED);
+        }
+
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 

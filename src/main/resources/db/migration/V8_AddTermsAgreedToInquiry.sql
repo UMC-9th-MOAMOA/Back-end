@@ -1,0 +1,2 @@
+ALTER TABLE inquiry
+    ADD COLUMN terms_agreed BOOLEAN NOT NULL DEFAULT FALSE;
