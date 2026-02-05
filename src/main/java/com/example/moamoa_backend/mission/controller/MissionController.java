@@ -65,7 +65,21 @@ public class MissionController {
     }
 
     @PostMapping("/{missionId}/watch")
-    @Operation(summary = "미션 영상 시청 완료 API", description = "영상을 끝까지 시청했을 때 호출합니다.")
+    @Operation(
+            summary = "미션 영상 시청 완료 (필수)",
+            description = """
+                    영상을 끝까지 시청했을 때 호출합니다.
+                    
+                    **[중요]**
+                    - 이 API를 호출하여 **시청 완료(`isContentWatched=true`)** 상태가 되어야만,
+                    - **`PATCH /missions/{id}/status` (도전하기)** API를 호출할 수 있습니다.
+                    - (안 그러면 400 에러 뜸)
+                    """
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "시청 완료 처리 성공 (이제 도전 가능)"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "미션 정보를 찾을 수 없음")
+    })
     public ApiResponse<MissionResponseDto.WatchResult> updateWatchStatus(
             @PathVariable Long missionId,
             @AuthenticationPrincipal UserDetails userDetails

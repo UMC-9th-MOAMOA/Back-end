@@ -123,6 +123,11 @@ public class MissionCommandServiceImpl implements MissionCommandService {
         return missionConverter.toCreateResult(newMission);
     }
 
+
+    /**
+     * 미션 영상 시청 완료 처리
+     * - 미션 도전을 위한 필수 선행 조건 (시청 완료 -> true)
+     */
     @Transactional
     @Override
     public MissionResponseDto.WatchResult updateMissionWatchStatus(Long memberId, Long missionId) {
@@ -136,7 +141,9 @@ public class MissionCommandServiceImpl implements MissionCommandService {
             memberMission = missionConverter.toMemberMission(member, mission);
             memberMissionRepository.save(memberMission);
         } else {
+            if(!memberMission.isContentWatched()){
             memberMission.changeIsContentWatched(true);
+            }
         }
 
         return missionConverter.toWatchResult(memberMission);
