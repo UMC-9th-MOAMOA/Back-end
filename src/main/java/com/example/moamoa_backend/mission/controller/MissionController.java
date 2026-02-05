@@ -8,6 +8,7 @@ import com.example.moamoa_backend.mission.dto.response.MissionResponseDto;
 import com.example.moamoa_backend.mission.service.command.MissionCommandService;
 import com.example.moamoa_backend.mission.service.query.MissionQueryService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -78,13 +79,25 @@ public class MissionController {
     @PatchMapping("/{missionId}/status")
     @Operation(
             summary = "미션 상태 변경 (도전하기/찜/포기)",
-            description = "미션의 상태를 변경합니다. 요청하는 `status` 값에 따라 동작이 다릅니다.\n\n" +
-                    "1. **NONE (도전/찜 취소)**:\n" +
-                    "   - 기본적으로 **시도 횟수가 +1 증가**합니다 (입장료 선불).\n" +
-                    "   - 단, **현재 상태가 'SCRAP(찜)'인 경우**에는 **찜 취소**로 간주하여 **횟수가 증가하지 않습니다.**\n\n" +
-                    "2. **SCRAP (찜하기)**: 찜 리스트로 이동합니다.\n" +
-                    "3. **FAIL (포기)**: 재도전 리스트로 이동합니다."
+            description = """
+                    미션의 상태를 변경합니다. 유저의 현재 상태와 요청 값에 따라 동작이 달라집니다.
+                    
+                    | 요청 상태 (`status`) | 동작 설명 | 비고 |
+                    | :--- | :--- | :--- |
+                    | **NONE** | **도전하기 / 재도전 / 찜 취소** | 기본적으로 시도 횟수가 1 증가합니다. <br> 단, `찜(SCRAP)` 상태에서 취소하는 경우엔 횟수가 늘지 않습니다. |
+                    | **SCRAP** | **찜하기** | 미션을 찜 보관함으로 이동시킵니다. (성공한 미션은 불가) |
+                    | **FAIL** | **포기하기** | 미션을 포기하고 재도전 리스트로 보냅니다. (시작 전에는 불가) |
+                    
+                    **[주의사항]**
+                    - `SUCCESS`(성공) 상태로는 이 API로 변경할 수 없습니다. (정답 제출 API 사용)
+                    - 이미 성공한 미션은 상태를 변경할 수 없습니다.
+                    """
             )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "상태 변경 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 상태값 요청 (오타, 혹은 SUCCESS로 변경 시도 등)"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "미션 정보를 찾을 수 없음")
+    })
     public ApiResponse<MissionResponseDto.StatusResult> updateStatus(
             @PathVariable Long missionId,
             @Valid @RequestBody MissionRequestDto.PatchStatus request,

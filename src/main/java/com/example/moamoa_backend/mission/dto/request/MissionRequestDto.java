@@ -87,6 +87,11 @@ public class MissionRequestDto {
             ){}
 
     public record PatchStatus(
+            @Schema(
+                    description = "변경할 상태값 (NONE, SCRAP, FAIL 중 택 1)",
+                    example = "NONE",
+                    allowableValues = {"NONE", "SCRAP", "FAIL"}
+            )
             @NotBlank(message = "상태값은 필수입니다.")
             String status
     ){}
