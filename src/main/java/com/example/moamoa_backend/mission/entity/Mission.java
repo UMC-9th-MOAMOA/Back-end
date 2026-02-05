@@ -25,9 +25,6 @@ public class Mission extends BaseEntity {
     @Column(nullable=false, length = 255)
     private String title;
 
-    @Column(columnDefinition = "TEXT", length = 500)
-    private String description;
-
     @Column(nullable = false)
     private String videoUrl;
 
