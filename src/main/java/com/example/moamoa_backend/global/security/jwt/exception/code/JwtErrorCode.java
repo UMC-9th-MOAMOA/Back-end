@@ -9,6 +9,10 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 public enum JwtErrorCode implements BaseErrorCode {
 
+    REFRESH_TOKEN_MISSING(HttpStatus.BAD_REQUEST,
+            "JWT400_1",
+            "Refresh Token 쿠키가 요청에 포함되지 않았습니다."),
+
     // ============= 401 Unauthorized =============
     TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED,
             "JWT401_1",

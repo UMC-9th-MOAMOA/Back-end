@@ -39,10 +39,6 @@ public enum AuthErrorCode implements BaseErrorCode {
 		"AUTH400_6",
 		"이메일 재전송은 30초 뒤에 가능합니다."),
 
-	REFRESH_TOKEN_MISSING(HttpStatus.BAD_REQUEST,
-		"AUTH400_7",
-		"Refresh Token 쿠키가 요청에 포함되지 않았습니다."),
-
 	UNSUPPORTED_OAUTH_PROVIDER(HttpStatus.BAD_REQUEST,
 		"AUTH400_8",
 		"지원하지 않는 소셜 로그인 플랫폼입니다."),
