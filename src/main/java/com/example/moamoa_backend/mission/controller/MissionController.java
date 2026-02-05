@@ -104,7 +104,6 @@ public class MissionController {
                     
                     **[주의사항]**
                     - `SUCCESS`(성공) 상태로는 이 API로 변경할 수 없습니다. (정답 제출 API 사용)
-                    - 이미 성공한 미션은 상태를 변경할 수 없습니다.
                     """
             )
     @ApiResponses(value = {
