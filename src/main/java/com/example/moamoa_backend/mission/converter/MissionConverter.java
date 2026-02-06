@@ -42,6 +42,7 @@ public class MissionConverter {
 
     public Mission toEntity(MissionRequestDto.Create request, int videoDuration){
         List<Quiz> quizzes = request.quizzes().stream()
+                .peek(this::validateQuizAnswer)
                 .map(this::toQuizEntity)
                 .collect(Collectors.toList());
 
@@ -64,6 +65,7 @@ public class MissionConverter {
                 .build();
 
         quizzes.forEach(quiz -> quiz.setMission(mission));
+        mission.getQuizzes().addAll(quizzes);
         return mission;
     }
 
@@ -228,6 +230,24 @@ public class MissionConverter {
                 .build();
     }
 
+    private void validateQuizAnswer(MissionRequestDto.CreateQuiz request) {
+        if (request.type() == QuizType.MULTIPLE) {
+            try {
+                // "1" -> 1 변환 시도
+                int answerIndex = Integer.parseInt(request.answer().trim());
+                int optionSize = request.options().size();
+
+                // 범위 체크 (1번 ~ 보기 개수)
+                if (answerIndex < 1 || answerIndex > optionSize) {
+                    throw new MissionException(MissionErrorCode.INVALID_QUIZ_ANSWER);
+                }
+            } catch (NumberFormatException e) {
+                // 숫자가 아닌 값이 들어옴
+                throw new MissionException(MissionErrorCode.INVALID_QUIZ_ANSWER);
+            }
+        }
+    }
+
     private MissionResponseDto.QuizDetail toQuizDetail(Quiz quiz){
         List<String> options = Collections.emptyList();
 
@@ -253,7 +273,7 @@ public class MissionConverter {
             return Quiz.builder()
                     .question(request.question())
                     .type(request.type())
-                    .answer(request.answer())
+                    .answer(request.answer().trim())
                     .detailInformation(optionsJson)
                     .build();
         }catch(Exception e){
