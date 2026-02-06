@@ -248,16 +248,17 @@ public class MissionCommandServiceImpl implements MissionCommandService {
             boolean isCorrect = false;
             String dbAnswer = quiz.getAnswer();
 
-            if (dbAnswer != null) {
-                String[] correctAnswers = dbAnswer.split(",");
-
-                for (String correct : correctAnswers) {
-                    if (userAnswer.trim().equalsIgnoreCase(correct.trim())) {
-                        isCorrect = true;
-                        break;
-                    }
-                }
+            if (dbAnswer == null || dbAnswer.isBlank()) {
+                throw new MissionException(MissionErrorCode.QUIZ_ANSWER_NOT_FOUND);
             }
+
+            String[] correctAnswers = dbAnswer.split(",");
+
+            for (String correct : correctAnswers) {
+                if (userAnswer.trim().equalsIgnoreCase(correct.trim())) {
+                    isCorrect = true;
+                    break;
+                }
 
             if(isCorrect){
                 earnedScore += missionConverter.getRewardByType(quiz.getType());
