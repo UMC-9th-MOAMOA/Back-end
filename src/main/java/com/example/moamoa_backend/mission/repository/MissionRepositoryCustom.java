@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface MissionRepositoryCustom {
     List<Mission> findTodayRecommendMission(Long memberId, List<Long> interestIds, Integer time);
@@ -23,4 +24,6 @@ public interface MissionRepositoryCustom {
     Slice<MissionResponseDto.RecommendResult> getMyMissions(
             Long memberId, String status, String condition, Long categoryId, Pageable pageable
     );
+
+    Optional<Mission> findByIdWithDetail(Long missionId);
 }

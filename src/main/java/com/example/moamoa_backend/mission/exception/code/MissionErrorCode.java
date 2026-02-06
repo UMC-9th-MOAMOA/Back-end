@@ -21,7 +21,8 @@ public enum MissionErrorCode implements BaseErrorCode {
     YOUTUBE_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "MISSION500_1", "유튜브 API 연동 중 오류가 발생했습니다."),
     INVALID_KEYWORD_TYPE(HttpStatus.BAD_REQUEST, "MISSION400_6", "유효하지 않은 키워드 타입입니다. (KEYWORD, SITUATION, SKILL 중 하나여야 합니다.)"),
     MISSION_VIDEO_NOT_WATCHED(HttpStatus.BAD_REQUEST, "MISSION400_7", "영상을 끝까지 시청해야 도전할 수 있습니다."),
-    INVALID_QUIZ_ANSWER(HttpStatus.BAD_REQUEST, "MISSION400_8", "유효하지 않은 정답입니다.")
+    INVALID_QUIZ_ANSWER(HttpStatus.BAD_REQUEST, "MISSION400_8", "유효하지 않은 정답입니다."),
+    QUIZ_ANSWER_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "MISSION500_2", "퀴즈에 정답 데이터가 존재하지 않습니다. 관리자에게 문의해주세요.")
     ;
     private final HttpStatus status;
     private final String code;

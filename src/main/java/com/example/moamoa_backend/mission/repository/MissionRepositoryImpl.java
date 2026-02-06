@@ -18,11 +18,15 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.example.moamoa_backend.interest.entity.QSubInterest.subInterest;
+import static com.example.moamoa_backend.keyword.entity.QKeyword.keyword;
 import static com.example.moamoa_backend.member.entity.mapping.QMemberMission.memberMission;
 import static com.example.moamoa_backend.mission.entity.QMission.mission;
+import static com.example.moamoa_backend.mission.entity.mapping.QMissionKeyword.missionKeyword;
 import static com.example.moamoa_backend.mission.entity.mapping.QMissionSubInterest.missionSubInterest;
+import static com.example.moamoa_backend.quiz.entity.QQuiz.quiz;
 
 @RequiredArgsConstructor
 public class MissionRepositoryImpl implements MissionRepositoryCustom {
@@ -135,6 +139,19 @@ public class MissionRepositoryImpl implements MissionRepositoryCustom {
         }
 
         return new SliceImpl<>(content, pageable, hasNext);
+    }
+
+    // src/main/java/com/example/moamoa_backend/mission/repository/MissionRepositoryImpl.java
+
+    @Override
+    public Optional<Mission> findByIdWithDetail(Long missionId) {
+        return Optional.ofNullable(
+                queryFactory
+                        .selectFrom(mission)
+                        .leftJoin(mission.quizzes, quiz).fetchJoin()
+                        .where(mission.id.eq(missionId))
+                        .fetchOne()
+        );
     }
     private BooleanExpression durationLoe(Integer time) {
         return time != null ? mission.durationMinutes.loe(time) : null;

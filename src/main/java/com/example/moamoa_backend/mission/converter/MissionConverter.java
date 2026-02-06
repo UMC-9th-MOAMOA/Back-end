@@ -259,12 +259,21 @@ public class MissionConverter {
             }
         }
 
+        List<String> acceptedAnswers = Collections.emptyList();
+        if (quiz.getAnswer() != null) {
+            acceptedAnswers = List.of(quiz.getAnswer().split(",")).stream()
+                    .map(String::trim)
+                    .toList();
+        }
+
         return MissionResponseDto.QuizDetail.builder()
                 .quizId(quiz.getId())
                 .type(quiz.getType().toString())
                 .question(quiz.getQuestion())
                 .option(options)
                 .explanation(quiz.getExplanation())
+                .answer(quiz.getAnswer())
+                .acceptedAnswers(acceptedAnswers)
                 .build();
     }
 
