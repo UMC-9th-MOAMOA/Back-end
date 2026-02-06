@@ -25,7 +25,7 @@ public class MissionResponseDto {
             @Schema(description = "미션 제목", example = "주식 차트 보는 법 A to Z")
             String title,
 
-            @Schema(description = "미션 카테고리 (소분류)", example = "경제")
+            @Schema(description = "미션 카테고리 (대분류)", example = "경제")
             String interest,
 
             @Schema(description = "유튜브 영상 URL", example = "https://youtu.be/...")
