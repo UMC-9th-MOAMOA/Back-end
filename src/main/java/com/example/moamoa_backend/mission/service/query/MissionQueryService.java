@@ -14,9 +14,13 @@ public interface MissionQueryService {
 
     List<MissionResponseDto.RecommendResult> getTodayRecommendMissions(Long memberId, Integer requestTime);
 
+
     MissionResponseDto.SearchResponse searchMissions(
-            Long memberId, String searchText, List<String> keywords,
-            Long categoryId, Long subCategoryId, Long seed, Pageable pageable
+            Long memberId, String searchText, List<String> keywords, Long seed, Pageable pageable
+    );
+
+    MissionResponseDto.SearchResponse getMissionsByCategory(
+            Long memberId, Long categoryId, Long subCategoryId, Long seed, Pageable pageable
     );
 
     MissionResponseDto.SearchResponse getMyMissions(Long memberId, String status, String condition, Long categoryId, Pageable pageable);

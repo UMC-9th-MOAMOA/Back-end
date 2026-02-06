@@ -172,10 +172,28 @@ public class MissionController {
     }
 
     @GetMapping("/recommend")
-    @Operation(summary = "오늘의 추천 미션 리스트 조회(소요시간 + 세부관심사별)", description = "유저의 관심사와 자투리 시간을 반영하여 미션 5개를 추천합니다. 찜한 미션이 최상단에 노출됩니다.")
+    @Operation(
+            summary = "오늘의 추천 미션 리스트 조회",
+            description = """
+            유저의 관심사와 자투리 시간(`time`)을 반영하여 맞춤형 미션 5개를 추천합니다.
+            
+            **[추천 로직]**
+            1. **1순위**: 유저가 **찜(SCRAP)** 해둔 미션 (최상단 노출)
+            2. **2순위**: 유저의 **관심사(SubInterest)** 에 맞는 미션
+            3. **필터**: 요청한 시간(`time`) 이하의 미션만 필터링 (미입력 시 전체)
+            
+            **[Response]**
+            - `isScrapped`: 해당 미션을 유저가 찜했는지 여부
+            """
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "MEMBER404_1: 사용자를 찾을 수 없음")
+    })
     public ApiResponse<List<MissionResponseDto.RecommendResult>> getTodayRecommendMissions(
-       @RequestParam(required = false) Integer time,
-       @AuthenticationPrincipal UserDetails userDetails
+            @io.swagger.v3.oas.annotations.Parameter(description = "여유 시간(분). 이 시간보다 짧거나 같은 미션만 추천됩니다. (입력 안 하면 전체)", example = "10")
+            @RequestParam(required = false) Integer time,
+            @AuthenticationPrincipal UserDetails userDetails
     ){
         Long memberId = Long.parseLong(userDetails.getUsername());
         List<MissionResponseDto.RecommendResult> result = missionQueryService.getTodayRecommendMissions(memberId,time);
@@ -184,23 +202,70 @@ public class MissionController {
     }
 
     @GetMapping("/search")
-    @Operation(summary = "미션 검색 API", description = "검색어, 키워드로 미션을 검색합니다. 시드값 랜덤으로 검색할때 하나씩 보내주시면 됩니다. ")
+    @Operation(
+            summary = "미션 검색 API (키워드/검색어)",
+            description = """
+            사용자가 입력한 검색어(`searchText`) 또는 선택한 키워드(`keywords`)로 미션을 검색합니다.
+            
+            **[검색 로직]**
+            - **검색어 + 키워드**: 두 조건이 모두 있는 경우 `AND` 조건으로 검색합니다. (둘 다 만족하는 미션만 노출)
+            - **랜덤 정렬**: `seed` 값을 기준으로 결과를 무작위로 섞습니다.
+            
+            **[페이징 가이드 (중요)]**
+            - 무한 스크롤 구현 시, **첫 페이지 요청 때 생성한 `seed` 값을 다음 페이지 요청에도 동일하게 보내주세요.**
+            - 시드가 바뀌면 페이지 넘길 때 중복된 미션이 나올 수 있습니다.
+            """
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "검색 성공 (결과 없으면 빈 리스트)"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 파라미터 요청")
+    })
     public ApiResponse<MissionResponseDto.SearchResponse> searchMissions(
-       @AuthenticationPrincipal UserDetails userDetails,
-       @RequestParam(required = false) String searchText,
-       @RequestParam(required = false) List<String> keywords,
-       @RequestParam(required = false) Long seed,
-       @PageableDefault(size = 10) Pageable pageable
+            @AuthenticationPrincipal UserDetails userDetails,
+
+            @io.swagger.v3.oas.annotations.Parameter(description = "제목 검색어 (포함 일치)", example = "주식")
+            @RequestParam(required = false) String searchText,
+
+            @io.swagger.v3.oas.annotations.Parameter(description = "키워드 리스트", example = "[\"초보\", \"투자\"]")
+            @RequestParam(required = false) List<String> keywords,
+
+            @io.swagger.v3.oas.annotations.Parameter(description = "랜덤 셔플용 시드값 (프론트 고정 전송)", example = "98765")
+            @RequestParam(required = false) Long seed,
+
+            @PageableDefault(size = 10) Pageable pageable
     ){
         Long memberId = Long.parseLong(userDetails.getUsername());
 
+        Long searchSeed = (seed != null) ? seed : System.currentTimeMillis();
+
         return ApiResponse.onSuccess(GeneralSuccessCode.OK,
-                missionQueryService.searchMissions(memberId, searchText, keywords, null, null, seed, pageable)
+                missionQueryService.searchMissions(memberId, searchText, keywords, searchSeed, pageable)
         );
     }
 
     @GetMapping("/categories")
-    @Operation(summary = "카테고리별 미션 조회 API", description = "대분류(categoryId) 또는 소분류(subCategoryId)로 미션을 조회합니다.")
+    @Operation(
+            summary = "카테고리별 미션 조회 API",
+            description = """
+            대분류(`categoryId`) 또는 소분류(`subCategoryId`)를 선택하여 미션을 조회합니다.
+            
+            **[파라미터 설명]**
+            - `categoryId`: 대분류 ID (예: 경제, IT) - 이것만 보내면 해당 대분류 하위의 모든 미션 조회
+            - `subCategoryId`: 소분류 ID (예: 주식, 코딩) - 특정 소분류만 콕 집어서 조회할 때 사용
+            
+            **[랜덤 정렬 가이드 (seed)]**
+            - 이 API는 결과를 무작위로 섞어서 보여줍니다.
+            - **페이징(무한 스크롤) 시 중복을 방지하기 위해, 프론트엔드에서 고정된 `seed` 값을 보내주세요.**
+            - (페이지 진입 시 생성한 시드값을 2페이지 요청 때도 동일하게 전송)
+            """,
+            parameters = {
+                    @io.swagger.v3.oas.annotations.Parameter(name = "seed", description = "랜덤 셔플용 시드값 (프론트 생성 및 고정 전송 권장)", example = "12345")
+            }
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 파라미터 요청")
+    })
     public ApiResponse<MissionResponseDto.SearchResponse> getMissionsByCategory(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(required = false) Long categoryId,
@@ -209,11 +274,11 @@ public class MissionController {
             @PageableDefault(size = 10) Pageable pageable
     ) {
         Long memberId = Long.parseLong(userDetails.getUsername());
-        Long searchSeed = (seed != null) ? seed : 0L;
+        Long searchSeed = (seed != null) ? seed : System.currentTimeMillis();
 
         return ApiResponse.onSuccess(
                 GeneralSuccessCode.OK,
-                missionQueryService.searchMissions(memberId, null, null, categoryId, subCategoryId, searchSeed, pageable)
+                missionQueryService.getMissionsByCategory(memberId, categoryId, subCategoryId, searchSeed, pageable)
         );
     }
 
