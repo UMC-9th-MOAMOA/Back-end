@@ -36,13 +36,15 @@ public class MissionRequestDto {
                         "question": "HTTP 프로토콜은 상태를 유지하지 않는(Stateless) 특성이 있다.",
                         "type": "OX",
                         "answer": "O",
-                        "options": ["O", "X"]
+                        "options": ["O", "X"],
+                        "explanation": "HTTP는 기본적으로 상태를 저장하지 않는 프로토콜입니다."
                       },
                       {
                         "question": "다음 중 관계형 데이터베이스(RDBMS)가 아닌 것은?",
                         "type": "MULTIPLE",
                         "answer": "3",
-                        "options": ["MySQL", "Oracle", "MongoDB", "PostgreSQL"]
+                        "options": ["MySQL", "Oracle", "MongoDB", "PostgreSQL"],
+                        "explanation": "MongoDB는 대표적인 NoSQL 데이터베이스입니다."
                       }
                     ]
                     """
