@@ -36,7 +36,8 @@ public class MissionResponseDto {
         Long quizId,
         String type,
         String question,
-        List<String> option //["O","X"] or [] or ["객관식1","객관식2"]
+        List<String> option, //["O","X"] or [] or ["객관식1","객관식2"]
+        String explanation
     ){}
 
     @Builder

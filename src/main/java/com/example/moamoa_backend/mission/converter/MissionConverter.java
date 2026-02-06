@@ -264,6 +264,7 @@ public class MissionConverter {
                 .type(quiz.getType().toString())
                 .question(quiz.getQuestion())
                 .option(options)
+                .explanation(quiz.getExplanation())
                 .build();
     }
 
@@ -275,6 +276,7 @@ public class MissionConverter {
                     .type(request.type())
                     .answer(request.answer().trim())
                     .detailInformation(optionsJson)
+                    .explanation(request.explanation())
                     .build();
         }catch(Exception e){
             throw new MissionException(MissionErrorCode.QUIZ_JSON_CONVERSION_FAIL);
