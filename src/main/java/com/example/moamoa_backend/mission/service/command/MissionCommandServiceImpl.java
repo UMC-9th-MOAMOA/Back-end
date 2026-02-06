@@ -255,7 +255,7 @@ public class MissionCommandServiceImpl implements MissionCommandService {
             String[] correctAnswers = dbAnswer.split(",");
 
             for (String correct : correctAnswers) {
-                if (userAnswer.trim().equalsIgnoreCase(correct.trim())) {
+                if (userAnswer.replaceAll("\\s+", "").equalsIgnoreCase(correct.replaceAll("\\s+", ""))) {
                     isCorrect = true;
                     break;
                 }
