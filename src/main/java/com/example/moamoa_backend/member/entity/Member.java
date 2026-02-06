@@ -154,7 +154,7 @@ public class Member extends BaseEntity {
         }
 
         this.dailyGoal = dailyGoal;
-        this.weeklyGoal = dailyGoal * 7;
+        this.weeklyGoal = dailyGoal * 5;
         this.goalRetention = retention;
         this.goalEndDate = retention == null ? null : retention.calculateEndDate(startDate);
     }
