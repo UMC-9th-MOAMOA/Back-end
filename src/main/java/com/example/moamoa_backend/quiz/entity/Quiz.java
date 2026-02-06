@@ -34,6 +34,9 @@ public class Quiz extends BaseEntity {
     @Column(columnDefinition = "JSON")
     private String detailInformation;
 
+    @Column(columnDefinition = "TEXT")
+    private String explanation;
+
     public void setMission(Mission mission) {
         this.mission = mission;
         if(!mission.getQuizzes().contains(this)) {

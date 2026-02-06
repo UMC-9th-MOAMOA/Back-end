@@ -83,7 +83,10 @@ public class MissionRequestDto {
                     description = "객관식 보기 리스트. OX는 [\"O\", \"X\"], 단답형은 [] 빈 배열",
                     example = "[\"O\", \"X\"]"
             )
-            List<String> options
+            List<String> options,
+
+            @Schema(description = "퀴즈 해설/설명", example = "경제학에서 희소성이란...")
+            String explanation
             ){}
 
     public record PatchStatus(
