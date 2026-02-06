@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -52,6 +53,11 @@ public class MissionQueryServiceImpl implements MissionQueryService{
 
     }
 
+    /**
+     * 추천 키워드 전체 목록 조회
+     *
+     * @return DB에 저장된 모든 키워드 리스트
+     */
     @Override
     public MissionResponseDto.KeywordListResult getRecommendedKeywords() {
 
@@ -60,6 +66,13 @@ public class MissionQueryServiceImpl implements MissionQueryService{
         return missionConverter.toKeywordList(keywordList);
     }
 
+
+    /**
+     * 연관 검색어 (Top 5) 조회
+     *
+     * @param keyword 사용자 입력 검색어
+     * @return 검색어가 포함된 키워드 상위 5개
+     */
     @Override
     public MissionResponseDto.KeywordListResult getRelatedKeywords(String keyword){
         List<Keyword> keywordList = keyword.isBlank() ?
@@ -68,6 +81,14 @@ public class MissionQueryServiceImpl implements MissionQueryService{
         return missionConverter.toKeywordList(keywordList);
     }
 
+    /**
+     * 오늘의 추천 미션 리스트 조회
+     *
+     * @param memberId 유저 ID
+     * @param requestTime 유저가 설정한 가용 시간(분) - null이면 시간 제한 없음
+     * @return 추천 미션 리스트 (찜 여부 포함)
+     *
+     */
     @Override
     public List<MissionResponseDto.RecommendResult> getTodayRecommendMissions(Long memberId, Integer requestTime){
 
@@ -76,51 +97,88 @@ public class MissionQueryServiceImpl implements MissionQueryService{
         }
 
         List<Long> interestIds = memberSubInterestRepository.findInterestSubPairsByMemberId(memberId).stream()
-                .map(MemberSubInterestRepository.InterestSubPair::getInterestId) // 인터페이스 메서드 호출
+                .map(MemberSubInterestRepository.InterestSubPair::getInterestId)
                 .distinct()
                 .toList();
 
-        List<Mission> missions = missionRepository.findTodayRecommendMission(memberId,interestIds,requestTime);
+        List<Mission> missions = missionRepository.findTodayRecommendMission(memberId, interestIds, requestTime);
 
-        return missions.stream()
-                .map(mission -> {
-                    boolean isScrapped = memberMissionRepository.existsByMemberIdAndMissionIdAndMissionStatus(
-                            memberId, mission.getId(), MissionStatus.SCRAP
-                    );
-                    return missionConverter.toRecommendResult(mission, isScrapped);
-                })
-                .toList();
+        if (missions.isEmpty()) {
+            return Collections.emptyList();
+        }
 
-    }
-
-    @Override
-    public MissionResponseDto.SearchResponse searchMissions(
-            Long memberId, String searchText, List<String> keywords,
-            Long categoryId, Long subCategoryId, Long seed, Pageable pageable
-    ){
-        Slice<Mission> missionSlice = missionRepository.searchMissions(
-                memberId,searchText,keywords,categoryId,subCategoryId,seed,pageable
-        );
-
-        List<Long> missionIds = missionSlice.getContent().stream()
+        List<Long> missionIds = missions.stream()
                 .map(Mission::getId)
                 .toList();
 
-        Map<Long,MemberMission> myMissionMap = memberMissionRepository
-                .findAllByMemberIdAndMissionIdIn(memberId,missionIds).stream()
-                .collect(Collectors.toMap(
-                        mm-> mm.getMission().getId(),
-                        mm -> mm
-                ));
+        List<MemberMission> memberMissions = memberMissionRepository.findAllByMemberIdAndMissionIdIn(memberId, missionIds);
 
-        return missionConverter.toSearchResponse(missionSlice,myMissionMap);
+        Set<Long> scrappedMissionIds = memberMissions.stream()
+                .filter(mm -> mm.getMissionStatus() == MissionStatus.SCRAP)
+                .map(mm -> mm.getMission().getId())
+                .collect(Collectors.toSet());
+
+        return missions.stream()
+                .map(mission -> {
+                    boolean isScrapped = scrappedMissionIds.contains(mission.getId());
+                    return missionConverter.toRecommendResult(mission, isScrapped);
+                })
+                .toList();
+    }
+
+    /**
+     * 미션 검색 (Refactored)
+     */
+    @Override
+    public MissionResponseDto.SearchResponse searchMissions(
+            Long memberId, String searchText, List<String> keywords, Long seed, Pageable pageable
+    ) {
+        Slice<Mission> missionSlice = missionRepository.searchMissions(
+                memberId, searchText, keywords, null, null, seed, pageable
+        );
+
+        return createSearchResponse(memberId, missionSlice);
+    }
+    /**
+     * 카테고리별 미션 조회
+     */
+    @Override
+    public MissionResponseDto.SearchResponse getMissionsByCategory(
+            Long memberId, Long categoryId, Long subCategoryId, Long seed, Pageable pageable
+    ) {
+        Slice<Mission> missionSlice = missionRepository.searchMissions(
+                memberId, null, null, categoryId, subCategoryId, seed, pageable
+        );
+
+        return createSearchResponse(memberId, missionSlice);
     }
 
     @Override
     public MissionResponseDto.SearchResponse getMyMissions(Long memberId, String status, String condition, Long categoryId, Pageable pageable) {
 
         Slice<MissionResponseDto.RecommendResult> slice = missionRepository.getMyMissions(memberId, status, condition, categoryId, pageable);
-
         return missionConverter.toMyMissionsResult(slice);
+    }
+
+    private MissionResponseDto.SearchResponse createSearchResponse(Long memberId, Slice<Mission> missionSlice) {
+        List<Mission> missions = missionSlice.getContent();
+
+        if (missions.isEmpty()) {
+            return missionConverter.toSearchResponse(missionSlice, Collections.emptyMap());
+        }
+
+        List<Long> missionIds = missions.stream()
+                .map(Mission::getId)
+                .toList();
+
+        Map<Long, MemberMission> myMissionMap = memberMissionRepository
+                .findAllByMemberIdAndMissionIdIn(memberId, missionIds).stream()
+                .collect(Collectors.toMap(
+                        mm -> mm.getMission().getId(),
+                        mm -> mm,
+                        (existing, replacement) -> existing // 중복 방지
+                ));
+
+        return missionConverter.toSearchResponse(missionSlice, myMissionMap);
     }
 }
