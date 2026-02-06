@@ -60,11 +60,20 @@ public class MissionController {
     @Operation(
             summary = "미션 상세 조회 API",
             description = """
-            특정 미션의 상세 정보와 사용자의 수행 상태를 조회합니다.
+            특정 미션의 상세 정보와 퀴즈 데이터를 조회합니다.
+            
+            **[프론트엔드 채점 가이드 (필독)]**
+            유저에게 즉각적인 정답/오답(O/X) 피드백을 주기 위해 `quizzes` 내부의 **`acceptedAnswers`** 필드를 사용해주세요.
+            
+            1. **단답형 채점**: 유저가 입력한 답이 `acceptedAnswers` 리스트에 포함되어 있는지 확인합니다.
+               - 비교 시 **대소문자는 무시(LowerCase 변환)** 하고,
+               - **모든 공백을 제거(replaceAll)** 해주세요. (예: "달러 수요" == "달러수요")
+               - (서버에서도 띄어쓰기를 완전히 무시하고 채점합니다.)
+               
+            2. **객관식/OX 채점**: `acceptedAnswers` 리스트의 첫 번째 값과 일치하는지 확인합니다.
             
             **[Response 필드 설명]**
             - `isContentWatched`: 영상 시청 완료 여부 (true여야 도전 가능)
-            - `quizzes`: 퀴즈 리스트 (프론트 채점을 위해 `answer` 필드가 포함됩니다.)
             - `attemptCount`: 현재까지의 시도 횟수
             """
     )
@@ -245,28 +254,32 @@ public class MissionController {
     @Operation(summary = "미션 정답 제출 및 채점",
             description = """
                    **[기능 설명]**
-                   유저의 퀴즈 답안을 채점하고 성공 여부와 보상을 반환합니다.
+                   유저의 답안을 최종 제출하여 서버에서 검증하고, 결과에 따라 보상을 지급합니다.
+                   
+                   **[서버 채점 로직]**
+                   프론트엔드 가이드와 동일하게 **대소문자 무시, 모든 공백 제거, 동의어 허용**을 적용하여 유연하게 채점합니다.
                    
                    **[보상 지급 정책]**
-                   이 API는 **'최초 시도'** 여부에 따라 결과가 다릅니다.
-                   
-                   1. 첫 시도 & 정답 
-                      - 성공 처리 (`isSuccess: true`)
-                      - **미션 보상 지급됨**
-                      - **일간/주간 목표 카운트 인정됨** (목표 달성 시 추가 보상)
+                   1. **첫 시도 & 정답** (`isFirstAttempt: true`)
+                      - `isSuccess: true`
+                      - **미션 보상(도토리) 지급**
+                      - **일간/주간 목표 카운트 인정** (목표 달성 시 추가 보상 지급)
                       
-                   2. 첫 시도 & 오답 
-                      - 실패 처리 (`isSuccess: false`)
+                   2. **첫 시도 & 오답**
+                      - `isSuccess: false`
                       - 보상 없음
                       
-                   3. 재시도 & 정답 (Retry) 
-                      - 성공 처리 (`isSuccess: true`)
+                   3. **재시도 & 정답** (이미 성공했거나, 한 번 실패한 후 재성공)
+                      - `isSuccess: true`
                       - **보상 없음 (`missionReward: 0`)**
-                      - **목표 카운트 인정 안 됨** (이미 실패했거나 기록이 있으므로 제외)
-                   
-                   **[요청 형식]**
-                   - `submissions`: 퀴즈 ID와 답안 리스트 (모든 문제 답안 필수)
-                   """)
+                      - **목표 카운트 제외** (중복 방지)
+                   """
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "채점 성공 (결과는 result.isSuccess 확인)"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "MISSION400_8: 답안 개수가 맞지 않거나 퀴즈 ID가 잘못됨"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "MISSION404_1: 해당 미션을 찾을 수 없음")
+    })
     public ApiResponse<MissionResponseDto.SubmitResult> submitMission(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable Long missionId,

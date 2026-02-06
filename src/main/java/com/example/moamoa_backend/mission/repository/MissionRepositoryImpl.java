@@ -141,18 +141,15 @@ public class MissionRepositoryImpl implements MissionRepositoryCustom {
         return new SliceImpl<>(content, pageable, hasNext);
     }
 
+    // src/main/java/com/example/moamoa_backend/mission/repository/MissionRepositoryImpl.java
+
     @Override
     public Optional<Mission> findByIdWithDetail(Long missionId) {
         return Optional.ofNullable(
                 queryFactory
                         .selectFrom(mission)
-                        .leftJoin(mission.missionKeywords, missionKeyword).fetchJoin()
-                        .leftJoin(missionKeyword.keyword, keyword).fetchJoin()
-                        .leftJoin(mission.missionSubInterests, missionSubInterest).fetchJoin()
-                        .leftJoin(missionSubInterest.subInterest, subInterest).fetchJoin()
                         .leftJoin(mission.quizzes, quiz).fetchJoin()
                         .where(mission.id.eq(missionId))
-                        .distinct()
                         .fetchOne()
         );
     }

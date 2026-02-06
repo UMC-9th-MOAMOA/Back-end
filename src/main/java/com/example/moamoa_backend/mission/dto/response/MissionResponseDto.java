@@ -25,7 +25,7 @@ public class MissionResponseDto {
             @Schema(description = "미션 제목", example = "주식 차트 보는 법 A to Z")
             String title,
 
-            @Schema(description = "미션 카테고리 (소분류)", example = "경제")
+            @Schema(description = "미션 카테고리 (대분류)", example = "경제")
             String interest,
 
             @Schema(description = "유튜브 영상 URL", example = "https://youtu.be/...")
@@ -71,8 +71,12 @@ public class MissionResponseDto {
             @Schema(description = "해설")
             String explanation,
 
-            @Schema(description = "정답 (프론트 채점용)", example = "1")
-            String answer
+            @Schema(description = "정답 (DB 원본 - 단순 참고용)", example = "클럭, Clock")
+            String answer,
+
+            @Schema(description = "인정 가능한 정답 리스트 (프론트 채점용 - 여기 포함되면 정답 처리)",
+                    example = "[\"클럭\", \"Clock\"]")
+            List<String> acceptedAnswers
     ){}
 
     @Builder

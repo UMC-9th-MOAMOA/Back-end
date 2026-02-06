@@ -6,6 +6,7 @@ import com.example.moamoa_backend.auth.dto.res.AuthResDto;
 import com.example.moamoa_backend.auth.exception.code.AuthSuccessCode;
 import com.example.moamoa_backend.auth.service.AuthService;
 import com.example.moamoa_backend.global.apiPayload.response.ApiResponse;
+import com.example.moamoa_backend.global.util.CookieUtil;
 import com.example.moamoa_backend.global.util.NetworkUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -14,9 +15,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -33,6 +32,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final CookieUtil cookieUtil;
 
     @Operation(summary = "이메일 인증번호 전송", description = "회원가입을 위해 이메일로 인증번호(6자리)를 전송합니다.")
     @SecurityRequirements(value = {})
@@ -63,7 +63,7 @@ public class AuthController {
             HttpServletResponse response
     ) {
         AuthResDto.GeneratedTokenDto generatedTokenDto = authService.signup(request);
-        setRefreshTokenCookie(response, generatedTokenDto.refreshToken());
+        cookieUtil.setRefreshTokenCookie(response, generatedTokenDto.refreshToken());
         return ApiResponse.onSuccess(AuthSuccessCode.SIGNUP_SUCCESS, AuthConverter.toTokenDto(generatedTokenDto));
     }
 
@@ -75,7 +75,7 @@ public class AuthController {
             HttpServletResponse response
     ) {
         AuthResDto.LoginResultDto result = authService.login(request);
-        setRefreshTokenCookie(response, result.generatedToken().refreshToken());
+        cookieUtil.setRefreshTokenCookie(response, result.generatedToken().refreshToken());
         return ApiResponse.onSuccess(AuthSuccessCode.LOGIN_SUCCESS, AuthConverter.toLoginResponseDto(result));
     }
 
@@ -89,7 +89,7 @@ public class AuthController {
     ) {
         AuthReqDto.ReissueDto request = new AuthReqDto.ReissueDto(refreshToken);
         AuthResDto.GeneratedTokenDto generatedTokenDto = authService.refresh(request);
-        setRefreshTokenCookie(response, generatedTokenDto.refreshToken());
+        cookieUtil.setRefreshTokenCookie(response, generatedTokenDto.refreshToken());
         return ApiResponse.onSuccess(AuthSuccessCode.REISSUE_SUCCESS, AuthConverter.toTokenDto(generatedTokenDto));
     }
 
@@ -98,7 +98,7 @@ public class AuthController {
     public ApiResponse<String> logout(@AuthenticationPrincipal UserDetails userDetails, HttpServletResponse response) {
         Long memberId = Long.parseLong(userDetails.getUsername());
         authService.logout(memberId);
-        clearRefreshTokenCookie(response);
+        cookieUtil.clearRefreshTokenCookie(response);
         return ApiResponse.onSuccess(AuthSuccessCode.LOGOUT_SUCCESS, null);
     }
 
@@ -110,7 +110,7 @@ public class AuthController {
             HttpServletResponse response
     ) {
         AuthResDto.LoginResultDto loginResultDto = authService.exchangeOAuthCode(request.code());
-        setRefreshTokenCookie(response, loginResultDto.generatedToken().refreshToken());
+        cookieUtil.setRefreshTokenCookie(response, loginResultDto.generatedToken().refreshToken());
         return ApiResponse.onSuccess(AuthSuccessCode.LOGIN_SUCCESS, AuthConverter.toLoginResponseDto(loginResultDto));
     }
 
@@ -122,7 +122,7 @@ public class AuthController {
             HttpServletResponse response
     ) {
         AuthResDto.GeneratedTokenDto generatedTokenDto = authService.recover(request);
-        setRefreshTokenCookie(response, generatedTokenDto.refreshToken());
+        cookieUtil.setRefreshTokenCookie(response, generatedTokenDto.refreshToken());
         return ApiResponse.onSuccess(AuthSuccessCode.RECOVER_SUCCESS, AuthConverter.toTokenDto(generatedTokenDto));
     }
 
@@ -158,27 +158,4 @@ public class AuthController {
         return ApiResponse.onSuccess(AuthSuccessCode.PASSWORD_RESET_SUCCESS, null);
     }
 
-    // ----- Helper Methods -----
-
-    private void setRefreshTokenCookie(HttpServletResponse response, String refreshToken) {
-        ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
-                .path("/")
-                .sameSite("None")
-                .httpOnly(true)
-                .secure(true)
-                .maxAge(14 * 24 * 60 * 60)
-                .build();
-        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-    }
-
-    private void clearRefreshTokenCookie(HttpServletResponse response) {
-        ResponseCookie cookie = ResponseCookie.from("refreshToken", "")
-                .path("/")
-                .sameSite("None")
-                .httpOnly(true)
-                .secure(true)
-                .maxAge(0)
-                .build();
-        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-    }
 }
