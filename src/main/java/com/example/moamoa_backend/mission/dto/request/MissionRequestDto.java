@@ -41,7 +41,7 @@ public class MissionRequestDto {
                       {
                         "question": "다음 중 관계형 데이터베이스(RDBMS)가 아닌 것은?",
                         "type": "MULTIPLE",
-                        "answer": "MongoDB",
+                        "answer": "3",
                         "options": ["MySQL", "Oracle", "MongoDB", "PostgreSQL"]
                       }
                     ]
@@ -72,7 +72,10 @@ public class MissionRequestDto {
             @NotNull(message ="퀴즈 타입은 필수입니다.")
             QuizType type,
 
-            @Schema(description = "퀴즈 정답 (OX인 경우 'O' 또는 'X'로 입력)", example = "O")
+            @Schema(
+                    description = "퀴즈 정답 (OX: 'O'/'X', 객관식: '1' 처럼 번호(String), 단답형: 정답 텍스트)",
+                    example = "1"
+            )
             @NotBlank(message = "퀴즈 답은 필수입니다.")
             String answer,
 
