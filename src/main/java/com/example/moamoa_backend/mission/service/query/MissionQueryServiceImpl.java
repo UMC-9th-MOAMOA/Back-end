@@ -53,6 +53,11 @@ public class MissionQueryServiceImpl implements MissionQueryService{
 
     }
 
+    /**
+     * 추천 키워드 전체 목록 조회
+     *
+     * @return DB에 저장된 모든 키워드 리스트
+     */
     @Override
     public MissionResponseDto.KeywordListResult getRecommendedKeywords() {
 
@@ -62,6 +67,12 @@ public class MissionQueryServiceImpl implements MissionQueryService{
     }
 
 
+    /**
+     * 연관 검색어 (Top 5) 조회
+     *
+     * @param keyword 사용자 입력 검색어
+     * @return 검색어가 포함된 키워드 상위 5개
+     */
     @Override
     public MissionResponseDto.KeywordListResult getRelatedKeywords(String keyword){
         List<Keyword> keywordList = keyword.isBlank() ?
@@ -146,7 +157,6 @@ public class MissionQueryServiceImpl implements MissionQueryService{
     public MissionResponseDto.SearchResponse getMyMissions(Long memberId, String status, String condition, Long categoryId, Pageable pageable) {
 
         Slice<MissionResponseDto.RecommendResult> slice = missionRepository.getMyMissions(memberId, status, condition, categoryId, pageable);
-
         return missionConverter.toMyMissionsResult(slice);
     }
 

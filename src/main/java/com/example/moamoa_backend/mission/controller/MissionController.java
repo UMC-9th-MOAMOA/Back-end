@@ -156,15 +156,40 @@ public class MissionController {
     }
 
     @GetMapping("/keywords")
-    @Operation(summary = "추천 키워드 목록 조회", description = "탐색에서 하단에 노출할 키워드들을 반환합니다.")
+    @Operation(
+            summary = "추천 키워드(태그) 목록 조회",
+            description = """
+            탐색 화면 하단이나 필터링에 사용할 **추천 키워드 전체 목록**을 조회합니다.
+            
+            **[반환 데이터]**
+            - 키워드 ID, 이름(태그명), 타입(SITUATION, SKILL 등)을 반환합니다.
+            """
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공")
+    })
     public ApiResponse<MissionResponseDto.KeywordListResult> getRecommendKeyword(){
         MissionResponseDto.KeywordListResult result = missionQueryService.getRecommendedKeywords();
         return ApiResponse.onSuccess(GeneralSuccessCode.OK,result);
     }
 
     @GetMapping("/keywords/related")
-    @Operation(summary = "연관 검색어(태그) 조회", description = "사용자가 입력한 검색어가 포함된 키워드(태그)를 최대 5개까지 추천해줍니다.")
+    @Operation(
+            summary = "연관 검색어(자동완성) 조회",
+            description = """
+            사용자가 검색창에 입력 중인 단어를 포함하는 키워드를 **최대 5개** 추천합니다.
+            
+            **[로직 설명]**
+            - 입력된 단어가 포함된(`Like %keyword%`) 키워드를 조회합니다.
+            - 공백이나 빈 문자열 입력 시 빈 리스트를 반환합니다.
+            """
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공 (결과 없으면 빈 리스트)"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 파라미터")
+    })
     public ApiResponse<MissionResponseDto.KeywordListResult> getRelatedKeywords(
+            @io.swagger.v3.oas.annotations.Parameter(description = "검색어 (예: '주식')", example = "주식")
             @RequestParam String keyword
     ) {
         MissionResponseDto.KeywordListResult result = missionQueryService.getRelatedKeywords(keyword);
