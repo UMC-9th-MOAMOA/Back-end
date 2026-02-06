@@ -259,6 +259,7 @@ public class MissionCommandServiceImpl implements MissionCommandService {
                     isCorrect = true;
                     break;
                 }
+            }
 
             if(isCorrect){
                 earnedScore += missionConverter.getRewardByType(quiz.getType());
