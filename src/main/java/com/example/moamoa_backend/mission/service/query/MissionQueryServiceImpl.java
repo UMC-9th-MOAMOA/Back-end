@@ -37,9 +37,13 @@ public class MissionQueryServiceImpl implements MissionQueryService{
     private final KeywordRepository keywordRepository;
     private final MemberRepository memberRepository;
     private final MemberSubInterestRepository memberSubInterestRepository;
+
+    /**
+     * 미션 상세 정보 조회
+     */
     @Override
     public MissionResponseDto.MissionDetail getMissionDetail(Long memberId, Long missionId){
-        Mission mission = missionRepository.findById(missionId).orElseThrow(()-> new MissionException(MissionErrorCode.MISSION_NOT_FOUND));
+        Mission mission = missionRepository.findByIdWithDetail(missionId).orElseThrow(()-> new MissionException(MissionErrorCode.MISSION_NOT_FOUND));
 
         MemberMission memberMission = memberMissionRepository.findByMemberIdAndMissionId(memberId,missionId).orElse(null);
 

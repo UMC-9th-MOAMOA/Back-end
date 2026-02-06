@@ -265,6 +265,7 @@ public class MissionConverter {
                 .question(quiz.getQuestion())
                 .option(options)
                 .explanation(quiz.getExplanation())
+                .answer(quiz.getAnswer())
                 .build();
     }
 
