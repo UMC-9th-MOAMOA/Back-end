@@ -7,6 +7,7 @@ import java.util.List;
 
 public class HomePocketResponseDto {
     public record Response(
+            String name,
             long todayMissionMinutes,
             long thisWeekMissionMinutes,
             int walletPoint,

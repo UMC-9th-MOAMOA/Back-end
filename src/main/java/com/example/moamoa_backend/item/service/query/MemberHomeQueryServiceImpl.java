@@ -186,6 +186,7 @@ public class MemberHomeQueryServiceImpl implements MemberHomeQueryService{
         }
 
         return new HomePocketResponseDto.Response(
+                m.getName(),
                 todayMissionMinutes,
                 thisWeekMissionMinutes,
                 walletPoint,
