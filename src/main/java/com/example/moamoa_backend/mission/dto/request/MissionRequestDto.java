@@ -55,6 +55,7 @@ public class MissionRequestDto {
     ){}
 
 
+    @Schema(description = "키워드 생성 요청 DTO")
     public record KeywordCreate(
             @Schema(description = "키워드 이름 (태그)", example = "취준생필독")
             @NotBlank(message = "키워드 이름은 필수입니다.")
@@ -65,6 +66,7 @@ public class MissionRequestDto {
             String type
     ){}
 
+    @Schema(description = "퀴즈 생성 요청 DTO")
     public record CreateQuiz(
             @Schema(description = "퀴즈 질문", example = "HTTP 프로토콜은 상태를 유지하지 않는(Stateless) 특성이 있다.")
             @NotBlank(message = "퀴즈 질문은 필수입니다.")
@@ -91,6 +93,7 @@ public class MissionRequestDto {
             String explanation
             ){}
 
+    @Schema(description = "미션 상태 변경 요청 DTO")
     public record PatchStatus(
             @Schema(
                     description = "변경할 상태값 (NONE, SCRAP, FAIL 중 택 1)",
@@ -101,14 +104,20 @@ public class MissionRequestDto {
             String status
     ){}
 
+    @Schema(description = "미션 정답 제출 요청 DTO")
     public record SubmitAnswer(
+            @Schema(description = "제출할 답안 목록")
             @NotNull(message = "답안 목록은 필수입니다.")
             @Valid List<QuizSubmission> submissions
     ){}
 
+    @Schema(description = "개별 퀴즈 답안 제출 DTO")
     public record QuizSubmission(
+            @Schema(description = "퀴즈 ID", example = "10")
             @NotNull(message = "퀴즈 ID는 필수입니다.")
             Long quizId,
+
+            @Schema(description = "사용자가 입력한 정답", example = "O")
             @NotBlank(message = "답안은 필수입니다.")
             String answer
     ){}
