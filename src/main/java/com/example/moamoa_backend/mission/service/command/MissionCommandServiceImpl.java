@@ -199,6 +199,26 @@ public class MissionCommandServiceImpl implements MissionCommandService {
         return missionConverter.toStatusResult(memberMission);
     }
 
+
+    /**
+     * 미션 정답 제출 및 채점
+     *
+     * 1. **스마트 채점**:
+     * - 단답형 정답은 **대소문자를 무시**합니다. (Clock == clock)
+     * - **콤마(,)로 구분된 동의어** 중 하나만 맞으면 정답 처리합니다. (ex: "상속,상속성")
+     *
+     * 2. **보상 지급 정책**:
+     * - **최초 시도(`isFirstAttempt`)**이면서 정답일 경우에만 미션 보상과 경험치를 지급합니다.
+     * - 재시도 성공 시에는 성공 상태(`SUCCESS`)로만 변경되고 보상은 0입니다.
+     *
+     * 3. **목표 달성 체크**:
+     * - 정답 제출 시 일간/주간 목표 달성 여부를 확인하고 추가 보상을 지급합니다.
+     *
+     * @param memberId 유저 ID
+     * @param missionId 미션 ID
+     * @param request 제출한 답안 리스트
+     * @return 채점 결과 (성공 여부, 획득 보상, 목표 달성 현황 등)
+     */
     @Transactional
     @Override
     public MissionResponseDto.SubmitResult submitMissionAnswer(Long memberId, Long missionId, MissionRequestDto.SubmitAnswer request) {
@@ -210,24 +230,39 @@ public class MissionCommandServiceImpl implements MissionCommandService {
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
         List<Quiz> quizzes = mission.getQuizzes();
+
+        if(quizzes.size() != request.submissions().size()){
+            throw new MissionException(MissionErrorCode.INVALID_QUIZ_ANSWER);
+        }
+
         int earnedScore = 0;
         boolean isAllCorrect = true;
 
-        if(quizzes.size() != request.submissions().size()){
-            isAllCorrect = false;
-        }else{
-            for(Quiz quiz : quizzes){
-                String userAnswer = request.submissions().stream()
-                        .filter(s -> s.quizId().equals(quiz.getId()))
-                        .findFirst()
-                        .map(MissionRequestDto.QuizSubmission::answer)
-                        .orElse(null);
+        for(Quiz quiz : quizzes){
+            String userAnswer = request.submissions().stream()
+                    .filter(s -> s.quizId().equals(quiz.getId()))
+                    .findFirst()
+                    .map(MissionRequestDto.QuizSubmission::answer)
+                    .orElseThrow(() -> new MissionException(MissionErrorCode.INVALID_QUIZ_ANSWER));
 
-                if(userAnswer != null && userAnswer.trim().equalsIgnoreCase(quiz.getAnswer())){
-                    earnedScore += missionConverter.getRewardByType(quiz.getType());
-                }else{
-                    isAllCorrect = false;
+            boolean isCorrect = false;
+            String dbAnswer = quiz.getAnswer();
+
+            if (dbAnswer != null) {
+                String[] correctAnswers = dbAnswer.split(",");
+
+                for (String correct : correctAnswers) {
+                    if (userAnswer.trim().equalsIgnoreCase(correct.trim())) {
+                        isCorrect = true;
+                        break;
+                    }
                 }
+            }
+
+            if(isCorrect){
+                earnedScore += missionConverter.getRewardByType(quiz.getType());
+            } else {
+                isAllCorrect = false;
             }
         }
 
