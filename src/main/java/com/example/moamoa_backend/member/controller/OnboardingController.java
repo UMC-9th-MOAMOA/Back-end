@@ -64,8 +64,8 @@ public class OnboardingController {
              	   (dailyMissionGoal=null AND goalRetention=null 이면 목표는 변경하지 않음: '나중에 설정' 케이스)
             - INTERESTS: selections 필수
             - GOAL: 
-			 		- OFF: dailyMissionGoal=null, goalRetention=null
-			        - ON/변경: dailyMissionGoal 필수(0~5) + goalRetention 필수
+			- OFF: dailyMissionGoal=null, goalRetention=null
+			- ON/변경: dailyMissionGoal 필수(0~5) + goalRetention 미전달 시 기존값 없으면 CONTINUE
             """
 	)
 	@PatchMapping("/onboarding")

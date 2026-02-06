@@ -69,18 +69,23 @@ public class GoalMaintenanceService {
 		if (pendingApplyDate == null || pendingApplyDate.isAfter(today)) {
 			return;
 		}
-
-		// 적용일이 되면 예약 목표를 즉시 반영
+		// 적용일(월요일)이 되면 "주간 목표만" 계산한다 (daily는 이미 즉시 적용됨)
+		Integer pendingDailyGoal = member.getPendingDailyGoal();
+		if (pendingDailyGoal == null) {
+			member.clearPendingGoalSetting();
+			return;
+		}
 		GoalRetention pendingRetention = member.getPendingGoalRetention();
-		member.applyGoalSetting(member.getPendingDailyGoal(), pendingRetention, pendingApplyDate);
+		member.applyWeeklyGoalNow(pendingDailyGoal, pendingRetention, pendingApplyDate);
 		member.clearPendingGoalSetting();
+
 	}
 
 	private void expireGoalIfNeeded(Member member, LocalDate today) {
 		LocalDate endDate = member.getGoalEndDate();
 		// 종료일을 지났으면 목표 OFF 처리
 		if (endDate != null && today.isAfter(endDate)) {
-			member.applyGoalSetting(null, null, today);
+			member.applyDailyGoalNow(null); // OFF: 전부 정리
 		}
 	}
 }

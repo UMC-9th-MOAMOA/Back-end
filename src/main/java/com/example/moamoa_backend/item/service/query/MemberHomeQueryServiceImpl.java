@@ -23,6 +23,7 @@ import java.sql.Date;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,6 +33,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class MemberHomeQueryServiceImpl implements MemberHomeQueryService{
+
+    private static final ZoneId KST = ZoneId.of("Asia/Seoul"); // 추가
 
     private final JPAQueryFactory queryFactory;
 
@@ -56,7 +59,7 @@ public class MemberHomeQueryServiceImpl implements MemberHomeQueryService{
             throw new MemberException(MemberErrorCode.MEMBER_NOT_FOUND);
         }
 
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(KST);
         LocalDate thisWeekMon = today.with(DayOfWeek.MONDAY);
         LocalDate nextWeekMon = thisWeekMon.plusWeeks(1);
 

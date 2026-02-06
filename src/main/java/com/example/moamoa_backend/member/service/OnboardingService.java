@@ -38,7 +38,7 @@ public class OnboardingService {
 	 * - 엔드포인트는 하나로 유지하고, scope로 "무엇을 수정할지"만 분기한다.
 	 *
 	 * scope 정책:
-	 * - ALL: selections(필수) + dailyMissionGoal(선택/null 허용)
+	 * - ALL: selections(필수)  dailyMissionGoal(선택/null 허용)
 	 * - INTERESTS: selections(필수)
 	 * - GOAL: dailyMissionGoal(필수, 0~5)
 	 *
@@ -85,7 +85,7 @@ public class OnboardingService {
 
 				// 토글 ON 상태에서 값 변경/저장하는 케이스
 				validateGoalRange(req.dailyMissionGoal());   // 0~5 범위 검증
-				requireGoalRetention(req.goalRetention());
+				// goalRetention은 선택(미전달 시 기존/CONTINUE로 보정)
 
 				// 목표 설정(즉시 적용 or 다음 주 예약)
 				updateGoalSetting(member, req.dailyMissionGoal(), req.goalRetention(), today);
@@ -123,11 +123,6 @@ public class OnboardingService {
 		}
 	}
 
-	private void requireGoalRetention(GoalRetention retention) {
-		if (retention == null) {
-			throw new MemberException(MemberErrorCode.ONBOARDING_GOAL_RETENTION_REQUIRED);
-		}
-	}
 
 	private void validateGoalRange(Integer goal) {
 		if (goal < 0 || goal > 5) {
@@ -156,28 +151,39 @@ public class OnboardingService {
 	 */
 	private void updateGoalSetting(Member member, Integer dailyGoal, GoalRetention retention, LocalDate today) {
 		if (dailyGoal == null) {
-			member.applyGoalSetting(null, null, today);
-			member.clearPendingGoalSetting();
+			member.applyDailyGoalNow(null);
 			return;
 		}
 
 		GoalRetention resolvedRetention = resolveRetention(member, retention);
 		LocalDate applyDate = goalMaintenanceService.resolveApplyDate(today);
 
+		// 1) 일간 목표는 "즉시" 반영
+		if (!Objects.equals(member.getDailyGoal(), dailyGoal)) {
+			member.applyDailyGoalNow(dailyGoal);
+		}
+
+		// 2) 주간 목표는 "월요일에만" 갱신. 월요일 아니면 다음 월요일로 예약(pending*)
 		if (applyDate.isEqual(today)) {
-			// 오늘 적용 가능한 경우: 동일 설정이면 skip
-			if (isSameGoalSetting(member, dailyGoal, resolvedRetention) && member.getPendingApplyDate() == null) {
+			// 월요일: 주간 목표 즉시 갱신(weekly = daily*5)
+			if (isSameWeeklySetting(member, dailyGoal, resolvedRetention) && member.getPendingApplyDate() == null) {
 				return;
 			}
-			member.applyGoalSetting(dailyGoal, resolvedRetention, applyDate);
+			member.applyWeeklyGoalNow(dailyGoal, resolvedRetention, applyDate);
 			member.clearPendingGoalSetting();
 		} else {
-			// 다음 주 예약 적용
+			// 월요일 전: 다음 주 월요일에 주간 목표만 갱신되도록 예약
 			if (isSamePendingSetting(member, dailyGoal, resolvedRetention, applyDate)) {
 				return;
 			}
 			member.scheduleGoalSetting(dailyGoal, resolvedRetention, applyDate);
 		}
+	}
+
+	private boolean isSameWeeklySetting(Member member, Integer baseDailyGoal, GoalRetention retention) {
+		Integer expectedWeekly = (baseDailyGoal == null) ? null : baseDailyGoal * 5;
+		return Objects.equals(member.getWeeklyGoal(), expectedWeekly)
+			&& Objects.equals(member.getGoalRetention(), retention);
 	}
 
 	private GoalRetention resolveRetention(Member member, GoalRetention retention) {
