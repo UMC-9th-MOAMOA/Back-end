@@ -57,7 +57,21 @@ public class MissionController {
     }
 
     @GetMapping("/{missionId}")
-    @Operation(summary = "미션 상세 조회 API", description = "미션 정보와 사용자의 수행 상태를 조회합니다.")
+    @Operation(
+            summary = "미션 상세 조회 API",
+            description = """
+            특정 미션의 상세 정보와 사용자의 수행 상태를 조회합니다.
+            
+            **[Response 필드 설명]**
+            - `isContentWatched`: 영상 시청 완료 여부 (true여야 도전 가능)
+            - `quizzes`: 퀴즈 리스트 (프론트 채점을 위해 `answer` 필드가 포함됩니다.)
+            - `attemptCount`: 현재까지의 시도 횟수
+            """
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "MISSION404_1: 해당 미션을 찾을 수 없음")
+    })
     public ApiResponse<MissionResponseDto.MissionDetail> getMissionDetail(
             @PathVariable Long missionId,
             @AuthenticationPrincipal UserDetails userDetails

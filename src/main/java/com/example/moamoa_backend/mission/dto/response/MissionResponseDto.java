@@ -1,5 +1,6 @@
 package com.example.moamoa_backend.mission.dto.response;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
@@ -16,28 +17,62 @@ public class MissionResponseDto {
     ){}
 
     @Builder
+    @Schema(description = "미션 상세 조회 응답 DTO")
     public record MissionDetail(
-        Long missionId,
-        String title,
-        String interest,
-        String videoUrl,
-        int durationMinutes,
-        int totalReward,
-        List<String> keyword,
-        List<QuizDetail> quizzes,
-        boolean isContentWatched,
-        int attemptCount,
-        LocalDateTime rewardAt
+            @Schema(description = "미션 ID", example = "1")
+            Long missionId,
 
+            @Schema(description = "미션 제목", example = "주식 차트 보는 법 A to Z")
+            String title,
+
+            @Schema(description = "미션 카테고리 (소분류)", example = "경제")
+            String interest,
+
+            @Schema(description = "유튜브 영상 URL", example = "https://youtu.be/...")
+            String videoUrl,
+
+            @Schema(description = "영상 소요 시간 (분)", example = "15")
+            int durationMinutes,
+
+            @Schema(description = "총 보상 (도토리)", example = "50")
+            int totalReward,
+
+            @Schema(description = "미션 키워드 리스트", example = "[\"초보\", \"재테크\"]")
+            List<String> keyword,
+
+            @Schema(description = "퀴즈 리스트")
+            List<QuizDetail> quizzes,
+
+            @Schema(description = "영상 시청 완료 여부 (true면 도전 가능)", example = "false")
+            boolean isContentWatched,
+
+            @Schema(description = "현재까지 시도한 횟수", example = "0")
+            int attemptCount,
+
+            @Schema(description = "보상 획득 일시", nullable = true)
+            LocalDateTime rewardAt
     ){}
 
     @Builder
+    @Schema(description = "퀴즈 상세 정보")
     public record QuizDetail(
-        Long quizId,
-        String type,
-        String question,
-        List<String> option, //["O","X"] or [] or ["객관식1","객관식2"]
-        String explanation
+            @Schema(description = "퀴즈 ID")
+            Long quizId,
+
+            @Schema(description = "퀴즈 타입 (OX, MULTIPLE, SHORT)")
+            String type,
+
+            @Schema(description = "질문 내용")
+            String question,
+
+            @Schema(description = "보기 리스트 (OX=['O','X'], 객관식=['보기1','보기2'], 단답형=[])")
+            List<String> option,
+
+            @Schema(description = "해설")
+            String explanation,
+
+            @Schema(description = "정답 (프론트 채점용)", example = "1")
+            String answer
     ){}
 
     @Builder
