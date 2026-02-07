@@ -35,9 +35,9 @@ public class OnboardingController {
 		summary = "내 온보딩 조회",
 		description = """
             내 온보딩 정보를 조회합니다. scope에 따라 필요한 항목만 반환합니다.
-            - ALL: selections + dailyMissionGoal + goalRetention + goalEndDate + pendingGoal*
+            - ALL: selections + goalEnabled + dailyMissionGoal + goalRetention + goalEndDate + pendingGoal*
             - INTERESTS: selections
-            - GOAL: dailyMissionGoal + goalRetention + goalEndDate + pendingGoal*
+            - GOAL: goalEnabled + dailyMissionGoal + goalRetention + goalEndDate + pendingGoal*
             """
 	)
 	@GetMapping("/onboarding")
@@ -64,8 +64,8 @@ public class OnboardingController {
              	   (dailyMissionGoal=null AND goalRetention=null 이면 목표는 변경하지 않음: '나중에 설정' 케이스)
             - INTERESTS: selections 필수
             - GOAL: 
-			- OFF: dailyMissionGoal=null, goalRetention=null
-			- ON/변경: dailyMissionGoal 필수(0~5) + goalRetention 미전달 시 기존값 없으면 CONTINUE
+			- OFF: goalEnabled=false
+			- ON/변경: goalEnabled=true + dailyMissionGoal(처음 켤 때는 필요), goalRetention(optional / retention-only 허용)
             """
 	)
 	@PatchMapping("/onboarding")
