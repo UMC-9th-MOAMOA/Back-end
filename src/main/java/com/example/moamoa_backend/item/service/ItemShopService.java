@@ -30,12 +30,10 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Comparator;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -169,31 +167,31 @@ public class ItemShopService {
 
 		EquipSlot targetSlot = target.getItem().getType().slot();
 
-		// 현재 착용중 전체 조회 후, 같은 슬롯인 것만 해제
-		List<MemberItem> equippedAll = memberItemRepository.findByMemberIdAndIsEquippedTrue(memberId);
+		// 토글 판단용: 현재 상태를 먼저 기억
+		boolean alreadyEquipped = target.isEquipped();
 
+		// 같은 슬롯에 끼고 있던 것들 해제 (target 포함될 수도 있음)
+		List<MemberItem> equippedAll = memberItemRepository.findByMemberIdAndIsEquippedTrue(memberId);
 		for (MemberItem mi : equippedAll) {
 			if (mi.getItem().getType().slot() == targetSlot) {
 				mi.unequip();
 			}
 		}
 
-		target.equip();
-		// 응답용: 착용 전체 다시 내려주기
+		// 원래 미착용이면 장착 / 원래 착용이면 여기서 끝(해제)
+		if (!alreadyEquipped) {
+			target.equip();
+		}
 
-		List<MemberItem> equippedAfter = Stream.concat(equippedAll.stream(), Stream.of(target))
-			.filter(MemberItem::isEquipped)
-			.collect(Collectors.toMap(
-				mi -> mi.getItem().getId(),        // itemId 기준
-				Function.identity(),
-				(a, b) -> b,
-				LinkedHashMap::new                 // 순서 유지
-			))
-			.values()
-			.stream()
-			.toList();
+		// 결과는 DB 기준으로 다시 조회해서 응답 만듦 (+ 정렬: slot -> type)
+		List<MemberItem> equippedAfter = memberItemRepository.findByMemberIdAndIsEquippedTrue(memberId);
 
 		List<AvatarEquipmentResponseDto.EquippedItem> equippedDtos = equippedAfter.stream()
+			.sorted(
+				Comparator
+					.comparing((MemberItem mi) -> mi.getItem().getType().slot())
+					.thenComparing(mi -> mi.getItem().getType())
+			)
 			.map(mi -> new AvatarEquipmentResponseDto.EquippedItem(
 				mi.getItem().getType(),
 				mi.getItem().getId(),
