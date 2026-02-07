@@ -23,6 +23,7 @@ public class InquiryDetailConverter {
                 inquiry.getCreatedAt(),
                 inquiry.getAnsweredAt(),
                 inquiry.getAnswer(), // 답변 내용(없으면 null)
+                inquiry.getResponderName(),  //답변 내용(없으면 null)
                 inquiryImageUrls,
                 answerImageUrls
         );

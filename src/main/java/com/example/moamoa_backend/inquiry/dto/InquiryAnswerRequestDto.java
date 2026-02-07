@@ -8,6 +8,7 @@ import java.util.List;
 public class InquiryAnswerRequestDto {
     public record CreateAnswer(
             @NotBlank @Size(max = 2000)
-            String answer
+            String answer,
+            @NotBlank @Size(max = 30) String responderName
     ) {}
 }

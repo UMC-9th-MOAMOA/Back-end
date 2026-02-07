@@ -18,7 +18,9 @@ public class InquiryQueryResDto {
             String title,
             String contentPreview,
             boolean answered,              // 답변완료 여부
-            LocalDateTime createdAt
+            LocalDateTime createdAt,
+            String responderName,
+            String answerPreview
     ) {}
 
     public record MyInquiryList(
