@@ -9,9 +9,10 @@ import jakarta.validation.Valid;
 public record OnboardingPatchRequestDto(
 	@Valid
 	List<Selection> selections,   // scope=INTERESTS/ALL에서 사용 (GOAL에서는 null 허용)
+	Boolean goalEnabled,         // 추가: true/false/null(미전달)
 
 	Integer dailyMissionGoal,     // 0~5 또는 null(OFF/나중에 설정)
-	GoalRetention goalRetention   // null 가능 (dailyMissionGoal이 null이면 반드시 null이어야 함: 서비스에서 검증)
+	GoalRetention goalRetention   // null 가능 (goalEnabled=true면 daily 없이 retention-only 가능)
 ) {
 	public record Selection(
 		Long interestId,            // 대분류 ID (소속 검증에 사용)
