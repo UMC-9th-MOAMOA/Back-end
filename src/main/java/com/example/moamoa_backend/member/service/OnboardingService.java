@@ -36,12 +36,10 @@ public class OnboardingService {
 	/**
 	 * 온보딩 수정 API
 	 * - 엔드포인트는 하나로 유지하고, scope로 "무엇을 수정할지"만 분기한다.
-	 *
 	 * scope 정책:
 	 * - ALL: selections(필수)  dailyMissionGoal(선택/null 허용)
 	 * - INTERESTS: selections(필수)
 	 * - GOAL: dailyMissionGoal(필수, 0~5)
-	 *
 	 * 응답은 항상 최신 상태(ALL)로 내려줘서 프론트 동기화에 유리하게 구성
 	 */
 	@Transactional
@@ -57,14 +55,13 @@ public class OnboardingService {
 		return switch (scope) {
 			case ALL -> {
 				requireSelections(req.selections());              // 관심사 최소 1개 이상 필수
-				validateGoalRangeIfPresent(req.dailyMissionGoal()); // goal은 null 허용, 값이 있으면 범위만 검증
-				validateGoalRetentionIfPresent(req.dailyMissionGoal(), req.goalRetention());
-
-				// "나중에 설정": goal 관련 값이 아예 없으면 목표를 건드리지 않는다.
-				if (!(req.dailyMissionGoal() == null && req.goalRetention() == null)) {
+				// $ goal 관련 patch가 왔을 때만 검증/반영
+				boolean hasGoalPatch = (req.dailyMissionGoal() != null) || (req.goalRetention() != null);
+				if (hasGoalPatch) {
+					validateGoalRangeIfPresent(req.dailyMissionGoal());
+					validateGoalRetentionIfPresent(req.dailyMissionGoal(), req.goalRetention());
 					updateGoalSetting(member, req.dailyMissionGoal(), req.goalRetention(), today);
 				}
-
 				updateMemberInterestsSmartSync(member, req.selections()); // 관심사 Smart Sync 반영
 
 				// 최신 ALL 상태로 응답 (member 재조회 없이)
@@ -76,21 +73,47 @@ public class OnboardingService {
 				yield toOnboardingResponse(loadSelections(memberId), member);
 			}
 			case GOAL -> {
-				// 설정 화면 토글 OFF 지원: dailyMissionGoal == null 이면 OFF 처리
-				if (req.dailyMissionGoal() == null) {
-					validateGoalRetentionIfPresent(null, req.goalRetention());
+				Boolean enabled = req.goalEnabled();
+				Integer reqDaily = req.dailyMissionGoal();
+				GoalRetention reqRetention = req.goalRetention();
+
+				// goalEnabled는 scope=GOAL에서 필수
+				if (enabled == null) {
+					throw new MemberException(MemberErrorCode.ONBOARDING_GOAL_RETENTION_INVALID);
+				}
+				//  OFF: goalEnabled=false (추가로: OFF 요청인데 값 같이 오면 거절 권장)
+				if (!enabled && (reqDaily != null || reqRetention != null)) {
+					throw new MemberException(MemberErrorCode.ONBOARDING_GOAL_RETENTION_INVALID);
+				}
+
+				//  Boolean.FALSE.equals(enabled) -> !enabled 로 단순화
+				if (!enabled) {
 					updateGoalSetting(member, null, null, today);
 					yield toOnboardingResponse(loadSelections(memberId), member);
 				}
 
-				// 토글 ON 상태에서 값 변경/저장하는 케이스
-				validateGoalRange(req.dailyMissionGoal());   // 0~5 범위 검증
-				// goalRetention은 선택(미전달 시 기존/CONTINUE로 보정)
+				// ON: goalEnabled=true
+				Integer currentDaily = member.getDailyGoal();
+				// 변경 없음 저장: daily/retention 둘 다 미전달이면 "아무 것도 안 함"
+				if (reqDaily == null && reqRetention == null) {
+					if (currentDaily == null) {
+						// 목표가 꺼져있는데 ON만 눌렀고 값이 없으면 켤 수 없음
+						throw new MemberException(MemberErrorCode.ONBOARDING_GOAL_RETENTION_INVALID);
+					}
+					yield toOnboardingResponse(loadSelections(memberId), member);
+				}
+				// daily가 없으면 현재 daily 유지 (= 유지기간만 변경 허용)
+				Integer dailyToUse = (reqDaily != null) ? reqDaily : currentDaily;
+				if (dailyToUse == null) {
+					// 목표 OFF 상태에서 daily 없이 ON 요청은 불가
+					throw new MemberException(MemberErrorCode.ONBOARDING_GOAL_RETENTION_INVALID);
+				}
+				validateGoalRange(dailyToUse);
 
-				// 목표 설정(즉시 적용 or 다음 주 예약)
-				updateGoalSetting(member, req.dailyMissionGoal(), req.goalRetention(), today);
+				updateGoalSetting(member, dailyToUse, reqRetention, today);
 				yield toOnboardingResponse(loadSelections(memberId), member);
 			}
+
 		};
 	}
 
@@ -108,7 +131,8 @@ public class OnboardingService {
 
 		return switch (scope) {
 			case ALL -> toOnboardingResponse(loadSelections(memberId), member);
-			case INTERESTS -> OnboardingResponseDto.of(loadSelections(memberId), null, null, null, null, null, null);
+			case INTERESTS ->
+				OnboardingResponseDto.of(loadSelections(memberId), null, null, null, null, null, null, null);
 			case GOAL -> toOnboardingResponse(null, member);
 		};
 	}
@@ -122,7 +146,6 @@ public class OnboardingService {
 			throw new MemberException(MemberErrorCode.ONBOARDING_SELECTION_REQUIRED);
 		}
 	}
-
 
 	private void validateGoalRange(Integer goal) {
 		if (goal < 0 || goal > 5) {
@@ -152,6 +175,7 @@ public class OnboardingService {
 	private void updateGoalSetting(Member member, Integer dailyGoal, GoalRetention retention, LocalDate today) {
 		if (dailyGoal == null) {
 			member.applyDailyGoalNow(null);
+			member.clearPendingGoalSetting(); //  OFF면 pending도 정리
 			return;
 		}
 
@@ -194,11 +218,6 @@ public class OnboardingService {
 		return Optional.ofNullable(member.getGoalRetention()).orElse(GoalRetention.CONTINUE);
 	}
 
-	private boolean isSameGoalSetting(Member member, Integer dailyGoal, GoalRetention retention) {
-		return Objects.equals(member.getDailyGoal(), dailyGoal)
-			&& Objects.equals(member.getGoalRetention(), retention);
-	}
-
 	private boolean isSamePendingSetting(Member member, Integer dailyGoal, GoalRetention retention,
 		LocalDate applyDate) {
 		return Objects.equals(member.getPendingDailyGoal(), dailyGoal)
@@ -216,8 +235,10 @@ public class OnboardingService {
 		Integer dailyGoal,
 		Member member
 	) {
+		Boolean goalEnabled = (member == null) ? null : (member.getDailyGoal() != null);
 		return OnboardingResponseDto.of(
 			selections,
+			goalEnabled,
 			dailyGoal,
 			member == null ? null : member.getGoalRetention(),
 			member == null ? null : member.getGoalEndDate(),
@@ -229,10 +250,8 @@ public class OnboardingService {
 
 	/**
 	 * 관심사 반영 로직 (핵심)
-	 *
 	 * 프론트 계약: "최종 상태"를 통째로 보낸다 (Replace)
 	 * 서버 역할: DB의 기존 상태와 비교해서 "차이만" 삭제/추가해 DB를 최종 상태로 맞춘다 (Smart Sync)
-	 *
 	 * 예시:
 	 * - 기존 DB: [10, 11, 25]
 	 * - 요청 값: [10, 30]
