@@ -161,7 +161,9 @@ public class MissionQueryServiceImpl implements MissionQueryService{
                 .map(MissionResponseDto.RecommendResult::missionId)
                 .toList();
 
-        Map<Long, List<String>> keywordMap = missionRepository.findAllByIdsWithKeywords(missionIds).stream()
+        Map<Long, List<String>> keywordMap = missionIds.isEmpty() ?
+                Collections.emptyMap() :
+                missionRepository.findAllByIdsWithKeywords(missionIds).stream()
                 .collect(Collectors.toMap(
                         Mission::getId,
                         mission -> mission.getMissionKeywords().stream()
