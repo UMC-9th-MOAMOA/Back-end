@@ -52,12 +52,6 @@ public class AuthReqDto {
             @NotBlank(message = "이름은 필수 입력 값입니다.")
             String name,
 
-            @NotNull(message = "생년월일은 필수 입력 값입니다.")
-            LocalDate birth,
-
-            @NotNull(message = "성별은 필수 입력 값입니다.")
-            Gender gender,
-
             @NotNull(message = "약관 동의 내역은 필수입니다.")
             @Size(min = 1, message = "최소 하나 이상의 약관에 동의해야 합니다.")
             @Valid
@@ -69,8 +63,8 @@ public class AuthReqDto {
                     .email(email)
                     .password(passwordEncoder.encode(password))
                     .name(name)
-                    .birthday(birth)
-                    .gender(gender)
+                    .birthday(null)
+                    .gender(null)
                     .role(Role.ROLE_USER)
                     .provider(Provider.LOCAL)
                     .providerId(email)
