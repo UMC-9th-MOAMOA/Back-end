@@ -1,19 +1,15 @@
 package com.example.moamoa_backend.member.service;
 
-import com.example.moamoa_backend.auth.exception.AuthException;
-import com.example.moamoa_backend.auth.exception.code.AuthErrorCode;
 import com.example.moamoa_backend.global.util.RedisUtil;
 import com.example.moamoa_backend.member.dto.req.MemberReqDto;
 import com.example.moamoa_backend.member.dto.res.MemberResDto;
 import com.example.moamoa_backend.member.entity.Member;
 import com.example.moamoa_backend.member.enums.Gender;
 import com.example.moamoa_backend.member.enums.MemberStatus;
-import com.example.moamoa_backend.member.enums.Provider;
 import com.example.moamoa_backend.member.exception.MemberException;
 import com.example.moamoa_backend.member.exception.code.MemberErrorCode;
 import com.example.moamoa_backend.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

@@ -8,8 +8,6 @@ import com.example.moamoa_backend.auth.service.AuthService;
 import com.example.moamoa_backend.global.apiPayload.response.ApiResponse;
 import com.example.moamoa_backend.global.util.CookieUtil;
 import com.example.moamoa_backend.global.util.NetworkUtil;
-import com.example.moamoa_backend.member.dto.req.MemberReqDto;
-import com.example.moamoa_backend.member.exception.code.MemberSuccessCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
