@@ -12,11 +12,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.util.AntPathMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.List;
 
 /**
  * 회원 상태 검증 필터
@@ -30,17 +30,16 @@ import java.util.Arrays;
  */
 public class MemberSetupFilter extends OncePerRequestFilter {
 
-	private final String[] setupAllowUris;
+    private final List<RequestMatcher> setupAllowMatchers;
 	private final MemberRepository memberRepository;
-	private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
 	// Security Config에서 관리
 	public MemberSetupFilter(
-            String[] setupAllowUris,
-		    MemberRepository memberRepository
+            List<RequestMatcher> setupAllowMatchers,
+            MemberRepository memberRepository
     ) {
-		this.setupAllowUris = setupAllowUris;
-		this.memberRepository = memberRepository;
+        this.setupAllowMatchers = setupAllowMatchers;
+        this.memberRepository = memberRepository;
 	}
 
 	@Override
@@ -48,7 +47,6 @@ public class MemberSetupFilter extends OncePerRequestFilter {
 		HttpServletResponse response,
 		FilterChain filterChain) throws ServletException, IOException {
 
-		String path = request.getRequestURI();
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         // 인증되지 않은 요청은 통과
@@ -67,7 +65,7 @@ public class MemberSetupFilter extends OncePerRequestFilter {
         }
 
         // Setup Whitelist는 통과
-        if (isSetupWhitelisted(path)) {
+        if (isSetupWhitelisted(request)) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -89,9 +87,9 @@ public class MemberSetupFilter extends OncePerRequestFilter {
 		filterChain.doFilter(request, response);
 	}
 
-	private boolean isSetupWhitelisted(String path) {
-		return Arrays.stream(setupAllowUris)
-			.anyMatch(pattern -> pathMatcher.match(pattern, path));
-	}
+    private boolean isSetupWhitelisted(HttpServletRequest request) {
+        return setupAllowMatchers.stream()
+                .anyMatch(matcher -> matcher.matches(request));
+    }
 
 }

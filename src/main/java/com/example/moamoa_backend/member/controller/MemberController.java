@@ -1,6 +1,7 @@
 package com.example.moamoa_backend.member.controller;
 
 import com.example.moamoa_backend.global.apiPayload.response.ApiResponse;
+import com.example.moamoa_backend.global.util.CookieUtil;
 import com.example.moamoa_backend.member.dto.req.MemberReqDto;
 import com.example.moamoa_backend.member.dto.res.MemberResDto;
 import com.example.moamoa_backend.member.enums.SettingValue;
@@ -8,6 +9,7 @@ import com.example.moamoa_backend.member.exception.code.MemberSuccessCode;
 import com.example.moamoa_backend.member.service.MemberService;
 import com.example.moamoa_backend.member.service.MemberSettingService;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -21,13 +23,16 @@ public class MemberController {
 
     private final MemberService memberService;
     private final MemberSettingService memberSettingService;
+    private final CookieUtil cookieUtil;
 
     @Operation(summary = "회원 탈퇴", description = "회원의 계정을 삭제합니다. (soft delete, 복구가능)")
     @DeleteMapping("/me")
     public ApiResponse<Void> deleteMember(
-            @AuthenticationPrincipal UserDetails userDetails
+            @AuthenticationPrincipal UserDetails userDetails,
+            HttpServletResponse response
     ) {
         memberService.deleteMember(Long.parseLong(userDetails.getUsername()));
+        cookieUtil.clearRefreshTokenCookie(response);
         return ApiResponse.onSuccess(MemberSuccessCode.MEMBER_WITHDRAW, null);
     }
 
