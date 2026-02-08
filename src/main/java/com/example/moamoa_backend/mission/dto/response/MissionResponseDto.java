@@ -39,8 +39,11 @@ public class MissionResponseDto {
             @Schema(description = "유튜브 영상 URL", example = "https://youtu.be/...")
             String videoUrl,
 
-            @Schema(description = "영상 소요 시간 (분)", example = "15")
+            @Schema(description = "예상 소요 시간 (분)", example = "15")
             int durationMinutes,
+
+            @Schema(description = "영상 총 길이 (초)", example = "890")
+            int videoLength,
 
             @Schema(description = "총 보상 (도토리)", example = "50")
             int totalReward,

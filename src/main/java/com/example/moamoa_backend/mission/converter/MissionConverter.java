@@ -87,6 +87,7 @@ public class MissionConverter {
                 .title(mission.getTitle())
                 .videoUrl(mission.getVideoUrl())
                 .durationMinutes(mission.getDurationMinutes())
+                .videoLength(mission.getVideoLength())
                 .interest(interestName)
                 .totalReward(mission.getReward())
                 .keyword(keywords)
