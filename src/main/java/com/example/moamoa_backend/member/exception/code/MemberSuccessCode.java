@@ -41,9 +41,6 @@ public enum MemberSuccessCode implements BaseSuccessCode {
 	MEMBER_MARK_GOAL_POPUP_SHOWN(HttpStatus.OK,
 		"MEMBER200_8",
 		"목표 팝업 확인 처리에 성공했습니다."),
-	PASSWORD_CHANGED(HttpStatus.OK,
-		"MEMBER200_9",
-		"비밀번호가 성공적으로 변경되었습니다."),
 
 	SETTING_SAVED(HttpStatus.OK,
 		"MEMBER200_10",

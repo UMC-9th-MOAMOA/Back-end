@@ -22,16 +22,6 @@ public class MemberController {
     private final MemberService memberService;
     private final MemberSettingService memberSettingService;
 
-    @Operation(summary = "비밀번호 변경", description = "로컬 로그인 회원의 비밀번호를 변경합니다.")
-    @PatchMapping("/me/password")
-    public ApiResponse<Void> changePassword(
-            @AuthenticationPrincipal UserDetails userDetails,
-            @Valid @RequestBody MemberReqDto.PasswordChange request
-    ) {
-        memberService.changePassword(Long.parseLong(userDetails.getUsername()), request);
-        return ApiResponse.onSuccess(MemberSuccessCode.PASSWORD_CHANGED, null);
-    }
-
     @Operation(summary = "회원 탈퇴", description = "회원의 계정을 삭제합니다. (soft delete, 복구가능)")
     @DeleteMapping("/me")
     public ApiResponse<Void> deleteMember(
