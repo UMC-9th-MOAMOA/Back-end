@@ -4,11 +4,11 @@ import com.example.moamoa_backend.member.entity.Member;
 import com.example.moamoa_backend.member.enums.Role;
 import com.example.moamoa_backend.member.enums.Provider;
 import com.example.moamoa_backend.member.enums.MemberStatus;
-import com.example.moamoa_backend.member.enums.Gender;
 import com.example.moamoa_backend.policy.dto.req.PolicyReqDto;
-import jakarta.validation.Valid;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
-import java.time.LocalDate;
+
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -48,6 +48,9 @@ public class AuthReqDto {
             @Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*?_.])[a-zA-Z0-9!@#$%^&*?_.]{8,64}$",
                     message = "비밀번호는 8~64자 영문, 숫자, 특수문자(!@#$%^&*?_.)를 모두 포함해야 합니다.")
             String password,
+
+            @NotBlank(message = "비밀번호 확인은 필수 입력 값입니다.")
+            String passwordCheck,
 
             @NotBlank(message = "이름은 필수 입력 값입니다.")
             String name,

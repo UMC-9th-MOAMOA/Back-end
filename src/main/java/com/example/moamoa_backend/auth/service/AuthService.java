@@ -203,6 +203,10 @@ public class AuthService {
     @Transactional
     public AuthResDto.GeneratedTokenDto signup(AuthReqDto.SignupDto request) {
 
+        if (!request.password().equals(request.passwordCheck())) {
+            throw new AuthException(AuthErrorCode.PASSWORD_CONFIRM_MISMATCH);
+        }
+
         // 이메일 인증 여부 확인 (인증 안 된 이메일로 가입 시도 차단)
         String isVerified = redisUtil.getData(VERIFIED_PREFIX + request.email());
         if (!"TRUE".equals(isVerified)) {
