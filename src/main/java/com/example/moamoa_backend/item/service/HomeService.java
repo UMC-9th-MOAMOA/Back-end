@@ -53,7 +53,7 @@ public class HomeService {
 				mi -> HomeResponseDto.EquippedItem.from(
 					mi.getItem().getId(),
 					mi.getItem().getName(),
-					mi.getItem().getImageUrl()
+					mi.getItem().getWearingImageUrl()
 				),
 				(a, b) -> a, // 동일 타입이 중복 장착된 데이터가 있으면 첫 번째 우선
 				() -> new EnumMap<>(ItemType.class)
