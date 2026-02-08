@@ -63,15 +63,24 @@ UPDATE wallet_history wh
     SET wh.item_id = wh.item_id - 100
 WHERE wh.item_id BETWEEN 101 AND 146;
 
--- 5) 101~146(착용용) 삭제: “짝 있는 것만”
-DELETE wear
-FROM item wear
-JOIN item base ON base.id = wear.id - 100
-WHERE base.id BETWEEN 1 AND 46
-  AND wear.id BETWEEN 101 AND 146;
+-- 5) 101~146(착용용) 삭제: 전체 삭제
+DELETE FROM item
+WHERE id BETWEEN 101 AND 146;
 
--- 6) NOT NULL 강제 + 기존 컬럼 제거
+-- 6-0) 안전장치: 혹시 남아있는 NULL을 채움 (NOT NULL 전에)
+UPDATE item
+SET shop_image_url = image_url
+WHERE shop_image_url IS NULL;
+
+UPDATE item
+SET wearing_image_url = shop_image_url
+WHERE wearing_image_url IS NULL;
+
+-- 6-1) NOT NULL 강제 (먼저)
 ALTER TABLE item
     MODIFY shop_image_url VARCHAR(1000) NOT NULL,
-    MODIFY wearing_image_url VARCHAR(1000) NOT NULL,
+    MODIFY wearing_image_url VARCHAR(1000) NOT NULL;
+
+-- 6-2) 기존 컬럼 제거 (나중에)
+ALTER TABLE item
 DROP COLUMN image_url;
