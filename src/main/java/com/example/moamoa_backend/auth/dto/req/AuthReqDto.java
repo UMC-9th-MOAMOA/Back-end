@@ -49,6 +49,9 @@ public class AuthReqDto {
                     message = "비밀번호는 8~64자 영문, 숫자, 특수문자(!@#$%^&*?_.)를 모두 포함해야 합니다.")
             String password,
 
+            @NotBlank(message = "비밀번호 확인은 필수 입력 값입니다.")
+            String passwordCheck,
+
             @NotBlank(message = "이름은 필수 입력 값입니다.")
             String name,
 
