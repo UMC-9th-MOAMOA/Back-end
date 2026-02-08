@@ -23,11 +23,14 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.ExceptionTranslationFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Spring Security 설정
@@ -84,15 +87,16 @@ public class SecurityConfig {
 	};
 
     // 로그인 필요O - 초기 설정(정책동의, 온보딩) 완료 전에도 접근 가능
-    private final String[] setupAllowUris = {
-            "/api/v1/auth/**",
-            "/api/v1/policies/**",
-            "/api/v1/members/me/onboarding",
-            "/api/v1/interests/**",
-            "/v3/api-docs/**",
-            "/swagger-ui/**",
-            "/swagger-resources/**"
-    };
+    private final List<RequestMatcher> setupAllowMatchers = List.of(
+            PathPatternRequestMatcher.withDefaults().matcher("/api/v1/auth/**"),
+            PathPatternRequestMatcher.withDefaults().matcher("/api/v1/policies/**"),
+            PathPatternRequestMatcher.withDefaults().matcher("/api/v1/members/me/onboarding"),
+            PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.DELETE, "/api/v1/members/me"),
+            PathPatternRequestMatcher.withDefaults().matcher("/api/v1/interests/**"),
+            PathPatternRequestMatcher.withDefaults().matcher("/v3/api-docs/**"),
+            PathPatternRequestMatcher.withDefaults().matcher("/swagger-ui/**"),
+            PathPatternRequestMatcher.withDefaults().matcher("/swagger-resources/**")
+    );
 
 	// 관리자만 접근 가능
 	private final String[] adminUris = {
@@ -175,7 +179,7 @@ public class SecurityConfig {
 
 	@Bean
 	public MemberSetupFilter memberSetupFilter() {
-		return new MemberSetupFilter(setupAllowUris, memberRepository);
+		return new MemberSetupFilter(setupAllowMatchers, memberRepository);
     }
 
 	@Bean
