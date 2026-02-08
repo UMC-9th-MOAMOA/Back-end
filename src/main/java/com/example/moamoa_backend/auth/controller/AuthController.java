@@ -8,6 +8,8 @@ import com.example.moamoa_backend.auth.service.AuthService;
 import com.example.moamoa_backend.global.apiPayload.response.ApiResponse;
 import com.example.moamoa_backend.global.util.CookieUtil;
 import com.example.moamoa_backend.global.util.NetworkUtil;
+import com.example.moamoa_backend.member.dto.req.MemberReqDto;
+import com.example.moamoa_backend.member.exception.code.MemberSuccessCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
@@ -156,6 +158,16 @@ public class AuthController {
     ) {
         authService.resetPassword(request);
         return ApiResponse.onSuccess(AuthSuccessCode.PASSWORD_RESET_SUCCESS, null);
+    }
+
+    @Operation(summary = "비밀번호 변경", description = "로컬 로그인 회원의 비밀번호를 변경합니다.")
+    @PatchMapping("/password")
+    public ApiResponse<Void> changePassword(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Valid @RequestBody AuthReqDto.PasswordChange request
+    ) {
+        authService.changePassword(Long.parseLong(userDetails.getUsername()), request);
+        return ApiResponse.onSuccess(AuthSuccessCode.PASSWORD_CHANGED, null);
     }
 
 }

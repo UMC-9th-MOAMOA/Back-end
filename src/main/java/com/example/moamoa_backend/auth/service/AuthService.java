@@ -8,6 +8,7 @@ import com.example.moamoa_backend.global.security.jwt.JwtUtil;
 import com.example.moamoa_backend.global.security.jwt.exception.JwtException;
 import com.example.moamoa_backend.global.security.jwt.exception.code.JwtErrorCode;
 import com.example.moamoa_backend.global.util.RedisUtil;
+import com.example.moamoa_backend.member.dto.req.MemberReqDto;
 import com.example.moamoa_backend.member.entity.Member;
 import com.example.moamoa_backend.member.enums.MemberStatus;
 import com.example.moamoa_backend.member.enums.Provider;
@@ -412,6 +413,40 @@ public class AuthService {
 
         // 토큰 삭제 (일회용)
         redisUtil.deleteData(tokenKey);
+    }
+
+    /**
+     * 비밀번호 변경
+     * 기존 비밀번호, 새 비밀번호, 새 비밀번호 확인 세가지 데이터를 통해 비밀번호 변경
+     */
+    @Transactional
+    public void changePassword(Long memberId, AuthReqDto.PasswordChange request) {
+
+        // 멤버 조회 및 로컬 로그인 회원인지 체크
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        if(member.getProvider() != Provider.LOCAL){
+            throw new AuthException(AuthErrorCode.SOCIAL_LOGIN_PASSWORD_CHANGE_NOT_ALLOWED);
+        }
+
+        // 현재 비밀번호 검증
+        if (!passwordEncoder.matches(request.currentPassword(), member.getPassword())) {
+            throw new AuthException(AuthErrorCode.PASSWORD_NOT_MATCH);
+        }
+
+        // 새 비밀번호 확인 일치 검증
+        if (!request.newPassword().equals(request.newPasswordCheck())) {
+            throw new AuthException(AuthErrorCode.PASSWORD_CONFIRM_MISMATCH);
+        }
+
+        // 기존 비밀번호와 새 비밀번호 동일 여부 검증
+        if (passwordEncoder.matches(request.newPassword(), member.getPassword())) {
+            throw new AuthException(AuthErrorCode.SAME_AS_OLD_PASSWORD);
+        }
+
+        // 비밀번호 변경
+        member.changePassword(passwordEncoder.encode(request.newPassword()));
     }
 
     /**
