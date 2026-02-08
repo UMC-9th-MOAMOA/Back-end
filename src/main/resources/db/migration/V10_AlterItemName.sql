@@ -1,0 +1,26 @@
+UPDATE item SET name ='좋음' where id =1;
+UPDATE item SET name ='똘망' where id =2;
+UPDATE item SET name ='졸린' where id =3;
+UPDATE item SET name ='나른한' where id =4;
+UPDATE item SET name ='부끄러운' where id =5;
+UPDATE item SET name ='정색' where id =6;
+UPDATE item SET name ='셔츠' where id =11;
+UPDATE item SET name ='니트' where id =12;
+UPDATE item SET name ='우비' where id =13;
+UPDATE item SET name ='조끼' where id =14;
+UPDATE item SET name ='자켓' where id =15;
+UPDATE item SET name ='반팔' where id =16;
+UPDATE item SET name ='청바지' where id =21;
+UPDATE item SET name ='치마' where id =22;
+UPDATE item SET name ='슬랙스' where id =23;
+UPDATE item SET name ='반바지' where id =24;
+UPDATE item SET name ='니트 치마' where id =25;
+UPDATE item SET name ='포켓 바지' where id =26;
+UPDATE item SET name ='도토리 모자' where id =31;
+UPDATE item SET name ='귀마개' where id =35;
+UPDATE item SET name ='방(낮)' where id =41;
+UPDATE item SET name ='방(밤)' where id =42;
+UPDATE item SET name ='서재' where id =43;
+UPDATE item SET name ='협곡' where id =44;
+UPDATE item SET image_url ='https://moamoa-s3-prod-bucket.s3.ap-northeast-2.amazonaws.com/public/items/accessory/%EC%9E%A5%EA%B0%91-2.svg' where id =33;
+
