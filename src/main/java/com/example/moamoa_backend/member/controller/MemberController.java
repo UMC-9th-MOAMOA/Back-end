@@ -37,7 +37,7 @@ public class MemberController {
     }
 
     @Operation(summary = "내 프로필 조회", description = "로그인한 회원의 프로필 정보를 조회합니다.")
-    @GetMapping("/me/profile")
+    @GetMapping("/me")
     public ApiResponse<MemberResDto.ProfileResponse> getProfile(
             @AuthenticationPrincipal UserDetails userDetails
     ) {
@@ -46,7 +46,7 @@ public class MemberController {
     }
 
     @Operation(summary = "내 프로필 수정", description = "로그인한 회원의 프로필 정보를 수정합니다.")
-    @PutMapping("/me/profile")
+    @PutMapping("/me")
     public ApiResponse<Void> updateProfile(
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestBody MemberReqDto.ProfileUpdate request
@@ -56,7 +56,7 @@ public class MemberController {
     }
 
     @Operation(summary = "팝업 다시 보지 않기 설정", description = "특정 팝업에 대해 다시 보지 않기(NEVER_SHOW) 설정을 저장합니다")
-    @PostMapping("/settings/ban")
+    @PostMapping("/me/dismissed-popups")
     public ApiResponse<Void> saveSetting(
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestBody MemberReqDto.SettingRequest request
