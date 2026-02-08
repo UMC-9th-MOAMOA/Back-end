@@ -64,13 +64,12 @@ public class SecurityConfig {
 		"/api/v1/auth/refresh",
 
 		// 비밀번호 초기화
-		"/api/v1/auth/password-reset/send-code",
-		"/api/v1/auth/password-reset/verify",
-		"/api/v1/auth/password-reset",
+		"/api/v1/auth/password-resets", // POST, PUT
+		"/api/v1/auth/password-resets/verifications",
 
 		// 회원가입 이메일 인증
-		"/api/v1/auth/email/send-code",
-		"/api/v1/auth/email/verify",
+		"/api/v1/auth/email/verification-codes",
+		"/api/v1/auth/email/verifications",
 
 		"/api/v1/auth/oauth2/token",
 		"/api/v1/auth/social/**",

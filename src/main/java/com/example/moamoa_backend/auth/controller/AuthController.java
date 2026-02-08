@@ -36,7 +36,7 @@ public class AuthController {
 
     @Operation(summary = "이메일 인증번호 전송", description = "회원가입을 위해 이메일로 인증번호(6자리)를 전송합니다.")
     @SecurityRequirements(value = {})
-    @PostMapping("/email/send-code")
+    @PostMapping("/email/verification-codes")
     public ApiResponse<Void> sendEmailAuthCode(
             @RequestBody @Valid AuthReqDto.EmailSendDto request,
             HttpServletRequest httpServletRequest
@@ -46,9 +46,9 @@ public class AuthController {
         return ApiResponse.onSuccess(AuthSuccessCode.EMAIL_SEND_SUCCESS, null);
     }
 
-    @Operation(summary = "이메일 인증번호 검증", description = "사용자가 입력한 인증번호를 검증합니다.")
+    @Operation(summary = "이메일 인증번호 검증", description = "사용자가 입력한 이메일 인증번호를 검증합니다.")
     @SecurityRequirements(value = {})
-    @PostMapping("/email/verify")
+    @PostMapping("/email/verifications")
     public ApiResponse<Void> verifyEmailAuthCode(@RequestBody @Valid AuthReqDto.EmailVerifyDto request) {
         authService.verifyEmailAuthCode(request.email(), request.authCode());
         return ApiResponse.onSuccess(AuthSuccessCode.EMAIL_VERIFY_SUCCESS, null);
@@ -126,9 +126,9 @@ public class AuthController {
         return ApiResponse.onSuccess(AuthSuccessCode.RECOVER_SUCCESS, AuthConverter.toTokenDto(generatedTokenDto));
     }
 
-    @Operation(summary = "비밀번호 재설정 코드 발송", description = "비밀번호 재설정을 위한 인증번호(6자리)를 이메일로 발송합니다.")
+    @Operation(summary = "비밀번호 초기화 코드 발송", description = "비밀번호 초기화를 위한 인증번호(6자리)를 이메일로 발송합니다.")
     @SecurityRequirements(value = {})
-    @PostMapping("/password-reset/send-code")
+    @PostMapping("/password-resets")
     public ApiResponse<Void> sendPasswordResetCode(
             @RequestBody @Valid AuthReqDto.EmailSendDto request,
             HttpServletRequest httpServletRequest
@@ -138,9 +138,9 @@ public class AuthController {
         return ApiResponse.onSuccess(AuthSuccessCode.EMAIL_SEND_SUCCESS, null);
     }
 
-    @Operation(summary = "비밀번호 재설정 코드 검증", description = "인증번호를 검증하고 비밀번호 변경에 사용할 토큰을 발급합니다.")
+    @Operation(summary = "비밀번호 초기화 코드 검증", description = "인증번호를 검증하고 비밀번호 초기화에 사용할 토큰을 발급합니다.")
     @SecurityRequirements(value = {})
-    @PostMapping("/password-reset/verify")
+    @PostMapping("/password-resets/verifications")
     public ApiResponse<AuthResDto.PasswordResetTokenDto> verifyPasswordResetCode(
             @RequestBody @Valid AuthReqDto.EmailVerifyDto request
     ) {
@@ -148,9 +148,9 @@ public class AuthController {
         return ApiResponse.onSuccess(AuthSuccessCode.EMAIL_VERIFY_SUCCESS, new AuthResDto.PasswordResetTokenDto(resetToken));
     }
 
-    @Operation(summary = "비밀번호 재설정", description = "토큰을 검증하고 새 비밀번호로 변경합니다.")
+    @Operation(summary = "비밀번호 초기화", description = "토큰을 검증하고 새 비밀번호로 초기화합니다.")
     @SecurityRequirements(value = {})
-    @PostMapping("/password-reset")
+    @PutMapping("/password-resets")
     public ApiResponse<Void> resetPassword(
             @RequestBody @Valid AuthReqDto.PasswordResetDto request
     ) {
