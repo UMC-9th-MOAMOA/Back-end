@@ -48,7 +48,9 @@ public class InquiryRepositoryImpl implements InquiryRepositoryCustom{
                         inquiry.content,
                         // answered: answeredAt != null 로 판단
                         inquiry.answeredAt.isNotNull(),
-                        inquiry.createdAt
+                        inquiry.createdAt,
+                        inquiry.responderName,
+                        inquiry.answer
                 ))
                 .from(inquiry)
                 .where(

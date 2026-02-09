@@ -49,6 +49,10 @@ public class Inquiry extends BaseEntity {
     @Column(nullable = false)
     private boolean termsAgreed;
 
+    @Column(name = "responder_name", length = 30)
+    private String responderName;
+
+
     //createdAt = 질문일시
 
     // 질문 이미지

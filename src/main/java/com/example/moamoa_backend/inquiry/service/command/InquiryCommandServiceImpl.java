@@ -79,6 +79,7 @@ public class InquiryCommandServiceImpl implements InquiryCommandService {
                 .orElseThrow(() -> new InquiryException(InquiryErrorCode.INQUIRY_NOT_FOUND));
 
         inquiry.setAnswer(request.answer());
+        inquiry.setResponderName(request.responderName());
         inquiry.setAnsweredAt(LocalDateTime.now());
         inquiry.setStatus(InquiryStatus.COMPLETED);
 

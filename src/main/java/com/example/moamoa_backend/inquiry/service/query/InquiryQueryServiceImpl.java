@@ -44,7 +44,9 @@ public class InquiryQueryServiceImpl implements com.example.moamoa_backend.inqui
                         i.title(),
                         toPreview(i.contentPreview(), 40),  // 40자 미리보기
                         i.answered(),
-                        i.createdAt()
+                        i.createdAt(),
+                        i.responderName(),
+                        toPreview(i.answerPreview(), 40)
                 ))
                 .toList();
 
@@ -52,7 +54,7 @@ public class InquiryQueryServiceImpl implements com.example.moamoa_backend.inqui
     }
 
     private String toPreview(String content, int maxLen) {
-        if (content == null) return "";
+        if (content == null) return null;
         String trimmed = content.trim();
         if (trimmed.length() <= maxLen) return trimmed;
         return trimmed.substring(0, maxLen) + "...";

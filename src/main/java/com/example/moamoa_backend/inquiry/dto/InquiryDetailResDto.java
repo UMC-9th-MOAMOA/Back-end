@@ -15,6 +15,7 @@ public class InquiryDetailResDto {
             LocalDateTime createdAt,
             LocalDateTime answeredAt,
             String answerContent,         // 없으면 null 가능
+            String responderName,         // 없으면 null 가능
 
             List<String> inquiryImageUrls,
             List<String> answerImageUrls

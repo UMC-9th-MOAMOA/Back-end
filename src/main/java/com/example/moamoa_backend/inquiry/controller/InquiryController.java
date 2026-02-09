@@ -109,7 +109,8 @@ public class InquiryController {
     ) {
         // ✅ 기존 서비스 시그니처 유지
         InquiryAnswerRequestDto.CreateAnswer request = new InquiryAnswerRequestDto.CreateAnswer(
-                form.answer()
+                form.answer(),
+                form.responderName()
         );
 
         InquiryAnswerResponseDto.CreateResult result =
