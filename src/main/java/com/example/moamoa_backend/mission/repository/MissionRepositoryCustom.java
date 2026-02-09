@@ -26,4 +26,6 @@ public interface MissionRepositoryCustom {
     );
 
     Optional<Mission> findByIdWithDetail(Long missionId);
+
+    List<Mission> findAllByIdsWithKeywords(List<Long> missionIds);
 }

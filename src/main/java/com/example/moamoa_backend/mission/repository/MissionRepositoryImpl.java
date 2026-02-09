@@ -240,4 +240,15 @@ public class MissionRepositoryImpl implements MissionRepositoryCustom {
             default -> throw new MissionException(MissionErrorCode.INVALID_MISSION_STATUS_PARAM);
         };
     }
+
+    @Override
+    public List<Mission> findAllByIdsWithKeywords(List<Long> missionIds) {
+        return queryFactory
+                .selectFrom(mission)
+                .leftJoin(mission.missionKeywords, missionKeyword).fetchJoin()
+                .leftJoin(missionKeyword.keyword, keyword).fetchJoin()
+                .where(mission.id.in(missionIds))
+                .distinct()
+                .fetch();
+    }
 }

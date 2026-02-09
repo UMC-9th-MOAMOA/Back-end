@@ -155,9 +155,23 @@ public class MissionQueryServiceImpl implements MissionQueryService{
 
     @Override
     public MissionResponseDto.SearchResponse getMyMissions(Long memberId, String status, String condition, Long categoryId, Pageable pageable) {
-
         Slice<MissionResponseDto.RecommendResult> slice = missionRepository.getMyMissions(memberId, status, condition, categoryId, pageable);
-        return missionConverter.toMyMissionsResult(slice);
+
+        List<Long> missionIds = slice.getContent().stream()
+                .map(MissionResponseDto.RecommendResult::missionId)
+                .toList();
+
+        Map<Long, List<String>> keywordMap = missionIds.isEmpty() ?
+                Collections.emptyMap() :
+                missionRepository.findAllByIdsWithKeywords(missionIds).stream()
+                .collect(Collectors.toMap(
+                        Mission::getId,
+                        mission -> mission.getMissionKeywords().stream()
+                                .map(mk -> mk.getKeyword().getName())
+                                .toList()
+                ));
+
+        return missionConverter.toMyMissionsResult(slice, keywordMap);
     }
 
     private MissionResponseDto.SearchResponse createSearchResponse(Long memberId, Slice<Mission> missionSlice) {

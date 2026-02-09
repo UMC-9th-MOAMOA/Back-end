@@ -87,6 +87,7 @@ public class MissionConverter {
                 .title(mission.getTitle())
                 .videoUrl(mission.getVideoUrl())
                 .durationMinutes(mission.getDurationMinutes())
+                .videoLength(mission.getVideoLength())
                 .interest(interestName)
                 .totalReward(mission.getReward())
                 .keyword(keywords)
@@ -202,10 +203,26 @@ public class MissionConverter {
                 .build();
     }
 
-    public MissionResponseDto.SearchResponse toMyMissionsResult(Slice<MissionResponseDto.RecommendResult> slice) {
+    public MissionResponseDto.SearchResponse toMyMissionsResult(
+            Slice<MissionResponseDto.RecommendResult> slice,
+            Map<Long, List<String>> keywordMap
+    ) {
+        List<MissionResponseDto.RecommendResult> newContent = slice.getContent().stream()
+                .map(dto -> MissionResponseDto.RecommendResult.builder()
+                        .missionId(dto.missionId())
+                        .title(dto.title())
+                        .durationMinutes(dto.durationMinutes())
+                        .category(dto.category())
+                        .quizCount(dto.quizCount())
+                        .isScrapped(dto.isScrapped())
+                        .videoUrl(dto.videoUrl())
+                        .keywords(keywordMap.getOrDefault(dto.missionId(), Collections.emptyList())) // 🔑 키워드 주입
+                        .build())
+                .toList();
+
         return MissionResponseDto.SearchResponse.builder()
-                .missions(slice.getContent()) // 리스트
-                .hasNext(slice.hasNext())     // 다음 페이지 여부
+                .missions(newContent)
+                .hasNext(slice.hasNext())
                 .build();
     }
 
