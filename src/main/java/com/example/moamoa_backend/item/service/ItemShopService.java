@@ -91,7 +91,7 @@ public class ItemShopService {
 					item.getType(), //서브 타입
 					item.getName(),
 					item.getPrice(),
-					item.getImageUrl(),
+					item.getShopImageUrl(),
 					item.isOnSale(),
 					ownedFlag,
 					equippedFlag,
@@ -195,7 +195,7 @@ public class ItemShopService {
 			.map(mi -> new AvatarEquipmentResponseDto.EquippedItem(
 				mi.getItem().getType(),
 				mi.getItem().getId(),
-				mi.getItem().getImageUrl()
+				mi.getItem().getWearingImageUrl()
 			))
 			.toList();
 

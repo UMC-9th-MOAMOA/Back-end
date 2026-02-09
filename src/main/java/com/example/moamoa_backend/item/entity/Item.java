@@ -27,7 +27,10 @@ public class Item extends BaseEntity {
     private String name;
 
     @Column(nullable = false, length = 1000)
-    private String imageUrl;
+    private String shopImageUrl;
+
+    @Column(nullable = false, length = 1000)
+    private String wearingImageUrl;
 
     @Column(nullable = false)
     private boolean isOnSale;
