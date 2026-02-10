@@ -1,5 +1,7 @@
 # 🦎  MOAMOA Backend
 
+--- 
+
 
 
 
@@ -9,8 +11,55 @@
 
 ---
 
+## 👨‍💻 Team MoaMoa
 
-## 👤 팀원 소개
+| 미카엘 (한민재) |                         준 (박영준)                          |                         배민 (배민규)                         | 제로 (김신영) |                        박콩 (박해원)                         |
+| :---: |:--------------------------------------------------------:|:--------------------------------------------------------:| :---: |:-------------------------------------------------------:|
+| <img src="https://github.com/minjaehan.png" width="100"> | <img src="https://github.com/YoungJJun.png" width="100"> | <img src="https://github.com/mingyu210.png" width="100"> | <img src="https://github.com/ZeroColaa.png" width="100"> | <img src="https://github.com/haewonee.png" width="100"> |
+| **Cloud & Infra** |                    **Auth & Policy**                     |                  **Inquiry & My space**                  | **Item & Onboarding** |                       **Mission**                       |
+| [@minjaehan](https://github.com/minjaehan) |        [@YoungJJun](https://github.com/YoungJJun)        |        [@mingyu210](https://github.com/mingyu210)        | [@ZeroColaa](https://github.com/ZeroColaa) |        [@haewonee](https://github.com/haewonee)         |
+
+---
+
+📌 **미카엘/한민재**
+
+- 담당: Cloud Engineering, Infra
+- [tommy3942@naver.com](mailto:tommy3942@naver.com)
+- https://github.com/minjaehan
+- 010-2025-2037
+
+📌 **준/박영준**
+
+- 담당: 로그인 관련 API
+    - 회원가입 및 탈퇴, 로그인
+    - 약관 조회, 동의, 갱신
+    - 회원정보 수정
+- [young_879@naver.com](mailto:young_879@naver.com)
+- https://github.com/YoungJJun
+- 010-8290-2699
+
+📌 **배민/배민규**
+
+- 담당: 도토리 조회, 출석체크, 스페이스 달력
+- [abba210@naver.com](mailto:abba210@naver.com)
+- https://github.com/mingyu210
+- 010-5545-0543
+
+📌 **제로/김신영**
+
+- 아이템, 온보딩 관련 api
+- [sinyoung556@gmail.com](mailto:sinyoung556@gmail.com)
+- https://github.com/ZeroColaa
+- 010-3541-7078
+
+
+📌 **박콩/박해원**
+
+- 담당: 미션 관련 API
+- [godnjs5870@naver.com](mailto:godnjs5870@naver.com)
+- https://github.com/haewonee
+- 010-2772-5870
+
 
 ---
 
@@ -25,10 +74,16 @@
 - Gradle (Groovy)
 - Lombok
 
-### Database
+### Database & Cache
 - MySQL
 - Amazon RDS
 - Redis
+
+### Database Migration
+- Flyway
+
+### Storage
+- Amazon S3
 
 ### Infrastructure / DevOps
 - Amazon EC2
@@ -37,6 +92,7 @@
 
 ### API & Documentation
 - Swagger (OpenAPI)
+
 ---
 
 
@@ -67,27 +123,37 @@ src/main/java/com/example/app
 │   └── util                    # 유틸리티 클래스
 │       └── JwtUtil.java
 │
-├── member                      # 회원 도메인
-│   ├── controller              # 회원 관련 API
-│   │   └── MemberController.java
-│   ├── service                 # 회원 비즈니스 로직
-│   │   └── MemberService.java
-│   ├── repository              # 회원 데이터 접근 계층
-│   │   └── MemberRepository.java
-│   ├── entity                  # 회원 엔티티
-│   │   └── Member.java
-│   ├── dto                     # 회원 DTO
-│   │   ├── request
-│   │   │   └── MemberSignupRequest.java
-│   │   └── response
-│   │       └── MemberResponse.java
-│   └── exception               # 회원 도메인 예외
-│       └── MemberException.java
+├── domain
+│    └─ member                        # 회원 도메인
+│       ├── controller              # 회원 관련 API
+│       │   └── MemberController.java
+│       ├── service                 # 회원 비즈니스 로직
+│       │   └── MemberService.java
+│       ├── repository              # 회원 데이터 접근 계층
+│       │   └── MemberRepository.java
+│       ├── entity                  # 회원 엔티티
+│       │   └── Member.java
+│       ├── dto                     # 회원 DTO
+│       │   ├── request
+│       │   │   └── MemberSignupRequest.java
+│       │   └── response
+│       │       └── MemberResponse.java
+│       └── exception               # 회원 도메인 예외
+│           └── MemberException.java
+│               
+│               ...
 │
 └── Application.java             # Spring Boot 실행 클래스
 
 ```
 ---
+
+## 🌐 서비스 아키텍쳐
+![2026-02-09 220024.png](./docs/images/2026-02-09_220024.png)
+
+--- 
+
+
 
 ## 🧾 개발 컨벤션
 아래 문서를 기준으로 네이밍/협업 규칙을 통일합니다.
