@@ -52,13 +52,13 @@ public class AuthController implements AuthControllerDocs {
     @Override
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/signup")
-    public ApiResponse<AuthResDto.TokenDto> signup(
+    public ApiResponse<AuthResDto.LoginResponseDto> signup(
             @RequestBody @Valid AuthReqDto.SignupDto request,
             HttpServletResponse response
     ) {
-        AuthResDto.GeneratedTokenDto generatedTokenDto = authService.signup(request);
-        cookieUtil.setRefreshTokenCookie(response, generatedTokenDto.refreshToken());
-        return ApiResponse.onSuccess(AuthSuccessCode.SIGNUP_SUCCESS, AuthConverter.toTokenDto(generatedTokenDto));
+        AuthResDto.LoginResultDto result = authService.signup(request);
+        cookieUtil.setRefreshTokenCookie(response, result.generatedToken().refreshToken());
+        return ApiResponse.onSuccess(AuthSuccessCode.SIGNUP_SUCCESS, AuthConverter.toLoginResponseDto(result));
     }
 
     @Override
