@@ -21,7 +21,7 @@
 
 ---
 
-📌 미카엘/한민재
+📌 **미카엘/한민재**
 
 - 담당: Cloud Engineering, Infra
 - [tommy3942@naver.com](mailto:tommy3942@naver.com)
@@ -53,7 +53,7 @@
 - 010-3541-7078
 
 
-📌 박콩/박해원
+📌 **박콩/박해원**
 
 - 담당: 미션 관련 API
 - [godnjs5870@naver.com](mailto:godnjs5870@naver.com)
