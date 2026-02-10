@@ -8,51 +8,52 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.example.moamoa_backend.global.apiPayload.response.ApiResponse;
 import com.example.moamoa_backend.domain.member.dto.req.OnboardingPatchRequestDto;
 import com.example.moamoa_backend.domain.member.dto.res.OnboardingResponseDto;
-
 import com.example.moamoa_backend.domain.member.enums.OnboardingUpdateScope;
 import com.example.moamoa_backend.domain.member.exception.code.MemberSuccessCode;
 import com.example.moamoa_backend.domain.member.service.OnboardingService;
-
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-@RestController
-@RequiredArgsConstructor
-@RequestMapping("/api/v1/members/me")
-public class OnboardingController  implements OnboardingControllerDocs {
-
-	private final OnboardingService onboardingService;
-
-
-	@GetMapping("/onboarding")
+@Tag(name = "Onboarding", description = "온보딩/설정(관심사, 목표) API")
+public interface OnboardingControllerDocs {
+	@Operation(
+		summary = "내 온보딩 조회",
+		description = """
+            내 온보딩 정보를 조회합니다. scope에 따라 필요한 항목만 반환합니다.
+            - ALL: selections + goalEnabled + dailyMissionGoal + goalRetention + goalEndDate + pendingGoal*
+            - INTERESTS: selections
+            - GOAL: goalEnabled + dailyMissionGoal + goalRetention + goalEndDate + pendingGoal*
+            """
+	)
 	public ApiResponse<OnboardingResponseDto> getOnboarding(
 		@AuthenticationPrincipal UserDetails userDetails,
 		@RequestParam(defaultValue = "ALL") OnboardingUpdateScope scope
-	) {
-		Long memberId = Long.parseLong(userDetails.getUsername());
+	) ;
 
-		return ApiResponse.onSuccess(
-			MemberSuccessCode.MEMBER_GET_ONBOARDING,
-			onboardingService.getMyOnboarding(memberId, scope)
-		);
-	}
-
-	@PatchMapping("/onboarding")
+	@Operation(
+		summary = "내 온보딩 수정",
+		description = """
+            프론트는 사용자가 선택을 마친 최종 결과 전체를 전송합니다.
+            서버는 기존 저장값과 비교하여 DB 상태를 최종 결과와 동일하게 갱신합니다(동기화).
+            
+            scope로 수정 범위를 지정합니다.
+            - ALL: selections 필수, dailyMissionGoal/goalRetention은 선택(null 허용)
+             	   (dailyMissionGoal=null AND goalRetention=null 이면 목표는 변경하지 않음: '나중에 설정' 케이스)
+            - INTERESTS: selections 필수
+            - GOAL: 
+			- OFF: goalEnabled=false
+			- ON/변경: goalEnabled=true + dailyMissionGoal(처음 켤 때는 필요), goalRetention(optional / retention-only 허용)
+            """
+	)
 	public ApiResponse<OnboardingResponseDto> patchOnboarding(
 		@AuthenticationPrincipal UserDetails userDetails,
 		@RequestParam OnboardingUpdateScope scope,
 		@Valid @RequestBody OnboardingPatchRequestDto request
-	) {
-		Long memberId = Long.parseLong(userDetails.getUsername());
+	) ;
 
-		return ApiResponse.onSuccess(
-			MemberSuccessCode.MEMBER_UPDATE_ONBOARDING,
-			onboardingService.patchOnboarding(memberId, scope, request)
-		);
-	}
 }
-

@@ -13,15 +13,12 @@ import com.example.moamoa_backend.domain.member.dto.res.GoalPopupResponseDto;
 import com.example.moamoa_backend.domain.member.exception.code.MemberSuccessCode;
 import com.example.moamoa_backend.domain.member.service.GoalResultService;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/members/me")
-@Tag(name = "GoalPopup", description = "목표 실패 팝업 조회 및 팝업 확인 처리 API")
-public class GoalPopupController {
+public class GoalPopupController  implements GoalPopupControllerDocs {
 
 	private final GoalResultService goalResultService;
 
@@ -43,14 +40,6 @@ public class GoalPopupController {
 	 * - 팝업은 '조회만'으로는 소진되지 않으며,
 	 *   프론트가 실제로 띄운 뒤 shown API를 호출해야 소진(봤음 처리)된다.
 	 */
-	@Operation(
-		summary = "목표 실패 팝업 조회",
-		description = """
-            홈 진입 시 띄워야 하는 목표 팝업 목록을 반환합니다.
-            - DAILY: 어제 결과(실패) 중 아직 안 본 것
-            - WEEKLY: 지난 주 결과(일요일 종료) 중 아직 안 본 것
-            """
-	)
 	@GetMapping("/goal-popups")
 	public ApiResponse<GoalPopupResponseDto> getGoalPopups(
 		@AuthenticationPrincipal UserDetails userDetails
@@ -73,10 +62,6 @@ public class GoalPopupController {
 	 *   멱등성:
 	 * - 이미 본 팝업(popupShownAt != null)을 다시 호출해도 상태는 유지된다.
 	 */
-	@Operation(
-		summary = "목표 팝업 확인 처리",
-		description = "goalResultId에 해당하는 목표 팝업을 '봤음'으로 처리합니다."
-	)
 	@PatchMapping("/goal-popups/{goalResultId}/shown")
 	public ApiResponse<Void> markGoalPopupShown(
 		@AuthenticationPrincipal UserDetails userDetails,
