@@ -142,7 +142,7 @@ src/main/java/com/example/app
 ---
 
 ## 🌐 서비스 아키텍쳐
-![2026-02-09 220024.png](./docs/images/2026-02-09 220024.png)
+![2026-02-09 220024.png](./docs/images/2026-02-09_220024.png)
 
 --- 
 
