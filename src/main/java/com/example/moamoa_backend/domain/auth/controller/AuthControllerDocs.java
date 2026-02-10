@@ -100,7 +100,7 @@ public interface AuthControllerDocs {
                     """
     )
     @SecurityRequirements(value = {})
-    ApiResponse<AuthResDto.TokenDto> signup(
+    ApiResponse<AuthResDto.LoginResponseDto> signup(
             @RequestBody @Valid AuthReqDto.SignupDto request,
             HttpServletResponse response
     );

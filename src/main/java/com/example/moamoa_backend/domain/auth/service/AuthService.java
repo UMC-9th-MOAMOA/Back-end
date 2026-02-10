@@ -201,7 +201,7 @@ public class AuthService {
      * - 자동 로그인
      */
     @Transactional
-    public AuthResDto.GeneratedTokenDto signup(AuthReqDto.SignupDto request) {
+    public AuthResDto.LoginResultDto signup(AuthReqDto.SignupDto request) {
 
         if (!request.password().equals(request.passwordCheck())) {
             throw new AuthException(AuthErrorCode.PASSWORD_CONFIRM_MISMATCH);
@@ -237,7 +237,11 @@ public class AuthService {
         // 인증 플래그 삭제 (재사용 방지)
         redisUtil.deleteData(VERIFIED_PREFIX + request.email());
 
-        return tokenDto;
+        return AuthResDto.LoginResultDto.builder()
+                .generatedToken(tokenDto)
+                .onboardingCompleted(savedMember.getOnboardingCompleted())
+                .policyAgreed(savedMember.getPolicyAgreed())
+                .build();
     }
 
     /**
