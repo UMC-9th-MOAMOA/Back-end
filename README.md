@@ -74,10 +74,16 @@
 - Gradle (Groovy)
 - Lombok
 
-### Database
+### Database & Cache
 - MySQL
 - Amazon RDS
 - Redis
+
+### Database Migration
+- Flyway
+
+### Storage
+- Amazon S3
 
 ### Infrastructure / DevOps
 - Amazon EC2
@@ -86,6 +92,7 @@
 
 ### API & Documentation
 - Swagger (OpenAPI)
+
 ---
 
 
@@ -118,21 +125,21 @@ src/main/java/com/example/app
 │
 ├── domain
 │    └─ member                        # 회원 도메인
-│         ├── controller              # 회원 관련 API
-│         │   └── MemberController.java
-│         ├── service                 # 회원 비즈니스 로직
-│         │   └── MemberService.java
-│         ├── repository              # 회원 데이터 접근 계층
-│         │   └── MemberRepository.java
-│         ├── entity                  # 회원 엔티티
-│         │   └── Member.java
-│         ├── dto                     # 회원 DTO
-│         │   ├── request
-│         │   │   └── MemberSignupRequest.java
-│         │   └── response
-│         │       └── MemberResponse.java
-│         └── exception               # 회원 도메인 예외
-│             └── MemberException.java
+│       ├── controller              # 회원 관련 API
+│       │   └── MemberController.java
+│       ├── service                 # 회원 비즈니스 로직
+│       │   └── MemberService.java
+│       ├── repository              # 회원 데이터 접근 계층
+│       │   └── MemberRepository.java
+│       ├── entity                  # 회원 엔티티
+│       │   └── Member.java
+│       ├── dto                     # 회원 DTO
+│       │   ├── request
+│       │   │   └── MemberSignupRequest.java
+│       │   └── response
+│       │       └── MemberResponse.java
+│       └── exception               # 회원 도메인 예외
+│           └── MemberException.java
 │               
 │               ...
 │
