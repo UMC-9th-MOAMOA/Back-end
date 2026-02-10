@@ -1,8 +1,8 @@
-package com.example.moamoa_backend.inquiry.repository;
+package com.example.moamoa_backend.domain.inquiry.repository;
 
-import com.example.moamoa_backend.inquiry.dto.InquiryDetailResDto;
-import com.example.moamoa_backend.inquiry.dto.InquiryQueryReqDto;
-import com.example.moamoa_backend.inquiry.dto.InquiryQueryResDto;
+import com.example.moamoa_backend.domain.inquiry.dto.InquiryDetailResDto;
+import com.example.moamoa_backend.domain.inquiry.dto.InquiryQueryReqDto;
+import com.example.moamoa_backend.domain.inquiry.dto.InquiryQueryResDto;
 
 import java.util.List;
 

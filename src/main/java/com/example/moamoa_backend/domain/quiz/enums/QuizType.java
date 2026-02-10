@@ -1,4 +1,4 @@
-package com.example.moamoa_backend.quiz.enums;
+package com.example.moamoa_backend.domain.quiz.enums;
 
 public enum QuizType {
     OX, //OX 퀴즈

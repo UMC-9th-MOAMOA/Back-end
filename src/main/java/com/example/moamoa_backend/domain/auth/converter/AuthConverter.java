@@ -1,6 +1,6 @@
-package com.example.moamoa_backend.auth.converter;
+package com.example.moamoa_backend.domain.auth.converter;
 
-import com.example.moamoa_backend.auth.dto.res.AuthResDto;
+import com.example.moamoa_backend.domain.auth.dto.res.AuthResDto;
 
 /**
  * Auth 관련 DTO 변환 클래스

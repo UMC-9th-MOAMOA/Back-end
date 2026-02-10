@@ -1,12 +1,12 @@
-package com.example.moamoa_backend.interest.service;
+package com.example.moamoa_backend.domain.interest.service;
 
-import com.example.moamoa_backend.interest.dto.InterestResponseDto;
-import com.example.moamoa_backend.interest.dto.SubInterestResponseDto;
-import com.example.moamoa_backend.interest.exception.InterestException;
-import com.example.moamoa_backend.interest.exception.code.InterestErrorCode;
-import com.example.moamoa_backend.interest.entity.SubInterest;
-import com.example.moamoa_backend.interest.repository.InterestRepository;
-import com.example.moamoa_backend.interest.repository.SubInterestRepository;
+import com.example.moamoa_backend.domain.interest.dto.InterestResponseDto;
+import com.example.moamoa_backend.domain.interest.dto.SubInterestResponseDto;
+import com.example.moamoa_backend.domain.interest.exception.InterestException;
+import com.example.moamoa_backend.domain.interest.exception.code.InterestErrorCode;
+import com.example.moamoa_backend.domain.interest.entity.SubInterest;
+import com.example.moamoa_backend.domain.interest.repository.InterestRepository;
+import com.example.moamoa_backend.domain.interest.repository.SubInterestRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

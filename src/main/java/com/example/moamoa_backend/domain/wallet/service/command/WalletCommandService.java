@@ -1,4 +1,4 @@
-package com.example.moamoa_backend.wallet.service.command;
+package com.example.moamoa_backend.domain.wallet.service.command;
 
 import com.example.moamoa_backend.domain.member.entity.Member;
 

@@ -1,6 +1,6 @@
-package com.example.moamoa_backend.mission.dto.request;
+package com.example.moamoa_backend.domain.mission.dto.request;
 
-import com.example.moamoa_backend.quiz.enums.QuizType;
+import com.example.moamoa_backend.domain.quiz.enums.QuizType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;

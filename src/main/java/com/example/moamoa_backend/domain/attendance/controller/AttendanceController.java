@@ -1,11 +1,10 @@
-package com.example.moamoa_backend.attendance.controller;
+package com.example.moamoa_backend.domain.attendance.controller;
 
-import com.example.moamoa_backend.attendance.dto.AttendanceMonthResponseDto;
-import com.example.moamoa_backend.attendance.dto.AttendanceResponseDto;
-import com.example.moamoa_backend.attendance.dto.AttendanceWeekResponseDto;
-import com.example.moamoa_backend.attendance.exception.code.AttendanceSuccessCode;
-import com.example.moamoa_backend.attendance.service.command.AttendanceCommandService;
-import com.example.moamoa_backend.attendance.service.query.AttendanceQueryService;
+import com.example.moamoa_backend.domain.attendance.dto.AttendanceResponseDto;
+import com.example.moamoa_backend.domain.attendance.dto.AttendanceWeekResponseDto;
+import com.example.moamoa_backend.domain.attendance.exception.code.AttendanceSuccessCode;
+import com.example.moamoa_backend.domain.attendance.service.command.AttendanceCommandService;
+import com.example.moamoa_backend.domain.attendance.service.query.AttendanceQueryService;
 import com.example.moamoa_backend.global.apiPayload.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

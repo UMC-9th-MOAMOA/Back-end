@@ -1,4 +1,4 @@
-package com.example.moamoa_backend.auth.dto.res;
+package com.example.moamoa_backend.domain.auth.dto.res;
 
 import lombok.Builder;
 

@@ -1,4 +1,4 @@
-package com.example.moamoa_backend.interest.exception.code;
+package com.example.moamoa_backend.domain.interest.exception.code;
 
 import com.example.moamoa_backend.global.apiPayload.code.BaseSuccessCode;
 

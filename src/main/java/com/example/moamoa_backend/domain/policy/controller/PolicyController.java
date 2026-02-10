@@ -1,10 +1,10 @@
-package com.example.moamoa_backend.policy.controller;
+package com.example.moamoa_backend.domain.policy.controller;
 
 import com.example.moamoa_backend.global.apiPayload.response.ApiResponse;
-import com.example.moamoa_backend.policy.dto.req.PolicyReqDto;
-import com.example.moamoa_backend.policy.dto.res.PolicyResDto;
-import com.example.moamoa_backend.policy.exception.code.PolicySuccessCode;
-import com.example.moamoa_backend.policy.service.PolicyService;
+import com.example.moamoa_backend.domain.policy.dto.req.PolicyReqDto;
+import com.example.moamoa_backend.domain.policy.dto.res.PolicyResDto;
+import com.example.moamoa_backend.domain.policy.exception.code.PolicySuccessCode;
+import com.example.moamoa_backend.domain.policy.service.PolicyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;

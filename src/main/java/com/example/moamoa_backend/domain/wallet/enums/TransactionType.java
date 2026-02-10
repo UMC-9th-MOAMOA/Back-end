@@ -1,4 +1,4 @@
-package com.example.moamoa_backend.wallet.enums;
+package com.example.moamoa_backend.domain.wallet.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

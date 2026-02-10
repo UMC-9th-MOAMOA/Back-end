@@ -1,7 +1,7 @@
-package com.example.moamoa_backend.auth.dto.oauth;
+package com.example.moamoa_backend.domain.auth.dto.oauth;
 
-import com.example.moamoa_backend.auth.exception.AuthException;
-import com.example.moamoa_backend.auth.exception.code.AuthErrorCode;
+import com.example.moamoa_backend.domain.auth.exception.AuthException;
+import com.example.moamoa_backend.domain.auth.exception.code.AuthErrorCode;
 import com.example.moamoa_backend.domain.member.entity.Member;
 import com.example.moamoa_backend.domain.member.enums.MemberStatus;
 import com.example.moamoa_backend.domain.member.enums.Provider;

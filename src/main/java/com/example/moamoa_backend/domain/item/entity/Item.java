@@ -1,7 +1,7 @@
-package com.example.moamoa_backend.item.entity;
+package com.example.moamoa_backend.domain.item.entity;
 
 import com.example.moamoa_backend.global.entity.BaseEntity;
-import com.example.moamoa_backend.item.enums.ItemType;
+import com.example.moamoa_backend.domain.item.enums.ItemType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;

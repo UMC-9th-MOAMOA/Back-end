@@ -1,9 +1,9 @@
-package com.example.moamoa_backend.wallet.repository;
+package com.example.moamoa_backend.domain.wallet.repository;
 
 import java.time.LocalDateTime;
 
-import com.example.moamoa_backend.wallet.entity.WalletHistory;
-import com.example.moamoa_backend.wallet.enums.TransactionType;
+import com.example.moamoa_backend.domain.wallet.entity.WalletHistory;
+import com.example.moamoa_backend.domain.wallet.enums.TransactionType;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

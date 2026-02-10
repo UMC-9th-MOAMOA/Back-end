@@ -1,9 +1,9 @@
-package com.example.moamoa_backend.inquiry.service.command;
+package com.example.moamoa_backend.domain.inquiry.service.command;
 
-import com.example.moamoa_backend.inquiry.dto.InquiryAnswerRequestDto;
-import com.example.moamoa_backend.inquiry.dto.InquiryAnswerResponseDto;
-import com.example.moamoa_backend.inquiry.dto.InquiryRequestDTO;
-import com.example.moamoa_backend.inquiry.dto.InquiryResponseDTO;
+import com.example.moamoa_backend.domain.inquiry.dto.InquiryAnswerRequestDto;
+import com.example.moamoa_backend.domain.inquiry.dto.InquiryAnswerResponseDto;
+import com.example.moamoa_backend.domain.inquiry.dto.InquiryRequestDTO;
+import com.example.moamoa_backend.domain.inquiry.dto.InquiryResponseDTO;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;

@@ -1,15 +1,15 @@
-package com.example.moamoa_backend.item.service;
+package com.example.moamoa_backend.domain.item.service;
 
-import com.example.moamoa_backend.item.dto.HomeResponseDto;
-import com.example.moamoa_backend.item.entity.MemberItem;
-import com.example.moamoa_backend.item.enums.ItemType;
-import com.example.moamoa_backend.item.repository.MemberItemRepository;
+import com.example.moamoa_backend.domain.item.dto.HomeResponseDto;
+import com.example.moamoa_backend.domain.item.entity.MemberItem;
+import com.example.moamoa_backend.domain.item.enums.ItemType;
+import com.example.moamoa_backend.domain.item.repository.MemberItemRepository;
 import com.example.moamoa_backend.domain.member.entity.Member;
 import com.example.moamoa_backend.domain.member.exception.MemberException;
 import com.example.moamoa_backend.domain.member.exception.code.MemberErrorCode;
 import com.example.moamoa_backend.domain.member.repository.MemberRepository;
 import com.example.moamoa_backend.domain.member.service.MemberSettingService;
-import com.example.moamoa_backend.wallet.service.query.WalletHistoryQueryService;
+import com.example.moamoa_backend.domain.wallet.service.query.WalletHistoryQueryService;
 
 import lombok.RequiredArgsConstructor;
 

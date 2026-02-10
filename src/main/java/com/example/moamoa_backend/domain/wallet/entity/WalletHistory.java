@@ -1,11 +1,11 @@
-package com.example.moamoa_backend.wallet.entity;
+package com.example.moamoa_backend.domain.wallet.entity;
 
 import com.example.moamoa_backend.global.entity.BaseEntity;
-import com.example.moamoa_backend.mission.entity.Mission;
-import com.example.moamoa_backend.item.entity.Item;
-import com.example.moamoa_backend.wallet.enums.TransactionType;
-import com.example.moamoa_backend.wallet.exception.WalletException;
-import com.example.moamoa_backend.wallet.exception.code.WalletErrorCode;
+import com.example.moamoa_backend.domain.mission.entity.Mission;
+import com.example.moamoa_backend.domain.item.entity.Item;
+import com.example.moamoa_backend.domain.wallet.enums.TransactionType;
+import com.example.moamoa_backend.domain.wallet.exception.WalletException;
+import com.example.moamoa_backend.domain.wallet.exception.code.WalletErrorCode;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;

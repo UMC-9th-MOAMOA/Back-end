@@ -1,8 +1,8 @@
-package com.example.moamoa_backend.item.entity;
+package com.example.moamoa_backend.domain.item.entity;
 
 import com.example.moamoa_backend.global.entity.BaseEntity;
-import com.example.moamoa_backend.item.exception.ItemException;
-import com.example.moamoa_backend.item.exception.code.ItemErrorCode;
+import com.example.moamoa_backend.domain.item.exception.ItemException;
+import com.example.moamoa_backend.domain.item.exception.code.ItemErrorCode;
 import com.example.moamoa_backend.domain.member.entity.Member;
 
 import jakarta.persistence.*;

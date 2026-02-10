@@ -1,6 +1,6 @@
-package com.example.moamoa_backend.inquiry.dto;
+package com.example.moamoa_backend.domain.inquiry.dto;
 
-import com.example.moamoa_backend.inquiry.enums.InquiryCategory;
+import com.example.moamoa_backend.domain.inquiry.enums.InquiryCategory;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

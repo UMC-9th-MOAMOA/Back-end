@@ -1,4 +1,4 @@
-package com.example.moamoa_backend.auth.repository;
+package com.example.moamoa_backend.domain.auth.repository;
 
 import com.nimbusds.oauth2.sdk.util.StringUtils;
 import jakarta.servlet.http.Cookie;

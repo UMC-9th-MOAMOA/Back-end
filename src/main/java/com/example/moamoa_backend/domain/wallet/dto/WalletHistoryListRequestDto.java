@@ -1,4 +1,4 @@
-package com.example.moamoa_backend.wallet.dto;
+package com.example.moamoa_backend.domain.wallet.dto;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

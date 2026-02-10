@@ -2,8 +2,8 @@ package com.example.moamoa_backend.domain.member.entity.mapping;
 
 import com.example.moamoa_backend.global.entity.BaseEntity;
 import com.example.moamoa_backend.domain.member.entity.Member;
-import com.example.moamoa_backend.mission.entity.Mission;
-import com.example.moamoa_backend.mission.enums.MissionStatus;
+import com.example.moamoa_backend.domain.mission.entity.Mission;
+import com.example.moamoa_backend.domain.mission.enums.MissionStatus;
 
 import jakarta.persistence.*;
 import lombok.*;

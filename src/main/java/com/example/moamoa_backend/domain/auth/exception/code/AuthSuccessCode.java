@@ -1,4 +1,4 @@
-package com.example.moamoa_backend.auth.exception.code;
+package com.example.moamoa_backend.domain.auth.exception.code;
 
 import com.example.moamoa_backend.global.apiPayload.code.BaseSuccessCode;
 import lombok.AllArgsConstructor;

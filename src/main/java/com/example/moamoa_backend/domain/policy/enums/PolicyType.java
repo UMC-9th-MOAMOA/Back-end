@@ -1,4 +1,4 @@
-package com.example.moamoa_backend.policy.enums;
+package com.example.moamoa_backend.domain.policy.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

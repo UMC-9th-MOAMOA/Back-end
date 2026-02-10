@@ -1,8 +1,8 @@
 package com.example.moamoa_backend.global.security.filter;
 
-import com.example.moamoa_backend.auth.exception.code.AuthErrorCode;
-import com.example.moamoa_backend.member.enums.Role;
-import com.example.moamoa_backend.member.repository.MemberRepository;
+import com.example.moamoa_backend.domain.auth.exception.code.AuthErrorCode;
+import com.example.moamoa_backend.domain.member.enums.Role;
+import com.example.moamoa_backend.domain.member.repository.MemberRepository;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

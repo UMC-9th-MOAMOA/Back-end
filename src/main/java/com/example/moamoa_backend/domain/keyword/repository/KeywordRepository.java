@@ -1,7 +1,7 @@
-package com.example.moamoa_backend.keyword.repository;
+package com.example.moamoa_backend.domain.keyword.repository;
 
-import com.example.moamoa_backend.keyword.entity.Keyword;
-import com.example.moamoa_backend.keyword.enums.KeywordType;
+import com.example.moamoa_backend.domain.keyword.entity.Keyword;
+import com.example.moamoa_backend.domain.keyword.enums.KeywordType;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

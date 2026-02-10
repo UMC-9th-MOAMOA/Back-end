@@ -1,6 +1,6 @@
-package com.example.moamoa_backend.item.dto;
+package com.example.moamoa_backend.domain.item.dto;
 
-import com.example.moamoa_backend.item.enums.ItemType;
+import com.example.moamoa_backend.domain.item.enums.ItemType;
 
 import java.util.List;
 

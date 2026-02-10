@@ -1,7 +1,7 @@
-package com.example.moamoa_backend.mission.repository;
+package com.example.moamoa_backend.domain.mission.repository;
 
-import com.example.moamoa_backend.mission.dto.response.MissionResponseDto;
-import com.example.moamoa_backend.mission.entity.Mission;
+import com.example.moamoa_backend.domain.mission.dto.response.MissionResponseDto;
+import com.example.moamoa_backend.domain.mission.entity.Mission;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 

@@ -1,4 +1,4 @@
-package com.example.moamoa_backend.inquiry.dto;
+package com.example.moamoa_backend.domain.inquiry.dto;
 
 import java.time.LocalDateTime;
 import java.util.List;

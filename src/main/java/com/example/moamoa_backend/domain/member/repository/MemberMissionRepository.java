@@ -1,7 +1,7 @@
 package com.example.moamoa_backend.domain.member.repository;
 
 import com.example.moamoa_backend.domain.member.entity.mapping.MemberMission;
-import com.example.moamoa_backend.mission.enums.MissionStatus;
+import com.example.moamoa_backend.domain.mission.enums.MissionStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

@@ -1,8 +1,8 @@
-package com.example.moamoa_backend.quiz.entity;
+package com.example.moamoa_backend.domain.quiz.entity;
 
 import com.example.moamoa_backend.global.entity.BaseEntity;
-import com.example.moamoa_backend.mission.entity.Mission;
-import com.example.moamoa_backend.quiz.enums.QuizType;
+import com.example.moamoa_backend.domain.mission.entity.Mission;
+import com.example.moamoa_backend.domain.quiz.enums.QuizType;
 import jakarta.persistence.*;
 import lombok.*;
 

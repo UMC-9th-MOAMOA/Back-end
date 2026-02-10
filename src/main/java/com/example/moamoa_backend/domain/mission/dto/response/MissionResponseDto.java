@@ -1,4 +1,4 @@
-package com.example.moamoa_backend.mission.dto.response;
+package com.example.moamoa_backend.domain.mission.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;

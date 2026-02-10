@@ -6,7 +6,6 @@ import com.example.moamoa_backend.domain.member.enums.MemberStatus;
 import com.example.moamoa_backend.domain.member.enums.Provider;
 import com.example.moamoa_backend.domain.member.enums.Role;
 import com.example.moamoa_backend.global.entity.BaseEntity;
-import com.example.moamoa_backend.member.enums.*;
 import com.example.moamoa_backend.domain.member.exception.MemberException;
 import com.example.moamoa_backend.domain.member.exception.code.MemberErrorCode;
 

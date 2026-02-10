@@ -1,4 +1,4 @@
-package com.example.moamoa_backend.inquiry.dto;
+package com.example.moamoa_backend.domain.inquiry.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;

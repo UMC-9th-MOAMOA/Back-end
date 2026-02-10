@@ -1,4 +1,4 @@
-package com.example.moamoa_backend.item.enums;
+package com.example.moamoa_backend.domain.item.enums;
 
 import java.util.List;
 

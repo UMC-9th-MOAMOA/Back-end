@@ -1,12 +1,12 @@
-package com.example.moamoa_backend.mission.controller;
+package com.example.moamoa_backend.domain.mission.controller;
 
 
 import com.example.moamoa_backend.global.apiPayload.code.GeneralSuccessCode;
 import com.example.moamoa_backend.global.apiPayload.response.ApiResponse;
-import com.example.moamoa_backend.mission.dto.request.MissionRequestDto;
-import com.example.moamoa_backend.mission.dto.response.MissionResponseDto;
-import com.example.moamoa_backend.mission.service.command.MissionCommandService;
-import com.example.moamoa_backend.mission.service.query.MissionQueryService;
+import com.example.moamoa_backend.domain.mission.dto.request.MissionRequestDto;
+import com.example.moamoa_backend.domain.mission.dto.response.MissionResponseDto;
+import com.example.moamoa_backend.domain.mission.service.command.MissionCommandService;
+import com.example.moamoa_backend.domain.mission.service.query.MissionQueryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;

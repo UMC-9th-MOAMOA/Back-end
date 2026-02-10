@@ -1,7 +1,7 @@
-package com.example.moamoa_backend.mission.service.util;
+package com.example.moamoa_backend.domain.mission.service.util;
 
-import com.example.moamoa_backend.mission.exception.MissionException;
-import com.example.moamoa_backend.mission.exception.code.MissionErrorCode;
+import com.example.moamoa_backend.domain.mission.exception.MissionException;
+import com.example.moamoa_backend.domain.mission.exception.code.MissionErrorCode;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;

@@ -1,8 +1,8 @@
-package com.example.moamoa_backend.wallet.service.command;
+package com.example.moamoa_backend.domain.wallet.service.command;
 
 import com.example.moamoa_backend.domain.member.entity.Member;
-import com.example.moamoa_backend.wallet.entity.Wallet;
-import com.example.moamoa_backend.wallet.repository.WalletRepository;
+import com.example.moamoa_backend.domain.wallet.entity.Wallet;
+import com.example.moamoa_backend.domain.wallet.repository.WalletRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

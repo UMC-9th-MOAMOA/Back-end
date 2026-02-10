@@ -1,12 +1,12 @@
-package com.example.moamoa_backend.attendance.controller;
+package com.example.moamoa_backend.domain.attendance.controller;
 
-import com.example.moamoa_backend.attendance.dto.AttendanceMonthResponseDto;
-import com.example.moamoa_backend.attendance.exception.code.AttendanceSuccessCode;
-import com.example.moamoa_backend.attendance.service.query.AttendanceQueryService;
+import com.example.moamoa_backend.domain.attendance.dto.AttendanceMonthResponseDto;
+import com.example.moamoa_backend.domain.attendance.exception.code.AttendanceSuccessCode;
+import com.example.moamoa_backend.domain.attendance.service.query.AttendanceQueryService;
 import com.example.moamoa_backend.global.apiPayload.response.ApiResponse;
-import com.example.moamoa_backend.wallet.dto.WalletHistoryDayResponseDto;
-import com.example.moamoa_backend.wallet.exception.code.WalletSuccessCode;
-import com.example.moamoa_backend.wallet.service.query.WalletHistoryQueryService;
+import com.example.moamoa_backend.domain.wallet.dto.WalletHistoryDayResponseDto;
+import com.example.moamoa_backend.domain.wallet.exception.code.WalletSuccessCode;
+import com.example.moamoa_backend.domain.wallet.service.query.WalletHistoryQueryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Max;

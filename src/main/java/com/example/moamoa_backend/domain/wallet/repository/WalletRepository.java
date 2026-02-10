@@ -1,7 +1,7 @@
-package com.example.moamoa_backend.wallet.repository;
+package com.example.moamoa_backend.domain.wallet.repository;
 
 import com.example.moamoa_backend.domain.member.entity.Member;
-import com.example.moamoa_backend.wallet.entity.Wallet;
+import com.example.moamoa_backend.domain.wallet.entity.Wallet;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;

@@ -1,6 +1,6 @@
-package com.example.moamoa_backend.interest.repository;
+package com.example.moamoa_backend.domain.interest.repository;
 
-import com.example.moamoa_backend.interest.entity.SubInterest;
+import com.example.moamoa_backend.domain.interest.entity.SubInterest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

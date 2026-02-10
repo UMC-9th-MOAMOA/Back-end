@@ -1,17 +1,17 @@
-package com.example.moamoa_backend.mission.converter;
+package com.example.moamoa_backend.domain.mission.converter;
 
 import com.example.moamoa_backend.domain.keyword.entity.Keyword;
 import com.example.moamoa_backend.domain.member.entity.Member;
 import com.example.moamoa_backend.domain.member.entity.mapping.MemberMission;
-import com.example.moamoa_backend.mission.dto.request.MissionRequestDto;
-import com.example.moamoa_backend.mission.dto.response.MissionResponseDto;
-import com.example.moamoa_backend.mission.entity.Mission;
-import com.example.moamoa_backend.mission.entity.mapping.MissionSubInterest;
-import com.example.moamoa_backend.mission.enums.MissionStatus;
-import com.example.moamoa_backend.mission.exception.MissionException;
-import com.example.moamoa_backend.mission.exception.code.MissionErrorCode;
-import com.example.moamoa_backend.quiz.entity.Quiz;
-import com.example.moamoa_backend.quiz.enums.QuizType;
+import com.example.moamoa_backend.domain.mission.dto.request.MissionRequestDto;
+import com.example.moamoa_backend.domain.mission.dto.response.MissionResponseDto;
+import com.example.moamoa_backend.domain.mission.entity.Mission;
+import com.example.moamoa_backend.domain.mission.entity.mapping.MissionSubInterest;
+import com.example.moamoa_backend.domain.mission.enums.MissionStatus;
+import com.example.moamoa_backend.domain.mission.exception.MissionException;
+import com.example.moamoa_backend.domain.mission.exception.code.MissionErrorCode;
+import com.example.moamoa_backend.domain.quiz.entity.Quiz;
+import com.example.moamoa_backend.domain.quiz.enums.QuizType;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;

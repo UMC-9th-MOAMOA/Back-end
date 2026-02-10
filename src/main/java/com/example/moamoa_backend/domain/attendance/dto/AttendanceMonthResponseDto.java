@@ -1,4 +1,4 @@
-package com.example.moamoa_backend.attendance.dto;
+package com.example.moamoa_backend.domain.attendance.dto;
 
 import java.util.List;
 

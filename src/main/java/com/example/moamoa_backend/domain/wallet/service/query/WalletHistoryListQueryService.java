@@ -1,7 +1,7 @@
-package com.example.moamoa_backend.wallet.service.query;
+package com.example.moamoa_backend.domain.wallet.service.query;
 
-import com.example.moamoa_backend.wallet.dto.WalletHistoryListRequestDto;
-import com.example.moamoa_backend.wallet.dto.WalletHistoryListResponseDto;
+import com.example.moamoa_backend.domain.wallet.dto.WalletHistoryListRequestDto;
+import com.example.moamoa_backend.domain.wallet.dto.WalletHistoryListResponseDto;
 
 public interface WalletHistoryListQueryService {
     WalletHistoryListResponseDto.Response getHistories(

@@ -1,4 +1,4 @@
-package com.example.moamoa_backend.auth.dto.oauth;
+package com.example.moamoa_backend.domain.auth.dto.oauth;
 
 import java.util.Map;
 

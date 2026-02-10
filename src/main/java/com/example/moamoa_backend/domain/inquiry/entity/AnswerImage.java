@@ -1,4 +1,4 @@
-package com.example.moamoa_backend.inquiry.entity;
+package com.example.moamoa_backend.domain.inquiry.entity;
 
 import com.example.moamoa_backend.global.entity.BaseEntity;
 import jakarta.persistence.*;

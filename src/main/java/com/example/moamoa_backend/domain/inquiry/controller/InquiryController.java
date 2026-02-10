@@ -1,15 +1,21 @@
-package com.example.moamoa_backend.inquiry.controller;
+package com.example.moamoa_backend.domain.inquiry.controller;
 
-import com.example.moamoa_backend.global.apiPayload.code.GeneralSuccessCode;
+import com.example.moamoa_backend.domain.inquiry.dto.InquiryAnswerFormDTO;
+import com.example.moamoa_backend.domain.inquiry.dto.InquiryAnswerRequestDto;
+import com.example.moamoa_backend.domain.inquiry.dto.InquiryAnswerResponseDto;
+import com.example.moamoa_backend.domain.inquiry.dto.InquiryDetailResDto;
+import com.example.moamoa_backend.domain.inquiry.dto.InquiryFormDTO;
+import com.example.moamoa_backend.domain.inquiry.dto.InquiryQueryReqDto;
+import com.example.moamoa_backend.domain.inquiry.dto.InquiryQueryResDto;
+import com.example.moamoa_backend.domain.inquiry.dto.InquiryRequestDTO;
+import com.example.moamoa_backend.domain.inquiry.dto.InquiryResponseDTO;
 import com.example.moamoa_backend.global.apiPayload.response.ApiResponse;
-import com.example.moamoa_backend.inquiry.dto.*;
-import com.example.moamoa_backend.inquiry.enums.InquiryCategory;
-import com.example.moamoa_backend.inquiry.exception.code.InquirySuccessCode;
-import com.example.moamoa_backend.inquiry.service.command.InquiryCommandService;
-import com.example.moamoa_backend.inquiry.service.query.InquiryQueryService;
+import com.example.moamoa_backend.domain.inquiry.dto.*;
+import com.example.moamoa_backend.domain.inquiry.enums.InquiryCategory;
+import com.example.moamoa_backend.domain.inquiry.exception.code.InquirySuccessCode;
+import com.example.moamoa_backend.domain.inquiry.service.command.InquiryCommandService;
+import com.example.moamoa_backend.domain.inquiry.service.query.InquiryQueryService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -19,9 +25,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 @Validated
 @RestController

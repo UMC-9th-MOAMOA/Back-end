@@ -1,6 +1,6 @@
-package com.example.moamoa_backend.wallet.dto;
+package com.example.moamoa_backend.domain.wallet.dto;
 
-import com.example.moamoa_backend.wallet.enums.TransactionType;
+import com.example.moamoa_backend.domain.wallet.enums.TransactionType;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

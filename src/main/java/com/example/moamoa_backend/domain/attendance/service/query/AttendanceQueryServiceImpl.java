@@ -1,11 +1,11 @@
-package com.example.moamoa_backend.attendance.service.query;
+package com.example.moamoa_backend.domain.attendance.service.query;
 
-import com.example.moamoa_backend.attendance.dto.AttendanceMonthResponseDto;
-import com.example.moamoa_backend.attendance.entity.QAttendance;
-import com.example.moamoa_backend.attendance.repository.AttendanceStreakRepository;
-import com.example.moamoa_backend.wallet.entity.QWallet;
-import com.example.moamoa_backend.wallet.entity.QWalletHistory;
-import com.example.moamoa_backend.wallet.enums.TransactionType;
+import com.example.moamoa_backend.domain.attendance.dto.AttendanceMonthResponseDto;
+import com.example.moamoa_backend.domain.attendance.entity.QAttendance;
+import com.example.moamoa_backend.domain.attendance.repository.AttendanceStreakRepository;
+import com.example.moamoa_backend.domain.wallet.entity.QWallet;
+import com.example.moamoa_backend.domain.wallet.entity.QWalletHistory;
+import com.example.moamoa_backend.domain.wallet.enums.TransactionType;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;

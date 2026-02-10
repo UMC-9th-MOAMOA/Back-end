@@ -1,7 +1,7 @@
-package com.example.moamoa_backend.mission.service.command;
+package com.example.moamoa_backend.domain.mission.service.command;
 
-import com.example.moamoa_backend.mission.dto.request.MissionRequestDto;
-import com.example.moamoa_backend.mission.dto.response.MissionResponseDto;
+import com.example.moamoa_backend.domain.mission.dto.request.MissionRequestDto;
+import com.example.moamoa_backend.domain.mission.dto.response.MissionResponseDto;
 import org.springframework.transaction.annotation.Transactional;
 
 public interface MissionCommandService {

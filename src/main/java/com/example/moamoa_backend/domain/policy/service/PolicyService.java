@@ -1,17 +1,17 @@
-package com.example.moamoa_backend.policy.service;
+package com.example.moamoa_backend.domain.policy.service;
 
 import com.example.moamoa_backend.domain.member.entity.Member;
 import com.example.moamoa_backend.domain.member.exception.MemberException;
 import com.example.moamoa_backend.domain.member.exception.code.MemberErrorCode;
 import com.example.moamoa_backend.domain.member.repository.MemberRepository;
-import com.example.moamoa_backend.policy.dto.req.PolicyReqDto;
-import com.example.moamoa_backend.policy.dto.res.PolicyResDto;
-import com.example.moamoa_backend.policy.entity.MemberPolicy;
-import com.example.moamoa_backend.policy.entity.Policy;
-import com.example.moamoa_backend.policy.exception.PolicyException;
-import com.example.moamoa_backend.policy.exception.code.PolicyErrorCode;
-import com.example.moamoa_backend.policy.repository.MemberPolicyRepository;
-import com.example.moamoa_backend.policy.repository.PolicyRepository;
+import com.example.moamoa_backend.domain.policy.dto.req.PolicyReqDto;
+import com.example.moamoa_backend.domain.policy.dto.res.PolicyResDto;
+import com.example.moamoa_backend.domain.policy.entity.MemberPolicy;
+import com.example.moamoa_backend.domain.policy.entity.Policy;
+import com.example.moamoa_backend.domain.policy.exception.PolicyException;
+import com.example.moamoa_backend.domain.policy.exception.code.PolicyErrorCode;
+import com.example.moamoa_backend.domain.policy.repository.MemberPolicyRepository;
+import com.example.moamoa_backend.domain.policy.repository.PolicyRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

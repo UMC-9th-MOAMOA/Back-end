@@ -1,9 +1,9 @@
-package com.example.moamoa_backend.auth.service;
+package com.example.moamoa_backend.domain.auth.service;
 
-import com.example.moamoa_backend.auth.dto.req.AuthReqDto;
-import com.example.moamoa_backend.auth.dto.res.AuthResDto;
-import com.example.moamoa_backend.auth.exception.AuthException;
-import com.example.moamoa_backend.auth.exception.code.AuthErrorCode;
+import com.example.moamoa_backend.domain.auth.dto.req.AuthReqDto;
+import com.example.moamoa_backend.domain.auth.dto.res.AuthResDto;
+import com.example.moamoa_backend.domain.auth.exception.AuthException;
+import com.example.moamoa_backend.domain.auth.exception.code.AuthErrorCode;
 import com.example.moamoa_backend.global.security.jwt.JwtUtil;
 import com.example.moamoa_backend.global.security.jwt.exception.JwtException;
 import com.example.moamoa_backend.global.security.jwt.exception.code.JwtErrorCode;

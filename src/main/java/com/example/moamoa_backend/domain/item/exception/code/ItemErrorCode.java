@@ -1,4 +1,4 @@
-package com.example.moamoa_backend.item.exception.code;
+package com.example.moamoa_backend.domain.item.exception.code;
 
 import com.example.moamoa_backend.global.apiPayload.code.BaseErrorCode;
 import lombok.AllArgsConstructor;

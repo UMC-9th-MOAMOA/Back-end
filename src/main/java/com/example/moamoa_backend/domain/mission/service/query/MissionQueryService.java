@@ -1,6 +1,6 @@
-package com.example.moamoa_backend.mission.service.query;
+package com.example.moamoa_backend.domain.mission.service.query;
 
-import com.example.moamoa_backend.mission.dto.response.MissionResponseDto;
+import com.example.moamoa_backend.domain.mission.dto.response.MissionResponseDto;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;

@@ -22,8 +22,8 @@ import com.example.moamoa_backend.domain.member.exception.MemberException;
 import com.example.moamoa_backend.domain.member.exception.code.MemberErrorCode;
 import com.example.moamoa_backend.domain.member.repository.GoalResultRepository;
 import com.example.moamoa_backend.domain.member.repository.MemberRepository;
-import com.example.moamoa_backend.wallet.enums.TransactionType;
-import com.example.moamoa_backend.wallet.repository.WalletHistoryRepository;
+import com.example.moamoa_backend.domain.wallet.enums.TransactionType;
+import com.example.moamoa_backend.domain.wallet.repository.WalletHistoryRepository;
 
 import lombok.RequiredArgsConstructor;
 

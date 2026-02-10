@@ -1,8 +1,8 @@
-package com.example.moamoa_backend.mission.entity.mapping;
+package com.example.moamoa_backend.domain.mission.entity.mapping;
 
 import com.example.moamoa_backend.global.entity.BaseEntity;
 import com.example.moamoa_backend.domain.interest.entity.SubInterest;
-import com.example.moamoa_backend.mission.entity.Mission;
+import com.example.moamoa_backend.domain.mission.entity.Mission;
 import jakarta.persistence.*;
 import lombok.*;
 

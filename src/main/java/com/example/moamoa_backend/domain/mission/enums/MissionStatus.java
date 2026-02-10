@@ -1,4 +1,4 @@
-package com.example.moamoa_backend.mission.enums;
+package com.example.moamoa_backend.domain.mission.enums;
 
 public enum MissionStatus {
     NONE, //시작 전(탐색 리스트 노출)

@@ -1,19 +1,19 @@
-package com.example.moamoa_backend.item.controller;
+package com.example.moamoa_backend.domain.item.controller;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.moamoa_backend.global.apiPayload.response.ApiResponse;
-import com.example.moamoa_backend.item.dto.AvatarEquipRequestDto;
-import com.example.moamoa_backend.item.dto.AvatarEquipmentResponseDto;
-import com.example.moamoa_backend.item.dto.ItemPurchaseRequestDto;
-import com.example.moamoa_backend.item.dto.ItemPurchaseResponseDto;
-import com.example.moamoa_backend.item.dto.ItemShopListResponseDto;
-import com.example.moamoa_backend.item.enums.ItemCategory;
-import com.example.moamoa_backend.item.enums.ItemType;
-import com.example.moamoa_backend.item.exception.code.ItemSuccessCode;
-import com.example.moamoa_backend.item.service.ItemShopService;
+import com.example.moamoa_backend.domain.item.dto.AvatarEquipRequestDto;
+import com.example.moamoa_backend.domain.item.dto.AvatarEquipmentResponseDto;
+import com.example.moamoa_backend.domain.item.dto.ItemPurchaseRequestDto;
+import com.example.moamoa_backend.domain.item.dto.ItemPurchaseResponseDto;
+import com.example.moamoa_backend.domain.item.dto.ItemShopListResponseDto;
+import com.example.moamoa_backend.domain.item.enums.ItemCategory;
+import com.example.moamoa_backend.domain.item.enums.ItemType;
+import com.example.moamoa_backend.domain.item.exception.code.ItemSuccessCode;
+import com.example.moamoa_backend.domain.item.service.ItemShopService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;

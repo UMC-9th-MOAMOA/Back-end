@@ -1,12 +1,12 @@
-package com.example.moamoa_backend.wallet.controller;
+package com.example.moamoa_backend.domain.wallet.controller;
 
 import com.example.moamoa_backend.global.apiPayload.response.ApiResponse;
-import com.example.moamoa_backend.wallet.dto.WalletHistoryListRequestDto;
-import com.example.moamoa_backend.wallet.dto.WalletHistoryListResponseDto;
-import com.example.moamoa_backend.wallet.dto.WalletPointResponseDto;
-import com.example.moamoa_backend.wallet.exception.code.WalletSuccessCode;
-import com.example.moamoa_backend.wallet.service.query.WalletHistoryQueryService;
-import com.example.moamoa_backend.wallet.service.query.WalletHistoryListQueryService;
+import com.example.moamoa_backend.domain.wallet.dto.WalletHistoryListRequestDto;
+import com.example.moamoa_backend.domain.wallet.dto.WalletHistoryListResponseDto;
+import com.example.moamoa_backend.domain.wallet.dto.WalletPointResponseDto;
+import com.example.moamoa_backend.domain.wallet.exception.code.WalletSuccessCode;
+import com.example.moamoa_backend.domain.wallet.service.query.WalletHistoryQueryService;
+import com.example.moamoa_backend.domain.wallet.service.query.WalletHistoryListQueryService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

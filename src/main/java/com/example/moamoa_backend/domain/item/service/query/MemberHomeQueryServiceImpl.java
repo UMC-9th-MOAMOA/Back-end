@@ -1,15 +1,15 @@
-package com.example.moamoa_backend.item.service.query;
+package com.example.moamoa_backend.domain.item.service.query;
 
-import com.example.moamoa_backend.attendance.entity.QAttendanceStreak;
-import com.example.moamoa_backend.item.dto.HomePocketResponseDto;
+import com.example.moamoa_backend.domain.attendance.entity.QAttendanceStreak;
+import com.example.moamoa_backend.domain.item.dto.HomePocketResponseDto;
 import com.example.moamoa_backend.domain.member.entity.Member;
-import com.example.moamoa_backend.member.entity.QMember;
-import com.example.moamoa_backend.member.entity.mapping.QMemberMission;
+import com.example.moamoa_backend.domain.member.entity.QMember;
+import com.example.moamoa_backend.domain.member.entity.mapping.QMemberMission;
 import com.example.moamoa_backend.domain.member.exception.MemberException;
 import com.example.moamoa_backend.domain.member.exception.code.MemberErrorCode;
-import com.example.moamoa_backend.mission.entity.QMission;
-import com.example.moamoa_backend.mission.enums.MissionStatus;
-import com.example.moamoa_backend.wallet.entity.QWallet;
+import com.example.moamoa_backend.domain.mission.entity.QMission;
+import com.example.moamoa_backend.domain.mission.enums.MissionStatus;
+import com.example.moamoa_backend.domain.wallet.entity.QWallet;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.DateTemplate;
 import com.querydsl.core.types.dsl.Expressions;

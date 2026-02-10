@@ -1,14 +1,13 @@
-package com.example.moamoa_backend.inquiry.service.query;
+package com.example.moamoa_backend.domain.inquiry.service.query;
 
-import com.example.moamoa_backend.inquiry.converter.InquiryQueryConverter;
-import com.example.moamoa_backend.inquiry.dto.InquiryDetailResDto;
-import com.example.moamoa_backend.inquiry.dto.InquiryQueryReqDto;
-import com.example.moamoa_backend.inquiry.dto.InquiryQueryResDto;
-import com.example.moamoa_backend.inquiry.repository.InquiryRepository;
-import com.example.moamoa_backend.inquiry.repository.InquiryRepositoryCustom;
-import com.example.moamoa_backend.member.exception.MemberException;
-import com.example.moamoa_backend.member.exception.code.MemberErrorCode;
-import com.example.moamoa_backend.member.repository.MemberRepository;
+import com.example.moamoa_backend.domain.inquiry.converter.InquiryQueryConverter;
+import com.example.moamoa_backend.domain.inquiry.dto.InquiryDetailResDto;
+import com.example.moamoa_backend.domain.inquiry.dto.InquiryQueryReqDto;
+import com.example.moamoa_backend.domain.inquiry.dto.InquiryQueryResDto;
+import com.example.moamoa_backend.domain.inquiry.repository.InquiryRepository;
+import com.example.moamoa_backend.domain.member.exception.MemberException;
+import com.example.moamoa_backend.domain.member.exception.code.MemberErrorCode;
+import com.example.moamoa_backend.domain.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,7 +17,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class InquiryQueryServiceImpl implements com.example.moamoa_backend.inquiry.service.query.InquiryQueryService{
+public class InquiryQueryServiceImpl implements InquiryQueryService {
 
     private final InquiryRepository inquiryRepository;
     private final MemberRepository memberRepository;

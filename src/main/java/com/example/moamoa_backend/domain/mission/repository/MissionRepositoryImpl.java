@@ -1,10 +1,10 @@
-package com.example.moamoa_backend.mission.repository;
+package com.example.moamoa_backend.domain.mission.repository;
 
-import com.example.moamoa_backend.mission.dto.response.MissionResponseDto;
-import com.example.moamoa_backend.mission.entity.Mission;
-import com.example.moamoa_backend.mission.enums.MissionStatus;
-import com.example.moamoa_backend.mission.exception.MissionException;
-import com.example.moamoa_backend.mission.exception.code.MissionErrorCode;
+import com.example.moamoa_backend.domain.mission.dto.response.MissionResponseDto;
+import com.example.moamoa_backend.domain.mission.entity.Mission;
+import com.example.moamoa_backend.domain.mission.enums.MissionStatus;
+import com.example.moamoa_backend.domain.mission.exception.MissionException;
+import com.example.moamoa_backend.domain.mission.exception.code.MissionErrorCode;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -20,13 +20,13 @@ import org.springframework.data.domain.SliceImpl;
 import java.util.List;
 import java.util.Optional;
 
-import static com.example.moamoa_backend.interest.entity.QSubInterest.subInterest;
-import static com.example.moamoa_backend.keyword.entity.QKeyword.keyword;
-import static com.example.moamoa_backend.member.entity.mapping.QMemberMission.memberMission;
-import static com.example.moamoa_backend.mission.entity.QMission.mission;
-import static com.example.moamoa_backend.mission.entity.mapping.QMissionKeyword.missionKeyword;
-import static com.example.moamoa_backend.mission.entity.mapping.QMissionSubInterest.missionSubInterest;
-import static com.example.moamoa_backend.quiz.entity.QQuiz.quiz;
+import static com.example.moamoa_backend.domain.interest.entity.QSubInterest.subInterest;
+import static com.example.moamoa_backend.domain.keyword.entity.QKeyword.keyword;
+import static com.example.moamoa_backend.domain.member.entity.mapping.QMemberMission.memberMission;
+import static com.example.moamoa_backend.domain.mission.entity.QMission.mission;
+import static com.example.moamoa_backend.domain.mission.entity.mapping.QMissionKeyword.missionKeyword;
+import static com.example.moamoa_backend.domain.mission.entity.mapping.QMissionSubInterest.missionSubInterest;
+import static com.example.moamoa_backend.domain.quiz.entity.QQuiz.quiz;
 
 @RequiredArgsConstructor
 public class MissionRepositoryImpl implements MissionRepositoryCustom {

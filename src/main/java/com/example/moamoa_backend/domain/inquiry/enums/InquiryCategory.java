@@ -1,4 +1,4 @@
-package com.example.moamoa_backend.inquiry.enums;
+package com.example.moamoa_backend.domain.inquiry.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

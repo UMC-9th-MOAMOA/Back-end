@@ -5,9 +5,9 @@ import com.example.moamoa_backend.global.apiPayload.code.GeneralErrorCode;
 import com.example.moamoa_backend.global.apiPayload.exception.GeneralException;
 import com.example.moamoa_backend.global.apiPayload.response.ApiResponse;
 import com.example.moamoa_backend.global.security.jwt.exception.code.JwtErrorCode;
-import com.example.moamoa_backend.item.exception.code.ItemErrorCode;
-import com.example.moamoa_backend.member.exception.code.MemberErrorCode;
-import com.example.moamoa_backend.wallet.exception.WalletException;
+import com.example.moamoa_backend.domain.item.exception.code.ItemErrorCode;
+import com.example.moamoa_backend.domain.member.exception.code.MemberErrorCode;
+import com.example.moamoa_backend.domain.wallet.exception.WalletException;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;

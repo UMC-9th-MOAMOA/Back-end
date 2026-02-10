@@ -1,7 +1,7 @@
-package com.example.moamoa_backend.item.repository;
+package com.example.moamoa_backend.domain.item.repository;
 
-import com.example.moamoa_backend.item.entity.Item;
-import com.example.moamoa_backend.item.enums.ItemType;
+import com.example.moamoa_backend.domain.item.entity.Item;
+import com.example.moamoa_backend.domain.item.enums.ItemType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

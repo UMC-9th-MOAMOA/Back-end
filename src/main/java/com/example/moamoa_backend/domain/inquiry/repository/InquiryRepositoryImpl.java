@@ -1,15 +1,15 @@
-package com.example.moamoa_backend.inquiry.repository;
+package com.example.moamoa_backend.domain.inquiry.repository;
 
-import com.example.moamoa_backend.inquiry.converter.InquiryDetailConverter;
-import com.example.moamoa_backend.inquiry.dto.InquiryDetailResDto;
-import com.example.moamoa_backend.inquiry.dto.InquiryQueryReqDto;
-import com.example.moamoa_backend.inquiry.dto.InquiryQueryResDto;
-import com.example.moamoa_backend.inquiry.entity.Inquiry;
-import com.example.moamoa_backend.inquiry.entity.QAnswerImage;
-import com.example.moamoa_backend.inquiry.entity.QInquiry;
-import com.example.moamoa_backend.inquiry.entity.QInquiryImage;
-import com.example.moamoa_backend.inquiry.exception.InquiryException;
-import com.example.moamoa_backend.inquiry.exception.code.InquiryErrorCode;
+import com.example.moamoa_backend.domain.inquiry.converter.InquiryDetailConverter;
+import com.example.moamoa_backend.domain.inquiry.dto.InquiryDetailResDto;
+import com.example.moamoa_backend.domain.inquiry.dto.InquiryQueryReqDto;
+import com.example.moamoa_backend.domain.inquiry.dto.InquiryQueryResDto;
+import com.example.moamoa_backend.domain.inquiry.entity.Inquiry;
+import com.example.moamoa_backend.domain.inquiry.entity.QAnswerImage;
+import com.example.moamoa_backend.domain.inquiry.entity.QInquiry;
+import com.example.moamoa_backend.domain.inquiry.entity.QInquiryImage;
+import com.example.moamoa_backend.domain.inquiry.exception.InquiryException;
+import com.example.moamoa_backend.domain.inquiry.exception.code.InquiryErrorCode;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.querydsl.core.types.Projections;

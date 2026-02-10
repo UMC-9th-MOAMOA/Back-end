@@ -1,11 +1,11 @@
-package com.example.moamoa_backend.wallet.service.query;
+package com.example.moamoa_backend.domain.wallet.service.query;
 
 
-import com.example.moamoa_backend.mission.entity.QMission;
-import com.example.moamoa_backend.wallet.dto.WalletHistoryDayResponseDto;
-import com.example.moamoa_backend.wallet.dto.WalletPointResponseDto;
-import com.example.moamoa_backend.wallet.entity.QWallet;
-import com.example.moamoa_backend.wallet.entity.QWalletHistory;
+import com.example.moamoa_backend.domain.mission.entity.QMission;
+import com.example.moamoa_backend.domain.wallet.dto.WalletHistoryDayResponseDto;
+import com.example.moamoa_backend.domain.wallet.dto.WalletPointResponseDto;
+import com.example.moamoa_backend.domain.wallet.entity.QWallet;
+import com.example.moamoa_backend.domain.wallet.entity.QWalletHistory;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

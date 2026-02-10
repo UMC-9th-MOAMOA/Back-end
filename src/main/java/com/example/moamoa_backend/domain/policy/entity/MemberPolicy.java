@@ -1,4 +1,4 @@
-package com.example.moamoa_backend.policy.entity;
+package com.example.moamoa_backend.domain.policy.entity;
 
 import com.example.moamoa_backend.global.entity.BaseEntity;
 import com.example.moamoa_backend.domain.member.entity.Member;

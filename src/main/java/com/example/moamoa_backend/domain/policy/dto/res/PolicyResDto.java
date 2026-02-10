@@ -1,4 +1,4 @@
-package com.example.moamoa_backend.policy.dto.res;
+package com.example.moamoa_backend.domain.policy.dto.res;
 
 import lombok.Builder;
 

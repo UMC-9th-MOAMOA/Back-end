@@ -1,4 +1,4 @@
-package com.example.moamoa_backend.inquiry.dto;
+package com.example.moamoa_backend.domain.inquiry.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

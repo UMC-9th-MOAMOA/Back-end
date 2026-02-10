@@ -1,4 +1,4 @@
-package com.example.moamoa_backend.mission.service.query;
+package com.example.moamoa_backend.domain.mission.service.query;
 
 import com.example.moamoa_backend.domain.keyword.entity.Keyword;
 import com.example.moamoa_backend.domain.keyword.repository.KeywordRepository;
@@ -8,13 +8,13 @@ import com.example.moamoa_backend.domain.member.exception.code.MemberErrorCode;
 import com.example.moamoa_backend.domain.member.repository.MemberMissionRepository;
 import com.example.moamoa_backend.domain.member.repository.MemberRepository;
 import com.example.moamoa_backend.domain.member.repository.MemberSubInterestRepository;
-import com.example.moamoa_backend.mission.converter.MissionConverter;
-import com.example.moamoa_backend.mission.dto.response.MissionResponseDto;
-import com.example.moamoa_backend.mission.entity.Mission;
-import com.example.moamoa_backend.mission.enums.MissionStatus;
-import com.example.moamoa_backend.mission.exception.MissionException;
-import com.example.moamoa_backend.mission.exception.code.MissionErrorCode;
-import com.example.moamoa_backend.mission.repository.MissionRepository;
+import com.example.moamoa_backend.domain.mission.converter.MissionConverter;
+import com.example.moamoa_backend.domain.mission.dto.response.MissionResponseDto;
+import com.example.moamoa_backend.domain.mission.entity.Mission;
+import com.example.moamoa_backend.domain.mission.enums.MissionStatus;
+import com.example.moamoa_backend.domain.mission.exception.MissionException;
+import com.example.moamoa_backend.domain.mission.exception.code.MissionErrorCode;
+import com.example.moamoa_backend.domain.mission.repository.MissionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;

@@ -1,9 +1,9 @@
-package com.example.moamoa_backend.inquiry.entity;
+package com.example.moamoa_backend.domain.inquiry.entity;
 
 import com.example.moamoa_backend.global.entity.BaseEntity;
-import com.example.moamoa_backend.inquiry.enums.InquiryCategory;
-import com.example.moamoa_backend.inquiry.enums.InquiryStatus;
-import com.example.moamoa_backend.member.entity.Member;
+import com.example.moamoa_backend.domain.inquiry.enums.InquiryCategory;
+import com.example.moamoa_backend.domain.inquiry.enums.InquiryStatus;
+import com.example.moamoa_backend.domain.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
 

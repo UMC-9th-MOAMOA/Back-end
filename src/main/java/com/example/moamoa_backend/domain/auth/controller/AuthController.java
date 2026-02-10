@@ -1,10 +1,10 @@
-package com.example.moamoa_backend.auth.controller;
+package com.example.moamoa_backend.domain.auth.controller;
 
-import com.example.moamoa_backend.auth.converter.AuthConverter;
-import com.example.moamoa_backend.auth.dto.req.AuthReqDto;
-import com.example.moamoa_backend.auth.dto.res.AuthResDto;
-import com.example.moamoa_backend.auth.exception.code.AuthSuccessCode;
-import com.example.moamoa_backend.auth.service.AuthService;
+import com.example.moamoa_backend.domain.auth.converter.AuthConverter;
+import com.example.moamoa_backend.domain.auth.dto.req.AuthReqDto;
+import com.example.moamoa_backend.domain.auth.dto.res.AuthResDto;
+import com.example.moamoa_backend.domain.auth.exception.code.AuthSuccessCode;
+import com.example.moamoa_backend.domain.auth.service.AuthService;
 import com.example.moamoa_backend.global.apiPayload.response.ApiResponse;
 import com.example.moamoa_backend.global.util.CookieUtil;
 import com.example.moamoa_backend.global.util.NetworkUtil;

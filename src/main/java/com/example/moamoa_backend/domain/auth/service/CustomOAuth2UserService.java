@@ -1,6 +1,6 @@
-package com.example.moamoa_backend.auth.service;
+package com.example.moamoa_backend.domain.auth.service;
 
-import com.example.moamoa_backend.auth.dto.oauth.OAuthAttributes;
+import com.example.moamoa_backend.domain.auth.dto.oauth.OAuthAttributes;
 import com.example.moamoa_backend.domain.member.entity.Member;
 import com.example.moamoa_backend.domain.member.enums.MemberStatus;
 import com.example.moamoa_backend.domain.member.repository.MemberRepository;

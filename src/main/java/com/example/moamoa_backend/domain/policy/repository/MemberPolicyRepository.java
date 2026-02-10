@@ -1,6 +1,6 @@
-package com.example.moamoa_backend.policy.repository;
+package com.example.moamoa_backend.domain.policy.repository;
 
-import com.example.moamoa_backend.policy.entity.MemberPolicy;
+import com.example.moamoa_backend.domain.policy.entity.MemberPolicy;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

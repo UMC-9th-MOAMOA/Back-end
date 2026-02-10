@@ -1,7 +1,7 @@
-package com.example.moamoa_backend.inquiry.converter;
+package com.example.moamoa_backend.domain.inquiry.converter;
 
-import com.example.moamoa_backend.inquiry.dto.InquiryDetailResDto;
-import com.example.moamoa_backend.inquiry.entity.Inquiry;
+import com.example.moamoa_backend.domain.inquiry.dto.InquiryDetailResDto;
+import com.example.moamoa_backend.domain.inquiry.entity.Inquiry;
 
 import java.util.List;
 

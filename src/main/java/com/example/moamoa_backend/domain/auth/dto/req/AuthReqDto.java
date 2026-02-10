@@ -1,4 +1,4 @@
-package com.example.moamoa_backend.auth.dto.req;
+package com.example.moamoa_backend.domain.auth.dto.req;
 
 import com.example.moamoa_backend.domain.member.entity.Member;
 import com.example.moamoa_backend.domain.member.enums.Role;

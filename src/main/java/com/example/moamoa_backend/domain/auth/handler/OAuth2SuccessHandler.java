@@ -1,7 +1,7 @@
-package com.example.moamoa_backend.auth.handler;
+package com.example.moamoa_backend.domain.auth.handler;
 
-import com.example.moamoa_backend.auth.exception.AuthException;
-import com.example.moamoa_backend.auth.exception.code.AuthErrorCode;
+import com.example.moamoa_backend.domain.auth.exception.AuthException;
+import com.example.moamoa_backend.domain.auth.exception.code.AuthErrorCode;
 import com.example.moamoa_backend.global.security.jwt.JwtUtil;
 import com.example.moamoa_backend.global.util.RedisUtil;
 import com.example.moamoa_backend.domain.member.entity.Member;

@@ -1,7 +1,7 @@
-package com.example.moamoa_backend.keyword.entity;
+package com.example.moamoa_backend.domain.keyword.entity;
 
 import com.example.moamoa_backend.global.entity.BaseEntity;
-import com.example.moamoa_backend.keyword.enums.KeywordType;
+import com.example.moamoa_backend.domain.keyword.enums.KeywordType;
 import jakarta.persistence.*;
 import lombok.*;
 

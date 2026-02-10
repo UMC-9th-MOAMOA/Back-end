@@ -1,4 +1,4 @@
-package com.example.moamoa_backend.policy.dto.req;
+package com.example.moamoa_backend.domain.policy.dto.req;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;

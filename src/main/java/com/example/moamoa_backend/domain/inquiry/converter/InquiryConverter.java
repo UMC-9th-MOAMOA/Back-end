@@ -1,11 +1,11 @@
-package com.example.moamoa_backend.inquiry.converter;
+package com.example.moamoa_backend.domain.inquiry.converter;
 
-import com.example.moamoa_backend.inquiry.dto.InquiryRequestDTO;
-import com.example.moamoa_backend.inquiry.dto.InquiryResponseDTO;
-import com.example.moamoa_backend.inquiry.entity.Inquiry;
-import com.example.moamoa_backend.inquiry.entity.InquiryImage;
-import com.example.moamoa_backend.inquiry.enums.InquiryStatus;
-import com.example.moamoa_backend.member.entity.Member;
+import com.example.moamoa_backend.domain.inquiry.dto.InquiryRequestDTO;
+import com.example.moamoa_backend.domain.inquiry.dto.InquiryResponseDTO;
+import com.example.moamoa_backend.domain.inquiry.entity.Inquiry;
+import com.example.moamoa_backend.domain.inquiry.entity.InquiryImage;
+import com.example.moamoa_backend.domain.inquiry.enums.InquiryStatus;
+import com.example.moamoa_backend.domain.member.entity.Member;
 
 import java.util.ArrayList;
 import java.util.List;

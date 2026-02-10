@@ -1,6 +1,6 @@
-package com.example.moamoa_backend.attendance.repository;
+package com.example.moamoa_backend.domain.attendance.repository;
 
-import com.example.moamoa_backend.attendance.entity.AttendanceStreak;
+import com.example.moamoa_backend.domain.attendance.entity.AttendanceStreak;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;

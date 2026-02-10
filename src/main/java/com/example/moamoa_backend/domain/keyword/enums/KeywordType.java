@@ -1,4 +1,4 @@
-package com.example.moamoa_backend.keyword.enums;
+package com.example.moamoa_backend.domain.keyword.enums;
 
 public enum KeywordType {
     SITUATION, //추천상황

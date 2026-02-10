@@ -1,6 +1,6 @@
-package com.example.moamoa_backend.attendance.converter;
+package com.example.moamoa_backend.domain.attendance.converter;
 
-import com.example.moamoa_backend.attendance.dto.AttendanceResponseDto;
+import com.example.moamoa_backend.domain.attendance.dto.AttendanceResponseDto;
 
 import java.time.LocalDate;
 

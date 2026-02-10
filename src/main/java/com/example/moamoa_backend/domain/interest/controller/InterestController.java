@@ -1,10 +1,10 @@
-package com.example.moamoa_backend.interest.controller;
+package com.example.moamoa_backend.domain.interest.controller;
 
 import com.example.moamoa_backend.global.apiPayload.response.ApiResponse;
-import com.example.moamoa_backend.interest.dto.InterestResponseDto;
-import com.example.moamoa_backend.interest.dto.SubInterestResponseDto;
-import com.example.moamoa_backend.interest.exception.code.InterestSuccessCode;
-import com.example.moamoa_backend.interest.service.InterestService;
+import com.example.moamoa_backend.domain.interest.dto.InterestResponseDto;
+import com.example.moamoa_backend.domain.interest.dto.SubInterestResponseDto;
+import com.example.moamoa_backend.domain.interest.exception.code.InterestSuccessCode;
+import com.example.moamoa_backend.domain.interest.service.InterestService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;

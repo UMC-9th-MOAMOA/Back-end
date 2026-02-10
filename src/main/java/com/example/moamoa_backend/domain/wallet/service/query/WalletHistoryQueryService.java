@@ -1,7 +1,7 @@
-package com.example.moamoa_backend.wallet.service.query;
+package com.example.moamoa_backend.domain.wallet.service.query;
 
-import com.example.moamoa_backend.wallet.dto.WalletHistoryDayResponseDto;
-import com.example.moamoa_backend.wallet.dto.WalletPointResponseDto;
+import com.example.moamoa_backend.domain.wallet.dto.WalletHistoryDayResponseDto;
+import com.example.moamoa_backend.domain.wallet.dto.WalletPointResponseDto;
 
 import java.time.LocalDate;
 
