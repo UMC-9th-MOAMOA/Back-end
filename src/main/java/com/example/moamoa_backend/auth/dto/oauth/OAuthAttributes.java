@@ -2,10 +2,10 @@ package com.example.moamoa_backend.auth.dto.oauth;
 
 import com.example.moamoa_backend.auth.exception.AuthException;
 import com.example.moamoa_backend.auth.exception.code.AuthErrorCode;
-import com.example.moamoa_backend.member.entity.Member;
-import com.example.moamoa_backend.member.enums.MemberStatus;
-import com.example.moamoa_backend.member.enums.Provider;
-import com.example.moamoa_backend.member.enums.Role;
+import com.example.moamoa_backend.domain.member.entity.Member;
+import com.example.moamoa_backend.domain.member.enums.MemberStatus;
+import com.example.moamoa_backend.domain.member.enums.Provider;
+import com.example.moamoa_backend.domain.member.enums.Role;
 import lombok.Builder;
 import lombok.Getter;
 

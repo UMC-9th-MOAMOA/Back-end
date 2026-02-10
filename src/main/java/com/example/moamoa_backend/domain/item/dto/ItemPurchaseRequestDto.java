@@ -1,0 +1,6 @@
+package com.example.moamoa_backend.domain.item.dto;
+
+import jakarta.validation.constraints.NotNull;
+
+public record ItemPurchaseRequestDto(@NotNull Long itemId) {
+}

@@ -1,10 +1,10 @@
 package com.example.moamoa_backend.auth.service;
 
 import com.example.moamoa_backend.auth.dto.oauth.OAuthAttributes;
-import com.example.moamoa_backend.member.entity.Member;
-import com.example.moamoa_backend.member.enums.MemberStatus;
-import com.example.moamoa_backend.member.repository.MemberRepository;
-import com.example.moamoa_backend.wallet.service.command.WalletCommandService;
+import com.example.moamoa_backend.domain.member.entity.Member;
+import com.example.moamoa_backend.domain.member.enums.MemberStatus;
+import com.example.moamoa_backend.domain.member.repository.MemberRepository;
+import com.example.moamoa_backend.domain.wallet.service.command.WalletCommandService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
