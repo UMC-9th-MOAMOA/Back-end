@@ -1,10 +1,10 @@
 package com.example.moamoa_backend.auth.dto.req;
 
-import com.example.moamoa_backend.member.entity.Member;
-import com.example.moamoa_backend.member.enums.Role;
-import com.example.moamoa_backend.member.enums.Provider;
-import com.example.moamoa_backend.member.enums.MemberStatus;
-import com.example.moamoa_backend.policy.dto.req.PolicyReqDto;
+import com.example.moamoa_backend.domain.member.entity.Member;
+import com.example.moamoa_backend.domain.member.enums.Role;
+import com.example.moamoa_backend.domain.member.enums.Provider;
+import com.example.moamoa_backend.domain.member.enums.MemberStatus;
+import com.example.moamoa_backend.domain.policy.dto.req.PolicyReqDto;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 
