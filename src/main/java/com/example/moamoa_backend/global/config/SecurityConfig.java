@@ -1,14 +1,14 @@
 package com.example.moamoa_backend.global.config;
 
-import com.example.moamoa_backend.auth.handler.OAuth2SuccessHandler;
-import com.example.moamoa_backend.auth.repository.HttpCookieOAuth2AuthorizationRequestRepository;
-import com.example.moamoa_backend.auth.service.CustomOAuth2UserService;
+import com.example.moamoa_backend.domain.auth.handler.OAuth2SuccessHandler;
+import com.example.moamoa_backend.domain.auth.repository.HttpCookieOAuth2AuthorizationRequestRepository;
+import com.example.moamoa_backend.domain.auth.service.CustomOAuth2UserService;
 import com.example.moamoa_backend.global.security.filter.MemberSetupFilter;
 import com.example.moamoa_backend.global.security.jwt.JwtAccessDeniedHandler;
 import com.example.moamoa_backend.global.security.jwt.JwtAuthFilter;
 import com.example.moamoa_backend.global.security.jwt.JwtAuthenticationEntryPoint;
-import com.example.moamoa_backend.member.enums.Role;
-import com.example.moamoa_backend.member.repository.MemberRepository;
+import com.example.moamoa_backend.domain.member.enums.Role;
+import com.example.moamoa_backend.domain.member.repository.MemberRepository;
 
 import lombok.RequiredArgsConstructor;
 
