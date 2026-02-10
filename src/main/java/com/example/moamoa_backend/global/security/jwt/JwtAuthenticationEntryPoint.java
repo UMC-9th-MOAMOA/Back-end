@@ -1,6 +1,6 @@
 package com.example.moamoa_backend.global.security.jwt;
 
-import com.example.moamoa_backend.auth.exception.code.AuthErrorCode;
+import com.example.moamoa_backend.domain.auth.exception.code.AuthErrorCode;
 import com.example.moamoa_backend.global.apiPayload.code.BaseErrorCode;
 import com.example.moamoa_backend.global.apiPayload.code.GeneralErrorCode;
 import com.example.moamoa_backend.global.apiPayload.response.ApiResponse;
