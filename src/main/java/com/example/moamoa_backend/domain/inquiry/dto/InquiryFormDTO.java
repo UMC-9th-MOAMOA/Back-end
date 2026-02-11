@@ -17,10 +17,6 @@ public class InquiryFormDTO {
             @NotBlank @Size(max = 20) String title,
             @NotBlank @Size(max = 2000) String content,
 
-            @NotNull
-            @Schema(description = "문의하기 약관 동의 여부", example = "true")
-            Boolean termsAgreed,
-
             @Schema(
                     description = "첨부 이미지 파일들 (선택, 여러 개 가능)",
                     type = "string",

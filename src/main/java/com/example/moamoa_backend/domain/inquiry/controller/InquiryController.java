@@ -50,8 +50,7 @@ public class InquiryController {
         InquiryRequestDTO.Create request = new InquiryRequestDTO.Create(
                 form.category(),
                 form.title(),
-                form.content(),
-                form.termsAgreed()
+                form.content()
         );
 
         InquiryResponseDTO.CreateResult result =
