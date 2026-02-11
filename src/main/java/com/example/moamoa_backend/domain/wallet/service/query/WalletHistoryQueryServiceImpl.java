@@ -40,6 +40,7 @@ public class WalletHistoryQueryServiceImpl implements WalletHistoryQueryService{
                                 wh.type,
                                 wh.amount,
                                 wh.createdAt,
+                                m.id,
                                 m.title,
                                 m.durationMinutes
                         )
