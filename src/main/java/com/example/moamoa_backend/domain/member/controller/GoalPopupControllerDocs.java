@@ -11,7 +11,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PathVariable;
 
-@Tag(name = "GoalPopup", description = "목표 실패 팝업 조회 및 팝업 확인 처리 API")
+@Tag(name = "GoalPopup API", description = "목표 실패 팝업 조회 및 팝업 확인 처리 API")
 public interface GoalPopupControllerDocs {
 
 	@Operation(

@@ -11,7 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 import org.springframework.web.bind.annotation.PathVariable;
 
-@Tag(name = "Interest", description = "온보딩 관심사(대분류/세부분류) 조회 API")
+@Tag(name = "Interest API", description = "온보딩 관심사(대분류/세부분류) 조회 API")
 public interface InterestControllerDocs {
 
 	@Operation(
