@@ -68,7 +68,7 @@ public interface MissionControllerDocs {
     })
     ApiResponse<MissionResponseDto.MissionDetail> getMissionDetail(
             @PathVariable Long missionId,
-            @Parameter(hidden = true) UserDetails userDetails
+             UserDetails userDetails
     );
 
     @Operation(
@@ -86,7 +86,7 @@ public interface MissionControllerDocs {
     })
     ApiResponse<MissionResponseDto.WatchResult> updateWatchStatus(
             @PathVariable Long missionId,
-            @Parameter(hidden = true) UserDetails userDetails
+             UserDetails userDetails
     );
 
     @Operation(
@@ -116,7 +116,7 @@ public interface MissionControllerDocs {
     ApiResponse<MissionResponseDto.StatusResult> updateStatus(
             @PathVariable Long missionId,
             @Valid @RequestBody MissionRequestDto.PatchStatus request,
-            @Parameter(hidden = true) UserDetails userDetails
+             UserDetails userDetails
     );
 
     @Operation(
@@ -173,7 +173,7 @@ public interface MissionControllerDocs {
     ApiResponse<List<MissionResponseDto.RecommendResult>> getTodayRecommendMissions(
             @Parameter(description = "여유 시간(분). 이 시간보다 짧거나 같은 미션만 추천됩니다. (입력 안 하면 전체)", example = "10")
             @RequestParam(required = false) Integer time,
-            @Parameter(hidden = true) UserDetails userDetails
+             UserDetails userDetails
     );
 
     @Operation(
@@ -195,7 +195,7 @@ public interface MissionControllerDocs {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 파라미터 요청")
     })
     ApiResponse<MissionResponseDto.SearchResponse> searchMissions(
-            @Parameter(hidden = true) UserDetails userDetails,
+             UserDetails userDetails,
 
             @Parameter(description = "제목 검색어 (포함 일치)", example = "주식")
             @RequestParam(required = false) String searchText,
@@ -229,7 +229,7 @@ public interface MissionControllerDocs {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 파라미터 요청")
     })
     ApiResponse<MissionResponseDto.SearchResponse> getMissionsByCategory(
-            @Parameter(hidden = true) UserDetails userDetails,
+             UserDetails userDetails,
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) Long subCategoryId,
             @RequestParam(required = false) Long seed,
@@ -258,7 +258,7 @@ public interface MissionControllerDocs {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 파라미터 요청")
             })
     ApiResponse<MissionResponseDto.SearchResponse> getMyMissions(
-            @Parameter(hidden = true) UserDetails userDetails,
+             UserDetails userDetails,
             @RequestParam String status,
             @RequestParam(required = false) String condition,
             @RequestParam(required = false) Long categoryId,
@@ -295,7 +295,7 @@ public interface MissionControllerDocs {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "MISSION404_1: 해당 미션을 찾을 수 없음")
     })
     ApiResponse<MissionResponseDto.SubmitResult> submitMission(
-            @Parameter(hidden = true) UserDetails userDetails,
+             UserDetails userDetails,
             @PathVariable Long missionId,
             @RequestBody @Valid MissionRequestDto.SubmitAnswer request
     );
