@@ -30,15 +30,12 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1")
-public class InquiryController {
+public class InquiryController implements InquiryControllerDocs {
 
     private final InquiryCommandService inquiryCommandService;
     private final InquiryQueryService inquiryQueryService;
 
-    @Operation(
-            summary = "1:1 문의 신청",
-            description = "multipart/form-data 폼 객체로 문의 정보 + 이미지 파일을 업로드합니다. (JWT 필요)"
-    )
+    @Override
     @PostMapping(value = "/support/inquiries", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<InquiryResponseDTO.CreateResult> createInquiry(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -60,10 +57,7 @@ public class InquiryController {
 
     }
 
-    @Operation(
-            summary = "나의 문의 목록 조회",
-            description = "기간(1/3/6/12개월), 카테고리, 답변상태 조건으로 나의 문의 목록을 조회합니다. (무한스크롤 커서 페이징, JWT 필요)"
-    )
+    @Override
     @GetMapping("/members/me/support/inquiries")
     public ApiResponse<InquiryQueryResDto.MyInquiryList> getMyInquiries(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -87,7 +81,7 @@ public class InquiryController {
 
     }
 
-    @Operation(summary = "나의 문의 상세 조회", description = "회원이 본인이 작성한 1:1 문의 상세(문의/답변/이미지)를 조회합니다. (JWT 필요)")
+    @Override
     @GetMapping("/members/me/support/inquiries/{inquiryId}")
     public ApiResponse<InquiryDetailResDto.MyInquiryDetail> getMyInquiryDetail(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -102,7 +96,7 @@ public class InquiryController {
 
     }
 
-    @Operation(summary = "문의 답변 등록", description = "multipart/form-data 폼 객체로 답변 + 답변 이미지 파일을 업로드합니다. (관리자 JWT 필요)")
+    @Override
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PostMapping(value = "/admin/support/inquiries/{inquiryId}/answer", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<InquiryAnswerResponseDto.CreateResult> answerInquiry(

@@ -13,23 +13,15 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "Attendance", description = "출석 관련 API")
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/attendance")
-public class AttendanceController {
+public class AttendanceController implements AttendanceControllerDocs{
     private final AttendanceCommandService attendanceCommandService;
     private final AttendanceQueryService attendanceQueryService;
-    @Operation(
-            summary = "출석 체크",
-            description = """
-                    앱 진입 시 호출되는 출석 체크 API입니다.
-                    
-                    - 오늘 처음 출석이면: 출석 기록 저장 + 도토리 1개 지급
-                    - 연속 7일 달성 시: 추가 보너스 도토리 10개 지급
-                    - 이미 출석한 경우: '이미 출석했습니다' 에러 반환
-                    """
-    )
+
+    @Override
     @PostMapping("/check")
     public ApiResponse<AttendanceResponseDto.CheckInResult> checkIn(
             @AuthenticationPrincipal UserDetails userDetails
@@ -42,11 +34,7 @@ public class AttendanceController {
         );
     }
 
-    // ✅ 새로 추가: 연속 출석 일수 조회 (다른 화면용)
-    @Operation(
-            summary = "연속 출석 일수 조회",
-            description = "팝업 외 다른 화면에서 연속 출석 일수(streak)만 필요할 때 사용하는 API입니다."
-    )
+    @Override
     @GetMapping("/week")
     public ApiResponse<AttendanceWeekResponseDto.Response> getWeekStreak(
             @AuthenticationPrincipal UserDetails userDetails

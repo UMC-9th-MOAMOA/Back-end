@@ -20,12 +20,12 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1")
-public class HomeController {
+public class HomeController implements HomeControllerDocs{
 
 	private final HomeService homeService;
 	private final MemberHomeQueryService memberHomeQueryService;
 
-	@Operation(summary = "홈 메인 조회", description = "사용자 이름/내 도토리 갯수/다람쥐 착장 정보(+배경 정보) 홈 메인 정보를 조회합니다.")
+	@Override
 	@GetMapping("/home")
 	public ApiResponse<HomeResponseDto> getHome(
 		@AuthenticationPrincipal UserDetails userDetails
@@ -36,7 +36,7 @@ public class HomeController {
 		return ApiResponse.onSuccess(ItemSuccessCode.HOME_OK, result);
 	}
 
-	@Operation(summary = "홈 화면 주머니 조회", description = "오늘/이번주 미션시간, 도토리 잔액, 연속출석, 목표 진행(없으면 null)")
+	@Override
 	@GetMapping("/pocket")
 	public ApiResponse<HomePocketResponseDto.Response> getHomePocket(
 			@AuthenticationPrincipal UserDetails userDetails
