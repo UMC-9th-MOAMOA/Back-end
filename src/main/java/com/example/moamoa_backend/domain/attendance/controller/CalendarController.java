@@ -23,24 +23,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 
-@Tag(name = "Calendar", description = "캘린더 API")
 @RestController
 @RequiredArgsConstructor
 @Validated
 @RequestMapping("/api/v1/space/calendar")
-public class CalendarController {
+public class CalendarController implements CalendarControllerDocs{
 
     private final AttendanceQueryService attendanceQueryService;
     private final WalletHistoryQueryService walletHistoryQueryService;
 
-    @Operation(
-            summary = "월별 출석/미션 보상 현황 조회",
-            description = """
-                    월 캘린더 표시용 API입니다.
-                    - attendedDays: 출석한 일자(파란색 표시)
-                    - missionRewardDays: 미션 보상으로 도토리 획득한 일자(도토리 아이콘 표시)
-                    """
-    )
+    @Override
     @GetMapping("/calendar")
     public ApiResponse<AttendanceMonthResponseDto.Response> getMonthStatus(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -64,15 +56,7 @@ public class CalendarController {
         );
     }
 
-    // ✅ 여기부터 추가: 일별 도토리 내역 조회 (캘린더 아래로 이동)
-    @Operation(
-            summary = "일별 도토리 내역 조회",
-            description = """
-                    캘린더에서 특정 날짜를 선택했을 때 해당 날짜의 도토리 내역을 조회합니다.
-                    - 출석/광고: type, amount 반환
-                    - 미션: type, amount + 미션 제목(title) + 소요시간(durationMinutes) 반환
-                    """
-    )
+    @Override
     @GetMapping("/day")
     public ApiResponse<WalletHistoryDayResponseDto.Response> getDayHistory(
             @AuthenticationPrincipal UserDetails userDetails,
