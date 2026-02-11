@@ -253,6 +253,10 @@ public interface MissionControllerDocs {
         - **categoryId** (선택): 대분류 ID로 필터링
         """
     )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 파라미터 요청")
+            })
     ApiResponse<MissionResponseDto.SearchResponse> getMyMissions(
             @Parameter(hidden = true) UserDetails userDetails,
             @RequestParam String status,
