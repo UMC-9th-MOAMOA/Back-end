@@ -16,7 +16,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@Tag(name = "Onboarding", description = "온보딩/설정(관심사, 목표) API")
+@Tag(name = "Onboarding API", description = "온보딩/설정(관심사, 목표) API")
 public interface OnboardingControllerDocs {
 
 	@Operation(
