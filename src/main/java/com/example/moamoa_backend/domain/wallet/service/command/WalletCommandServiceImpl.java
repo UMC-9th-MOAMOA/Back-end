@@ -3,7 +3,9 @@ package com.example.moamoa_backend.domain.wallet.service.command;
 import com.example.moamoa_backend.domain.member.entity.Member;
 import com.example.moamoa_backend.domain.wallet.entity.Wallet;
 import com.example.moamoa_backend.domain.wallet.repository.WalletRepository;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,14 +14,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class WalletCommandServiceImpl implements WalletCommandService {
 
-    private final WalletRepository walletRepository;
+	private final WalletRepository walletRepository;
 
-
-    public void createWallet(Member member) {
-        if (walletRepository.existsByMember(member)){
-            return;
-        }
-        Wallet newWallet = Wallet.create(member);
-        walletRepository.save(newWallet);
-    }
+	public void createWallet(Member member) {
+		if (walletRepository.existsByMember(member)) {
+			return;
+		}
+		Wallet newWallet = Wallet.create(member);
+		walletRepository.save(newWallet);
+	}
 }

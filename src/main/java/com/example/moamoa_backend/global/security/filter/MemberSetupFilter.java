@@ -30,16 +30,16 @@ import java.util.List;
  */
 public class MemberSetupFilter extends OncePerRequestFilter {
 
-    private final List<RequestMatcher> setupAllowMatchers;
+	private final List<RequestMatcher> setupAllowMatchers;
 	private final MemberRepository memberRepository;
 
 	// Security Config에서 관리
 	public MemberSetupFilter(
-            List<RequestMatcher> setupAllowMatchers,
-            MemberRepository memberRepository
-    ) {
-        this.setupAllowMatchers = setupAllowMatchers;
-        this.memberRepository = memberRepository;
+		List<RequestMatcher> setupAllowMatchers,
+		MemberRepository memberRepository
+	) {
+		this.setupAllowMatchers = setupAllowMatchers;
+		this.memberRepository = memberRepository;
 	}
 
 	@Override
@@ -47,49 +47,49 @@ public class MemberSetupFilter extends OncePerRequestFilter {
 		HttpServletResponse response,
 		FilterChain filterChain) throws ServletException, IOException {
 
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        // 인증되지 않은 요청은 통과
-        if (auth == null || !auth.isAuthenticated()) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+		// 인증되지 않은 요청은 통과
+		if (auth == null || !auth.isAuthenticated()) {
+			filterChain.doFilter(request, response);
+			return;
+		}
 
-        boolean isUser = auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals(Role.ROLE_USER.name()));
+		boolean isUser = auth.getAuthorities().stream()
+			.anyMatch(a -> a.getAuthority().equals(Role.ROLE_USER.name()));
 
-        // USER 아닌경우 통과
-        if (!isUser) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+		// USER 아닌경우 통과
+		if (!isUser) {
+			filterChain.doFilter(request, response);
+			return;
+		}
 
-        // Setup Whitelist는 통과
-        if (isSetupWhitelisted(request)) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+		// Setup Whitelist는 통과
+		if (isSetupWhitelisted(request)) {
+			filterChain.doFilter(request, response);
+			return;
+		}
 
-        Long memberId = Long.parseLong(auth.getName());
+		Long memberId = Long.parseLong(auth.getName());
 
-        // 정책 동의 여부 체크
-        if (!memberRepository.existsByIdAndPolicyAgreedTrue(memberId)) {
-            request.setAttribute("exception", AuthErrorCode.POLICY_NOT_AGREED);
-            throw new AccessDeniedException("Policy not agreed");
-        }
+		// 정책 동의 여부 체크
+		if (!memberRepository.existsByIdAndPolicyAgreedTrue(memberId)) {
+			request.setAttribute("exception", AuthErrorCode.POLICY_NOT_AGREED);
+			throw new AccessDeniedException("Policy not agreed");
+		}
 
-        // 온보딩 완료 여부 체크
-        if (!memberRepository.existsByIdAndOnboardingCompletedTrue(memberId)) {
-            request.setAttribute("exception", AuthErrorCode.ONBOARDING_NOT_COMPLETED);
-            throw new AccessDeniedException("Onboarding not completed");
-        }
+		// 온보딩 완료 여부 체크
+		if (!memberRepository.existsByIdAndOnboardingCompletedTrue(memberId)) {
+			request.setAttribute("exception", AuthErrorCode.ONBOARDING_NOT_COMPLETED);
+			throw new AccessDeniedException("Onboarding not completed");
+		}
 
 		filterChain.doFilter(request, response);
 	}
 
-    private boolean isSetupWhitelisted(HttpServletRequest request) {
-        return setupAllowMatchers.stream()
-                .anyMatch(matcher -> matcher.matches(request));
-    }
+	private boolean isSetupWhitelisted(HttpServletRequest request) {
+		return setupAllowMatchers.stream()
+			.anyMatch(matcher -> matcher.matches(request));
+	}
 
 }

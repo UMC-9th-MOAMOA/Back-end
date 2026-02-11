@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 public enum InterestSuccessCode implements BaseSuccessCode {
 
+	//200
 	INTEREST_LIST_OK(
 		HttpStatus.OK,
 		"INTEREST200_1",

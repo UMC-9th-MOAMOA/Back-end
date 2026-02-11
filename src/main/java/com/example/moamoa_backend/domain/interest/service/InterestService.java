@@ -7,7 +7,9 @@ import com.example.moamoa_backend.domain.interest.exception.code.InterestErrorCo
 import com.example.moamoa_backend.domain.interest.entity.SubInterest;
 import com.example.moamoa_backend.domain.interest.repository.InterestRepository;
 import com.example.moamoa_backend.domain.interest.repository.SubInterestRepository;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

@@ -58,7 +58,7 @@ public class ItemShopService {
 
 		List<ItemType> candidateTypes = category.types();
 
-		// (선택) type 필터가 들어오면 category 소속인지 검증
+		// type 필터가 들어오면 category 소속인지 검증
 		List<ItemType> queryTypes = candidateTypes;
 		if (type != null) {
 			if (!candidateTypes.contains(type)) {
@@ -131,8 +131,7 @@ public class ItemShopService {
 		} catch (DataIntegrityViolationException e) {
 			/**
 			 * uk_member_item(unique member_id + item_id) 위반 등으로 중복 구매가 확정된 경우.
-			 * @Transactional 이므로 예외가 던져지면 전체 롤백되어
-			 * wallet.usePoint()로 차감된 point도 함께 롤백된다.
+			 * wallet.usePoint()로 차감된 point도 함께 롤백
 			 */
 			throw new ItemException(ItemErrorCode.ITEM_ALREADY_OWNED);
 		}
@@ -141,7 +140,7 @@ public class ItemShopService {
 		walletHistoryRepository.save(
 			WalletHistory.forPurchase(
 				wallet,
-				item,                  // ✅ 추가: FK 연결
+				item,                  // 추가: FK 연결
 				item.getPrice(),
 				wallet.getPoint(),
 				"아이템 구매: " + item.getName()

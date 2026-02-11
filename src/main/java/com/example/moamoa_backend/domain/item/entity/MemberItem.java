@@ -14,47 +14,47 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(uniqueConstraints = {
-    @UniqueConstraint(name = "uk_member_item", columnNames = {"member_id", "item_id"})
+	@UniqueConstraint(name = "uk_member_item", columnNames = {"member_id", "item_id"})
 })
 public class MemberItem extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(name = "member_id", nullable = false)
+	private Member member;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "item_id", nullable = false)
-    private Item item;
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(name = "item_id", nullable = false)
+	private Item item;
 
-    @Column(nullable = false)
-    private boolean isEquipped;
+	@Column(nullable = false)
+	private boolean isEquipped;
 
-    private MemberItem(Member member, Item item, boolean isEquipped) {
-        if (member == null) {
-            throw new ItemException(ItemErrorCode.MEMBER_ITEM_MEMBER_NULL);
-        }
-        if (item == null) {
-            throw new ItemException(ItemErrorCode.MEMBER_ITEM_ITEM_NULL);
-        }
-        this.member = member;
-        this.item = item;
-        this.isEquipped = isEquipped;
-    }
+	private MemberItem(Member member, Item item, boolean isEquipped) {
+		if (member == null) {
+			throw new ItemException(ItemErrorCode.MEMBER_ITEM_MEMBER_NULL);
+		}
+		if (item == null) {
+			throw new ItemException(ItemErrorCode.MEMBER_ITEM_ITEM_NULL);
+		}
+		this.member = member;
+		this.item = item;
+		this.isEquipped = isEquipped;
+	}
 
-    /** 기본 생성: 구매 직후는 항상 미착용(false) */
-    public static MemberItem create(Member member, Item item) {
-        return new MemberItem(member, item, false);
-    }
+	//기본 생성: 구매 직후는 항상 미착용(false)
+	public static MemberItem create(Member member, Item item) {
+		return new MemberItem(member, item, false);
+	}
 
-    public void equip() {
-        this.isEquipped = true;
-    }
+	public void equip() {
+		this.isEquipped = true;
+	}
 
-    public void unequip() {
-        this.isEquipped = false;
-    }
+	public void unequip() {
+		this.isEquipped = false;
+	}
 }

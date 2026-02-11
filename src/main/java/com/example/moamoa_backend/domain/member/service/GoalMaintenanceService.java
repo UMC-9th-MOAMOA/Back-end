@@ -20,9 +20,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class GoalMaintenanceService {
 
+	private static final ZoneId KST = ZoneId.of("Asia/Seoul");
 	private final MemberRepository memberRepository;
 	private final GoalResultService goalResultService;
-	private static final ZoneId KST = ZoneId.of("Asia/Seoul");
 
 	/**
 	 * 목표 상태(예약 적용/만료)를 즉시 반영

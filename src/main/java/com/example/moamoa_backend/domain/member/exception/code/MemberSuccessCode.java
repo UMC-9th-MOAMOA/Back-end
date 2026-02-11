@@ -11,10 +11,7 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 public enum MemberSuccessCode implements BaseSuccessCode {
 
-	MEMBER_SIGNUP(HttpStatus.CREATED,
-		"MEMBER201_1",
-		"회원가입이 완료되었습니다."),
-
+	//Member 200
 	PROFILE_FETCHED(HttpStatus.OK,
 		"MEMBER200_1",
 		"회원 정보 조회에 성공했습니다."),
@@ -44,7 +41,12 @@ public enum MemberSuccessCode implements BaseSuccessCode {
 
 	SETTING_SAVED(HttpStatus.OK,
 		"MEMBER200_10",
-		"설정이 저장되었습니다.");
+		"설정이 저장되었습니다."),
+
+	//Member 201
+	MEMBER_SIGNUP(HttpStatus.CREATED,
+		"MEMBER201_1",
+		"회원가입이 완료되었습니다.");
 
 	private final HttpStatus status;
 	private final String code;

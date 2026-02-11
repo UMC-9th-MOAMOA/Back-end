@@ -31,11 +31,12 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class GoalResultService {
 
+	private static final ZoneId KST = ZoneId.of("Asia/Seoul");
+	private static final int IN_CLAUSE_BATCH_SIZE = 1000; // (대량 회원 대비)
+
 	private final GoalResultRepository goalResultRepository;
 	private final MemberRepository memberRepository;
 	private final WalletHistoryRepository walletHistoryRepository;
-	private static final ZoneId KST = ZoneId.of("Asia/Seoul");
-	private static final int IN_CLAUSE_BATCH_SIZE = 1000; // (대량 회원 대비)
 
 	/**
 	 *   “목표 실패 팝업” 조회 API용

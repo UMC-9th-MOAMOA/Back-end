@@ -85,17 +85,17 @@ public class SecurityConfig {
 		"/api/v1/policies/**"
 	};
 
-    // 로그인 필요O - 초기 설정(정책동의, 온보딩) 완료 전에도 접근 가능
-    private final List<RequestMatcher> setupAllowMatchers = List.of(
-            PathPatternRequestMatcher.withDefaults().matcher("/api/v1/auth/**"),
-            PathPatternRequestMatcher.withDefaults().matcher("/api/v1/policies/**"),
-            PathPatternRequestMatcher.withDefaults().matcher("/api/v1/members/me/onboarding"),
-            PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.DELETE, "/api/v1/members/me"),
-            PathPatternRequestMatcher.withDefaults().matcher("/api/v1/interests/**"),
-            PathPatternRequestMatcher.withDefaults().matcher("/v3/api-docs/**"),
-            PathPatternRequestMatcher.withDefaults().matcher("/swagger-ui/**"),
-            PathPatternRequestMatcher.withDefaults().matcher("/swagger-resources/**")
-    );
+	// 로그인 필요O - 초기 설정(정책동의, 온보딩) 완료 전에도 접근 가능
+	private final List<RequestMatcher> setupAllowMatchers = List.of(
+		PathPatternRequestMatcher.withDefaults().matcher("/api/v1/auth/**"),
+		PathPatternRequestMatcher.withDefaults().matcher("/api/v1/policies/**"),
+		PathPatternRequestMatcher.withDefaults().matcher("/api/v1/members/me/onboarding"),
+		PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.DELETE, "/api/v1/members/me"),
+		PathPatternRequestMatcher.withDefaults().matcher("/api/v1/interests/**"),
+		PathPatternRequestMatcher.withDefaults().matcher("/v3/api-docs/**"),
+		PathPatternRequestMatcher.withDefaults().matcher("/swagger-ui/**"),
+		PathPatternRequestMatcher.withDefaults().matcher("/swagger-resources/**")
+	);
 
 	// 관리자만 접근 가능
 	private final String[] adminUris = {
@@ -128,7 +128,7 @@ public class SecurityConfig {
 				auth.anyRequest().authenticated();
 			})
 
-            // 필터 순서: JwtAuthFilter → (ExceptionTranslationFilter) → MemberSetupFilter
+			// 필터 순서: JwtAuthFilter → (ExceptionTranslationFilter) → MemberSetupFilter
 			.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
 			.addFilterAfter(memberSetupFilter(), ExceptionTranslationFilter.class)
 
@@ -164,7 +164,7 @@ public class SecurityConfig {
 			"https://api.moamoa.io.kr",
 			"http://localhost:5173",
 			"https://localhost:5173",
-                "https://*--moamoamoa.netlify.app"
+			"https://*--moamoamoa.netlify.app"
 		));
 
 		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
@@ -179,7 +179,7 @@ public class SecurityConfig {
 	@Bean
 	public MemberSetupFilter memberSetupFilter() {
 		return new MemberSetupFilter(setupAllowMatchers, memberRepository);
-    }
+	}
 
 	@Bean
 	public BCryptPasswordEncoder passwordEncoder() {

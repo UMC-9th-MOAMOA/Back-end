@@ -64,7 +64,7 @@ public class WalletHistoryQueryServiceImpl implements WalletHistoryQueryService{
                 .mapToInt(Integer::intValue)
                 .sum();
 
-        // totalAcorns: amount 합(너 구조상 적립이 +값이면 그대로 합)
+        // totalAcorns: amount 합
         int totalAcorns = items.stream()
                 .mapToInt(WalletHistoryDayResponseDto.Item::amount)
                 .sum();

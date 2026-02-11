@@ -14,14 +14,14 @@ import org.springframework.stereotype.Repository;
 public interface WalletHistoryRepository extends JpaRepository<WalletHistory, Long> {
 
 	@Query("""
-        select count(wh)
-        from WalletHistory wh
-        join wh.wallet w
-        where w.member.id = :memberId
-          and wh.type = :type
-          and wh.createdAt >= :startAt
-          and wh.createdAt < :endAt
-        """)
+		select count(wh)
+		from WalletHistory wh
+		join wh.wallet w
+		where w.member.id = :memberId
+		  and wh.type = :type
+		  and wh.createdAt >= :startAt
+		  and wh.createdAt < :endAt
+		""")
 	long countByMemberAndTypeBetween(
 		@Param("memberId") Long memberId,
 		@Param("type") TransactionType type,

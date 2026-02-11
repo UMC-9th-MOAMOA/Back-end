@@ -17,5 +17,6 @@ public record OnboardingPatchRequestDto(
 	public record Selection(
 		Long interestId,            // 대분류 ID (소속 검증에 사용)
 		List<Long> subInterestIds   // 세부 관심사 ID 목록 (실제 저장 대상)
-	) {}
+	) {
+	}
 }

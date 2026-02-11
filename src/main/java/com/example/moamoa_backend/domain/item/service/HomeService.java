@@ -32,7 +32,6 @@ public class HomeService {
 	private final MemberSettingService memberSettingService;
 	private final WalletHistoryQueryService walletHistoryQueryService;
 
-
 	@Transactional
 	public HomeResponseDto getHome(Long memberId) {
 		Member member = memberRepository.findById(memberId)
