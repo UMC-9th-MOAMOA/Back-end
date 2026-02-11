@@ -21,6 +21,14 @@ import java.util.regex.Pattern;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+/**
+ * YouTube Data API(v3)를 호출하여 영상 길이(초)를 조회하는 유틸 서비스.
+ *
+ * 예외 정책
+ * - URL 파싱 실패: INVALID_YOUTUBE_URL
+ * - 영상 조회 실패: YOUTUBE_VIDEO_NOT_FOUND
+ * - 외부 호출/파싱 실패: YOUTUBE_SERVER_ERROR
+ */
 public class YoutubeUtilService {
 
 	@Value("${youtube.api.key}")
@@ -29,6 +37,9 @@ public class YoutubeUtilService {
 	private RestClient restClient;
 
 	@PostConstruct
+	/**
+	 * RestClient를 초기화하고 타임아웃을 설정한다.
+	 */
 	private void init() {
 		SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
 		factory.setConnectTimeout(5000); // 연결 5초 대기
@@ -39,6 +50,13 @@ public class YoutubeUtilService {
 			.build();
 	}
 
+	/**
+	 * 유튜브 영상 URL을 받아 영상 길이를 초 단위로 반환한다.
+	 *
+	 * @param videoUrl 유튜브 영상 URL
+	 * @return 영상 길이(초)
+	 * @throws MissionException 유효하지 않은 URL/영상 없음/서버 오류
+	 */
 	public int getDurationInSeconds(String videoUrl) {
 		try {
 			String videoId = extractVideoId(videoUrl);
@@ -71,6 +89,12 @@ public class YoutubeUtilService {
 		}
 	}
 
+	/**
+	 * 유튜브 URL에서 videoId를 추출한다.
+	 *
+	 * @param url 유튜브 URL
+	 * @return 추출된 videoId (추출 실패 시 null)
+	 */
 	private String extractVideoId(String url) {
 		String pattern = "(?<=watch\\?v=|/videos/|embed\\/|youtu.be\\/|\\/v\\/|\\/e\\/|watch\\?v%3D|watch\\?feature=player_embedded&v=|%2Fvideos%2F|embed%2F|youtu.be%2F|%2Fv%2F)[^#\\&\\?\\n]*";
 		Pattern compiledPattern = Pattern.compile(pattern);

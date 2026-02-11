@@ -31,6 +31,15 @@ import java.time.ZonedDateTime;
 @Service
 @RequiredArgsConstructor
 @Transactional
+/**
+ * 출석 체크인(출석 기록 + 연속 출석 + 보상 지급)을 처리하는 Command 서비스.
+ *
+ * 주요 정책
+ * - Redis(일자 TTL)로 1차 중복 방지
+ * - DB Unique 제약으로 2차 중복 방지
+ * - streak, wallet은 SELECT ... FOR UPDATE로 동시성 제어
+ * - DB 처리 실패 시 Redis 키를 롤백 삭제
+ */
 public class AttendanceCommandServiceImpl implements AttendanceCommandService {
 
 	private static final ZoneId KST = ZoneId.of("Asia/Seoul");
@@ -46,6 +55,20 @@ public class AttendanceCommandServiceImpl implements AttendanceCommandService {
 	private final WalletHistoryRepository walletHistoryRepository;
 
 	@Override
+	/**
+	 * 출석 체크인을 수행한다.
+	 *
+	 * 처리 흐름
+	 * 1) Redis 키로 당일 중복 체크인 차단
+	 * 2) Member 존재 확인
+	 * 3) Attendance 저장 (DB 중복/무결성 방어)
+	 * 4) AttendanceStreak 갱신 (락)
+	 * 5) Wallet 포인트 적립 + WalletHistory 기록 (락)
+	 *
+	 * @param memberId 출석 체크인을 수행할 회원 ID
+	 * @return 출석 체크인 결과 DTO
+	 * @throws AttendanceException 이미 출석했거나 회원이 없을 때
+	 */
 	public AttendanceResponseDto.CheckInResult checkIn(Long memberId) {
 		LocalDate today = LocalDate.now(KST);
 
@@ -86,7 +109,7 @@ public class AttendanceCommandServiceImpl implements AttendanceCommandService {
 			Wallet wallet = walletRepository.findByMemberIdForUpdate(memberId)
 				.orElseGet(() -> walletRepository.save(Wallet.create(member)));
 
-			// ✅ 출석 보상 +1 (type=ATTENDANCE)
+			// 출석 보상 +1 (type=ATTENDANCE)
 			wallet.addPoint(ATTENDANCE_REWARD);
 			walletHistoryRepository.save(
 				WalletHistory.create(
@@ -100,7 +123,7 @@ public class AttendanceCommandServiceImpl implements AttendanceCommandService {
 				)
 			);
 
-			// ✅ 연속 7일 달성 보너스 +10 (type=ATTENDANCE_STREAK_BONUS)
+			// 연속 7일 달성 보너스 +10 (type=ATTENDANCE_STREAK_BONUS)
 			if (completedToday) {
 				wallet.addPoint(STREAK_7_BONUS);
 				walletHistoryRepository.save(
@@ -125,6 +148,17 @@ public class AttendanceCommandServiceImpl implements AttendanceCommandService {
 		}
 	}
 
+	/**
+	 * 오늘 체크인 시 새로운 연속 출석 일수를 계산한다.
+	 *
+	 * 규칙
+	 * - 어제(lastAttendedDate)가 어제면 연속 +1
+	 * - 그 외는 1로 리셋
+	 *
+	 * @param streak 회원의 출석 streak 엔티티
+	 * @param today 오늘 날짜
+	 * @return 계산된 새로운 streak 값
+	 */
 	private int calculateNewStreak(AttendanceStreak streak, LocalDate today) {
 		LocalDate yesterday = LocalDate.now(KST).minusDays(1);
 
@@ -139,10 +173,23 @@ public class AttendanceCommandServiceImpl implements AttendanceCommandService {
 		return 1;
 	}
 
+	/**
+	 * Redis 중복 방지를 위한 당일 키를 생성한다.
+	 *
+	 * @param memberId 회원 ID
+	 * @param date 날짜
+	 * @return redis key 문자열
+	 */
 	private String buildTodayKey(Long memberId, LocalDate date) {
 		return "att:member:" + memberId + ":date:" + date;
 	}
 
+	/**
+	 * 현재 시각부터 해당 타임존 기준 "내일 00:00"까지 남은 초(TTL)를 계산한다.
+	 *
+	 * @param zoneId 기준 타임존
+	 * @return 남은 초(Seconds)
+	 */
 	private long secondsUntilEndOfDay(ZoneId zoneId) {
 		ZonedDateTime now = ZonedDateTime.now(zoneId);
 		ZonedDateTime nextDayStart = now.toLocalDate().plusDays(1).atStartOfDay(zoneId);

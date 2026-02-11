@@ -16,6 +16,10 @@ public class WalletCommandServiceImpl implements WalletCommandService {
 
 	private final WalletRepository walletRepository;
 
+	/**
+	 * 회원 가입 시 지갑 생성
+	 * @param member 지갑을 생성할 회원 엔티티
+	 */
 	public void createWallet(Member member) {
 		if (walletRepository.existsByMember(member)) {
 			return;

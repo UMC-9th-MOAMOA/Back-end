@@ -34,6 +34,15 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+/**
+ * 홈 화면(Home Pocket)에 필요한 회원 요약 정보를 조회하는 Query 서비스.
+ *
+ * 조회 항목
+ * - 오늘/이번주 미션 수행 시간 합
+ * - 지갑 포인트
+ * - 출석 연속 일수
+ * - 목표 진행(주간 일자별 성공 카운트, 지난주 총합, 이번주 총합)
+ */
 public class MemberHomeQueryServiceImpl implements MemberHomeQueryService {
 
 	private static final ZoneId KST = ZoneId.of("Asia/Seoul");
@@ -49,6 +58,13 @@ public class MemberHomeQueryServiceImpl implements MemberHomeQueryService {
 	private final QMission mission = QMission.mission;
 
 	@Override
+	/**
+	 * 홈 포켓 데이터를 조회한다.
+	 *
+	 * @param memberId 회원 ID
+	 * @return 홈 포켓 응답 DTO
+	 * @throws MemberException 회원이 존재하지 않는 경우
+	 */
 	public HomePocketResponseDto.Response getHomePocket(Long memberId) {
 
 		// 1) member 조회 (목표 필드가 member에 있음)
@@ -150,8 +166,8 @@ public class MemberHomeQueryServiceImpl implements MemberHomeQueryService {
 
 			Map<LocalDate, Long> thisWeekMap = new HashMap<>();
 			for (Tuple t : tuples) {
-				Date sqlDate = t.get(rewardDate);          // java.sql.Date로 받기
-				LocalDate localDate = sqlDate.toLocalDate(); // LocalDate로 변환
+				Date sqlDate = t.get(rewardDate);
+				LocalDate localDate = sqlDate.toLocalDate();
 				thisWeekMap.put(localDate, t.get(countExpr));
 			}
 
@@ -165,7 +181,7 @@ public class MemberHomeQueryServiceImpl implements MemberHomeQueryService {
 				thisWeekTotal += cnt;
 			}
 
-			// ✅ 저번주 총합
+			// 지난주 총합
 			LocalDate lastWeekMon = thisWeekMon.minusWeeks(1);
 			LocalDateTime lastWeekStart = lastWeekMon.atStartOfDay();
 			LocalDateTime thisWeekStart2 = thisWeekMon.atStartOfDay();

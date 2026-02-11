@@ -32,6 +32,13 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Transactional
+/**
+ * 문의 생성/답변 등록을 처리하는 Command 서비스.
+ *
+ * 공통 정책
+ * - 이미지 최대 5장 제한
+ * - 이미지 업로드 실패 시 도메인 예외로 변환
+ */
 public class InquiryCommandServiceImpl implements InquiryCommandService {
 
 	private final InquiryRepository inquiryRepository;
@@ -39,6 +46,19 @@ public class InquiryCommandServiceImpl implements InquiryCommandService {
 	private final S3UploadService s3UploadService;
 
 	@Override
+	/**
+	 * 문의를 생성한다.
+	 *
+	 * 처리 흐름
+	 * 1) 회원 존재 확인
+	 * 2) (선택) 이미지 업로드 -> URL 리스트 생성 (최대 5장)
+	 * 3) Inquiry 엔티티 생성 후 저장
+	 *
+	 * @param memberId 문의를 생성할 회원 ID
+	 * @param request 문의 생성 요청 DTO
+	 * @param images 첨부 이미지 파일 목록(선택)
+	 * @return 문의 생성 결과 DTO
+	 */
 	public InquiryResponseDTO.CreateResult create(Long memberId, InquiryRequestDTO.Create request,
 		List<MultipartFile> images) {
 
@@ -73,6 +93,23 @@ public class InquiryCommandServiceImpl implements InquiryCommandService {
 	}
 
 	@Override
+	/**
+	 * 문의에 답변을 등록한다.
+	 *
+	 * 처리 흐름
+	 * 1) 문의 존재 확인
+	 * 2) 답변 내용/응답자/시간/상태 변경
+	 * 3) (선택) 답변 이미지 업로드 -> AnswerImage로 매핑 (최대 5장)
+	 * 4) 저장 후 응답 DTO 반환
+	 *
+	 * 교체 정책
+	 * - 기존 answerImages 컬렉션을 clear 후 새로 채움
+	 *
+	 * @param inquiryId 답변할 문의 ID
+	 * @param request 답변 요청 DTO
+	 * @param images 답변 이미지 파일 목록(선택)
+	 * @return 답변 등록 결과 DTO
+	 */
 	public InquiryAnswerResponseDto.CreateResult answer(Long inquiryId, InquiryAnswerRequestDto.CreateAnswer request,
 		List<MultipartFile> images) {
 
@@ -84,11 +121,11 @@ public class InquiryCommandServiceImpl implements InquiryCommandService {
 		inquiry.setAnsweredAt(LocalDateTime.now());
 		inquiry.setStatus(InquiryStatus.COMPLETED);
 
-		// ✅ 컬렉션 null 방지
+		// 컬렉션 null 방지
 		if (inquiry.getAnswerImages() == null) {
 			inquiry.setAnswerImages(new ArrayList<>());
 		}
-		// ✅ 교체 정책
+		// 교체 정책
 		inquiry.getAnswerImages().clear();
 
 		// 1) 답변 이미지 파일 -> S3 업로드 -> AnswerImage 저장
