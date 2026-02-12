@@ -22,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import software.amazon.awssdk.services.s3.endpoints.internal.Value;
 
 import java.util.Collections;
 import java.util.List;
@@ -93,7 +94,7 @@ public class MissionQueryServiceImpl implements MissionQueryService {
 	 *
 	 */
 	@Override
-	public List<MissionResponseDto.RecommendResult> getTodayRecommendMissions(Long memberId, Integer requestTime) {
+	public List<MissionResponseDto.RecommendResult> getTodayRecommendMissions(Long memberId, Integer requestTime, Boolean isRefresh) {
 
 		if (!memberRepository.existsById(memberId)) {
 			throw new MemberException(MemberErrorCode.MEMBER_NOT_FOUND);
@@ -104,7 +105,8 @@ public class MissionQueryServiceImpl implements MissionQueryService {
 			.distinct()
 			.toList();
 
-		List<Mission> missions = missionRepository.findTodayRecommendMission(memberId, interestIds, requestTime);
+        boolean refreshFlag = Boolean.TRUE.equals(isRefresh);
+		List<Mission> missions = missionRepository.findTodayRecommendMission(memberId, interestIds, requestTime,refreshFlag);
 
 		if (missions.isEmpty()) {
 			return Collections.emptyList();
