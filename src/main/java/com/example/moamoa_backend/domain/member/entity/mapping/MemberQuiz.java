@@ -20,15 +20,15 @@ public class MemberQuiz extends BaseEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
+    @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "quiz_id")
+    @JoinColumn(name = "quiz_id", nullable = false)
     private Quiz quiz;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "mission_id")
+    @JoinColumn(name = "mission_id", nullable = false)
     private Mission mission;
 
     private String selectedAnswer;

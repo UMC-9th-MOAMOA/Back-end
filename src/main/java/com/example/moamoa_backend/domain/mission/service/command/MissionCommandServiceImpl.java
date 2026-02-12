@@ -41,6 +41,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -249,6 +251,10 @@ public class MissionCommandServiceImpl implements MissionCommandService {
 		int earnedScore = 0;
 		boolean isAllCorrect = true;
 
+        Map<Long, MemberQuiz> existingQuizMap = memberQuizRepository.findAllByMemberIdAndMissionId(memberId, missionId)
+                .stream()
+                .collect(Collectors.toMap(mq -> mq.getQuiz().getId(), mq -> mq));
+
 		for (Quiz quiz : quizzes) {
 			String userAnswer = request.submissions().stream()
 				.filter(s -> s.quizId().equals(quiz.getId()))
@@ -278,18 +284,18 @@ public class MissionCommandServiceImpl implements MissionCommandService {
 				isAllCorrect = false;
 			}
 
-            MemberQuiz memberQuiz = memberQuizRepository.findByMemberAndQuiz(member,quiz).orElse(null);
+            MemberQuiz memberQuiz = existingQuizMap.get(quiz.getId());
 
-            if(memberQuiz == null) {
+            if (memberQuiz == null) {
                 memberQuizRepository.save(MemberQuiz.builder()
-                                .member(member)
-                                .quiz(quiz)
-                                .mission(mission)
-                                .selectedAnswer(userAnswer)
-                                .isCorrect(isCorrect)
+                        .member(member)
+                        .quiz(quiz)
+                        .mission(mission)
+                        .selectedAnswer(userAnswer)
+                        .isCorrect(isCorrect)
                         .build());
-            }else{
-                memberQuiz.updateResult(userAnswer,isCorrect);
+            } else {
+                memberQuiz.updateResult(userAnswer, isCorrect);
             }
 		}
 
