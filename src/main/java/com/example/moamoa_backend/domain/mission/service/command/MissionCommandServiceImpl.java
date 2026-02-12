@@ -351,17 +351,37 @@ public class MissionCommandServiceImpl implements MissionCommandService {
 		long dailyCount = countMissionCompleteBetween(memberId, today, tomorrow);
 		long weeklyCount = countMissionCompleteBetween(memberId, thisMonday, tomorrow);
 
-		if (member.getDailyGoal() != null && dailyCount == member.getDailyGoal()) {
-			int reward = member.getDailyGoal() * 5;
-			earnedGoalReward += reward;
-			updateWalletAndSaveHistory(wallet, null, TransactionType.DAILY_REWARD, reward, "일간 목표 달성");
-		}
+		if(member.getDailyGoal()!=null && dailyCount >= member.getDailyGoal()){
 
-		if (member.getWeeklyGoal() != null && weeklyCount == member.getWeeklyGoal()) {
-			int reward = member.getWeeklyGoal() * 10;
-			earnedGoalReward += reward;
-			updateWalletAndSaveHistory(wallet, null, TransactionType.WEEKLY_REWARD, reward, "주간 목표 달성");
-		}
+            //이미 오늘 목표 보상 받았는지
+            boolean alreadyDailyRewarded = walletHistoryRepository.countByMemberAndTypeBetween(
+                    memberId,
+                    TransactionType.DAILY_REWARD,
+                    today.atStartOfDay(),
+                    tomorrow.atStartOfDay()
+                    )>0;
+
+            if(!alreadyDailyRewarded){
+                int reward = member.getDailyGoal() * 5;
+                earnedGoalReward += reward;
+                updateWalletAndSaveHistory(wallet,null,TransactionType.DAILY_REWARD,reward,"일간 목표 달성");
+            }
+        }
+        if (member.getWeeklyGoal() != null && weeklyCount >= member.getWeeklyGoal()) {
+            // 이미 이번 주 주간 보상을 받았는지 확인
+            boolean alreadyWeeklyRewarded = walletHistoryRepository.countByMemberAndTypeBetween(
+                    memberId,
+                    TransactionType.WEEKLY_REWARD,
+                    thisMonday.atStartOfDay(),
+                    tomorrow.atStartOfDay()
+            ) > 0;
+
+            if (!alreadyWeeklyRewarded) {
+                int reward = member.getWeeklyGoal() * 10;
+                earnedGoalReward += reward;
+                updateWalletAndSaveHistory(wallet, null, TransactionType.WEEKLY_REWARD, reward, "주간 목표 달성");
+            }
+        }
 
 		if (earnedGoalReward > 0)
 			walletHistoryRepository.flush();
