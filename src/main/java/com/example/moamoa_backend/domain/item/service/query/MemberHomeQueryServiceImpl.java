@@ -87,45 +87,48 @@ public class MemberHomeQueryServiceImpl implements MemberHomeQueryService {
 		LocalDateTime thisWeekStart = thisWeekMon.atStartOfDay();
 		LocalDateTime nextWeekStart = nextWeekMon.atStartOfDay();
 
-		// 2) 오늘/이번주 미션 시청시간 합
-		Long todaySeconds = queryFactory
-			.select(
-				Expressions.numberTemplate(
-					Long.class,
-					"coalesce(sum({0}), 0)",
-						mission.videoLength
+		// 2) 오늘/이번주 미션 수행시간 합 (missionPerformedAt + FAIL/SUCCESS 기준)
+		Long todayMinutes = queryFactory
+				.select(
+						Expressions.numberTemplate(
+								Long.class,
+								"coalesce(sum({0}), 0)",
+								mission.durationMinutes   // ✅ durationMinutes 사용
+						)
 				)
-			)
-			.from(mm)
-			.join(mm.mission, mission)
-			.where(
-				mm.member.id.eq(memberId),
-				mm.createdAt.goe(todayStart),
-				mm.createdAt.lt(tomorrowStart)
-			)
-			.fetchOne();
-
-		Long thisWeekSeconds = queryFactory
-			.select(
-				Expressions.numberTemplate(
-					Long.class,
-					"coalesce(sum({0}), 0)",
-						mission.videoLength
+				.from(mm)
+				.join(mm.mission, mission)
+				.where(
+						mm.member.id.eq(memberId),
+						mm.missionPerformedAt.isNotNull(),
+						mm.missionPerformedAt.goe(todayStart),
+						mm.missionPerformedAt.lt(tomorrowStart),
+						mm.missionStatus.in(MissionStatus.FAIL, MissionStatus.SUCCESS)
 				)
-			)
-			.from(mm)
-			.join(mm.mission, mission)
-			.where(
-				mm.member.id.eq(memberId),
-				mm.createdAt.goe(thisWeekStart),
-				mm.createdAt.lt(nextWeekStart)
-			)
-			.fetchOne();
+				.fetchOne();
 
-		long todayMissionMinutes =
-				(todaySeconds == null ? 0L : todaySeconds) / 60;
-		long thisWeekMissionMinutes =
-				(thisWeekSeconds == null ? 0L : thisWeekSeconds) / 60;
+		Long thisWeekMinutes = queryFactory
+				.select(
+						Expressions.numberTemplate(
+								Long.class,
+								"coalesce(sum({0}), 0)",
+								mission.durationMinutes   // ✅ durationMinutes 사용
+						)
+				)
+				.from(mm)
+				.join(mm.mission, mission)
+				.where(
+						mm.member.id.eq(memberId),
+						mm.missionPerformedAt.isNotNull(),
+						mm.missionPerformedAt.goe(thisWeekStart),
+						mm.missionPerformedAt.lt(nextWeekStart),
+						mm.missionStatus.in(MissionStatus.FAIL, MissionStatus.SUCCESS)
+				)
+				.fetchOne();
+
+		long todayMissionMinutes = todayMinutes == null ? 0L : todayMinutes;
+		long thisWeekMissionMinutes = thisWeekMinutes == null ? 0L : thisWeekMinutes;
+
 
 		// 3) wallet point
 		Integer point = queryFactory
