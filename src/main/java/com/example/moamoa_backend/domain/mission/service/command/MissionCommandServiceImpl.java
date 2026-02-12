@@ -297,6 +297,8 @@ public class MissionCommandServiceImpl implements MissionCommandService {
 			memberMissionRepository.save(memberMission);
 		}
 
+        memberMission.updatePerformedAt();
+
 		LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
 		LocalDate tomorrow = today.plusDays(1);
 		LocalDate thisMonday = today.with(

@@ -53,6 +53,8 @@ public class MemberMission extends BaseEntity {
 	@Builder.Default
 	private boolean isContentWatched = false;
 
+    private LocalDateTime missionPerformedAt;
+
 	public void changeMissionStatus(MissionStatus missionStatus) {
 		this.missionStatus = missionStatus;
 	}
@@ -76,4 +78,9 @@ public class MemberMission extends BaseEntity {
 		this.rewardAt = LocalDateTime.now(KST);
 	}
 
+    public void updatePerformedAt(){
+        if(this.missionPerformedAt == null){
+            this.missionPerformedAt = LocalDateTime.now(KST);
+        }
+    }
 }

@@ -1,0 +1,1 @@
+ALTER TABLE member_mission ADD COLUMN mission_performed_at DATETIME(6) NULL;
