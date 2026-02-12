@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 @Getter
 @AllArgsConstructor
 public enum WalletSuccessCode implements BaseSuccessCode {
+
+	// ============= 200 OK =============
 	WALLET_CHARGE_SUCCESS(
 		HttpStatus.OK,
 		"WALLET200_1",
@@ -34,7 +36,6 @@ public enum WalletSuccessCode implements BaseSuccessCode {
 		"광고 보상이 지급되었습니다."
 	),
 
-	// ===== 조회 =====
 	WALLET_BALANCE_INQUIRY_SUCCESS(
 		HttpStatus.OK,
 		"WALLET200_5",
@@ -46,11 +47,13 @@ public enum WalletSuccessCode implements BaseSuccessCode {
 		"WALLET200_6",
 		"도토리 내역 조회에 성공했습니다."
 	),
+
 	WALLET_DAILY_HISTORY_SUCCESS(
 		HttpStatus.OK,
 		"WALLET_200_7",
 		"도토리 일일 획득 내역 조회에 성공했습니다."
 	);
+
 	private final HttpStatus status;
 	private final String code;
 	private final String message;

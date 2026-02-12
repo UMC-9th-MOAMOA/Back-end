@@ -11,7 +11,7 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 public enum PolicySuccessCode implements BaseSuccessCode {
 
-	//200
+	// ============= 200 OK =============
 	POLICY_GET_SUCCESS(HttpStatus.OK,
 		"POLICY200_1",
 		"약관 상세 조회를 완료했습니다."),

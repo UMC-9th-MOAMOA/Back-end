@@ -11,7 +11,7 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 public enum PolicyErrorCode implements BaseErrorCode {
 
-      // ============= 400 Bad Request =============
+	// ============= 400 Bad Request =============
 	MANDATORY_AGREEMENT_REQUIRED(HttpStatus.BAD_REQUEST,
 		"POLICY400_1",
 		"필수 약관에 모두 동의해야 합니다."),
@@ -20,7 +20,7 @@ public enum PolicyErrorCode implements BaseErrorCode {
 		"POLICY400_2",
 		"중복된 약관 ID가 존재합니다."),
 
-    //404
+	// ============= 404 Not Found =============
 	POLICY_NOT_FOUND(HttpStatus.NOT_FOUND,
 		"POLICY404_1",
 		"존재하지 않는 정책입니다.");

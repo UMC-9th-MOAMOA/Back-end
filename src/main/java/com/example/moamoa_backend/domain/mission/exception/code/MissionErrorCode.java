@@ -11,7 +11,7 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 public enum MissionErrorCode implements BaseErrorCode {
 
-	  // ============= 400 Bad Request =============
+	// ============= 400 Bad Request =============
 	QUIZ_JSON_CONVERSION_FAIL(
 		HttpStatus.BAD_REQUEST,
 		"MISSION400_1",
@@ -52,7 +52,7 @@ public enum MissionErrorCode implements BaseErrorCode {
 		"MISSION400_8",
 		"유효하지 않은 정답입니다."),
 
-	//404
+	// ============= 404 Not Found =============
 	MISSION_NOT_FOUND(
 		HttpStatus.NOT_FOUND,
 		"MISSION_404_1",

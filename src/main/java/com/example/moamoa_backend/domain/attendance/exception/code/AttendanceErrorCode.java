@@ -11,19 +11,19 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 public enum AttendanceErrorCode implements BaseErrorCode {
 
-	//401
+	// ============= 401 Unauthorized =============
 	UNAUTHORIZED(
 		HttpStatus.UNAUTHORIZED,
 		"ATTENDANCE401_1",
 		"인증 정보가 없습니다."),
 
-	//404
+	// ============= 404 Not Found =============
 	MEMBER_NOT_FOUND(
 		HttpStatus.NOT_FOUND,
 		"ATTENDANCE404_1",
 		"회원 정보를 찾을 수 없습니다."),
 
-	//409
+	// ============= 409 Conflict =============
 	ALREADY_ATTENDED(
 		HttpStatus.CONFLICT,
 		"ATTENDANCE409_1",
