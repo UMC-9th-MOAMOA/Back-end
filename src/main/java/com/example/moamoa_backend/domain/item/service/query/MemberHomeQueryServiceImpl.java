@@ -87,13 +87,13 @@ public class MemberHomeQueryServiceImpl implements MemberHomeQueryService {
 		LocalDateTime thisWeekStart = thisWeekMon.atStartOfDay();
 		LocalDateTime nextWeekStart = nextWeekMon.atStartOfDay();
 
-		// 2) 오늘/이번주 미션 수행시간 합 (SUCCESS 기준)
-		Long todayMinutes = queryFactory
+		// 2) 오늘/이번주 미션 시청시간 합
+		Long todaySeconds = queryFactory
 			.select(
 				Expressions.numberTemplate(
 					Long.class,
 					"coalesce(sum({0}), 0)",
-					mission.durationMinutes
+						mission.videoLength
 				)
 			)
 			.from(mm)
@@ -105,12 +105,12 @@ public class MemberHomeQueryServiceImpl implements MemberHomeQueryService {
 			)
 			.fetchOne();
 
-		Long thisWeekMinutes = queryFactory
+		Long thisWeekSeconds = queryFactory
 			.select(
 				Expressions.numberTemplate(
 					Long.class,
 					"coalesce(sum({0}), 0)",
-					mission.durationMinutes
+						mission.videoLength
 				)
 			)
 			.from(mm)
@@ -122,8 +122,10 @@ public class MemberHomeQueryServiceImpl implements MemberHomeQueryService {
 			)
 			.fetchOne();
 
-		long todayMissionMinutes = todayMinutes == null ? 0L : todayMinutes;
-		long thisWeekMissionMinutes = thisWeekMinutes == null ? 0L : thisWeekMinutes;
+		long todayMissionMinutes =
+				(todaySeconds == null ? 0L : todaySeconds) / 60;
+		long thisWeekMissionMinutes =
+				(thisWeekSeconds == null ? 0L : thisWeekSeconds) / 60;
 
 		// 3) wallet point
 		Integer point = queryFactory

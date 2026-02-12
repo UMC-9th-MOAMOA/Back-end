@@ -79,6 +79,7 @@ public class WalletHistoryListQueryServiceImpl implements WalletHistoryListQuery
 		LocalDateTime startAt = resolveStartAt(period);
 
 		BooleanExpression where = w.member.id.eq(memberId)
+				.and(wh.amount.ne(0))
 			.and(applyPeriod(wh, startAt))
 			.and(applyTab(wh, tab))
 			.and(applyEarnSource(wh, tab, earnSource));
