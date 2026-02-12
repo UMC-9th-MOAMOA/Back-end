@@ -33,7 +33,7 @@ public class CalendarController implements CalendarControllerDocs {
 	private final WalletHistoryQueryService walletHistoryQueryService;
 
 	@Override
-	@GetMapping("/calendar")
+	@GetMapping
 	public ApiResponse<AttendanceMonthResponseDto.Response> getMonthStatus(
 		@AuthenticationPrincipal UserDetails userDetails,
 		@RequestParam
