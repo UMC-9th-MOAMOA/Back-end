@@ -35,7 +35,15 @@ public class MissionRepositoryImpl implements MissionRepositoryCustom {
 	private final JPAQueryFactory queryFactory;
 
 	@Override
-	public List<Mission> findTodayRecommendMission(Long memberId, List<Long> interestIds, Integer time) {
+	public List<Mission> findTodayRecommendMission(Long memberId, List<Long> interestIds, Integer time, boolean isRefresh) {
+
+        OrderSpecifier<?>[] sortOrder;
+
+        if(isRefresh){
+            sortOrder = new OrderSpecifier<?>[] { orderByRandom(null) };
+        }else{
+            sortOrder = new OrderSpecifier<?>[] { orderByScrapFirst(), orderByScrapDuration(), orderByRandom(null) };
+        }
 
 		return queryFactory
 			.selectFrom(mission)
@@ -44,16 +52,10 @@ public class MissionRepositoryImpl implements MissionRepositoryCustom {
 				.and(memberMission.member.id.eq(memberId)))
 			.where(
 				mission.missionSubInterests.any().subInterest.interest.id.in(interestIds),
-
 				durationLoe(time),
-
 				isAvailableMission()
 			)
-			.orderBy(
-				orderByScrapFirst(),
-				orderByScrapDuration(),
-				orderByRandom(null)
-			)
+			.orderBy(sortOrder)
 			.limit(5)
 			.fetch();
 	}

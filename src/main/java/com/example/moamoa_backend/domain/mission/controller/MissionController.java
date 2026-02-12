@@ -96,6 +96,7 @@ public class MissionController implements MissionControllerDocs {
 	@GetMapping("/recommend")
 	public ApiResponse<List<MissionResponseDto.RecommendResult>> getTodayRecommendMissions(
 		@RequestParam(required = false) Integer time,
+        @RequestParam(required = false, defaultValue = "false") Boolean isRefresh,
 		@AuthenticationPrincipal UserDetails userDetails
 	) {
 		Long memberId = Long.parseLong(userDetails.getUsername());

@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface MissionRepositoryCustom {
-	List<Mission> findTodayRecommendMission(Long memberId, List<Long> interestIds, Integer time);
+	List<Mission> findTodayRecommendMission(Long memberId, List<Long> interestIds, Integer time, boolean isRefresh);
 
 	Slice<Mission> searchMissions(
 		Long memberId,
