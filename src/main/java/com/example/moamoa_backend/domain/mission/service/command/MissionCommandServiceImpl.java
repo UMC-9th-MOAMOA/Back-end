@@ -438,9 +438,10 @@ public class MissionCommandServiceImpl implements MissionCommandService {
 	private void updateWalletAndSaveHistory(Wallet wallet, Mission mission, TransactionType type, int amount,
 		String description) {
 
-		if (amount > 0) {
-			wallet.addPoint(amount);
-		}
+        if(amount <=0){
+            return;
+        }
+        wallet.addPoint(amount);
 
 		WalletHistory history = WalletHistory.create(
 			wallet,
