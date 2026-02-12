@@ -30,7 +30,9 @@ public class OnboardingService {
 	private final MemberRepository memberRepository;
 	private final MemberSubInterestRepository memberSubInterestRepository;
 	private final SubInterestRepository subInterestRepository;
+
 	private final GoalMaintenanceService goalMaintenanceService;
+
 	private static final ZoneId KST = ZoneId.of("Asia/Seoul");
 
 	/**

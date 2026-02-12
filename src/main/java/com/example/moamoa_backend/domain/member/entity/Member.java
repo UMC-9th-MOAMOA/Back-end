@@ -69,35 +69,25 @@ public class Member extends BaseEntity {
 	@Column(nullable = true)
 	private Integer weeklyGoal;
 
-	/**
-	 * 목표 유지 기간(없으면 null) - 설정 시 종료일 계산에 사용
-	 */
+	//목표 유지 기간(없으면 null) - 설정 시 종료일 계산에 사용
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = true)
 	private GoalRetention goalRetention;
 
-	/**
-	 * 목표 유지 종료일(포함) - 오늘이 이 날짜를 지나면 목표가 만료
-	 */
+	// 목표 유지 종료일(포함) - 오늘이 이 날짜를 지나면 목표가 만료
 	@Column(nullable = true)
 	private LocalDate goalEndDate;
 
-	/**
-	 * 다음 주 적용 대기 중인 목표 값
-	 */
+	//다음 주 적용 대기 중인 목표 값
 	@Column(nullable = true)
 	private Integer pendingDailyGoal;
 
-	/**
-	 * 다음 주 적용 대기 중인 목표 유지 기간
-	 */
+	//다음 주 적용 대기 중인 목표 유지 기간
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = true)
 	private GoalRetention pendingGoalRetention;
 
-	/**
-	 * 다음 주 적용 예정일(월요일)
-	 */
+	//다음 주 적용 예정일(월요일)
 	@Column(nullable = true)
 	private LocalDate pendingApplyDate;
 
@@ -122,6 +112,9 @@ public class Member extends BaseEntity {
 	@Column(nullable = false)
 	@Builder.Default
 	private Boolean policyAgreed = false;
+
+
+	//================도메인 메서드===================
 
 	/**
 	 * 온보딩 완료 처리

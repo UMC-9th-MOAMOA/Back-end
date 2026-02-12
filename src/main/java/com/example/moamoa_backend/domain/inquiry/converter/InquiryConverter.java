@@ -12,44 +12,46 @@ import java.util.List;
 
 public class InquiryConverter {
 
-    private InquiryConverter() {}
+	private InquiryConverter() {
+	}
 
-    public static Inquiry toEntity(Member member, InquiryRequestDTO.Create request, List<String> imageUrls) {
+	public static Inquiry toEntity(Member member, InquiryRequestDTO.Create request, List<String> imageUrls) {
 
-        Inquiry inquiry = Inquiry.builder()
-                .member(member)
-                .category(request.category())
-                .title(request.title())
-                .content(request.content())
-                .isSecret(true)                 // ✅ 항상 비공개
-                .status(InquiryStatus.WAITING)  // ✅ 최초 답변대기
-                .answer(null)
-                .answeredAt(null)
-                .build();
+		Inquiry inquiry = Inquiry.builder()
+			.member(member)
+			.category(request.category())
+			.title(request.title())
+			.content(request.content())
+			.isSecret(true)                 // ✅ 항상 비공개 처리
+			.status(InquiryStatus.WAITING)  // ✅ 최초 답변대기
+			.answer(null)
+			.answeredAt(null)
+			.build();
 
-        if (imageUrls != null && !imageUrls.isEmpty()) {
-            List<InquiryImage> images = new ArrayList<>();
+		if (imageUrls != null && !imageUrls.isEmpty()) {
+			List<InquiryImage> images = new ArrayList<>();
 
-            for (int i = 0; i < imageUrls.size(); i++) {
-                String url = imageUrls.get(i);
-                if (url == null || url.isBlank()) continue;
+			for (int i = 0; i < imageUrls.size(); i++) {
+				String url = imageUrls.get(i);
+				if (url == null || url.isBlank())
+					continue;
 
-                InquiryImage img = InquiryImage.builder()
-                        .imageUrl(url)
-                        .sortOrder(i + 1)
-                        .build();
+				InquiryImage img = InquiryImage.builder()
+					.imageUrl(url)
+					.sortOrder(i + 1)
+					.build();
 
-                img.setInquiry(inquiry);
-                images.add(img);
-            }
+				img.setInquiry(inquiry);
+				images.add(img);
+			}
 
-            inquiry.getInquiryImages().addAll(images);
-        }
+			inquiry.getInquiryImages().addAll(images);
+		}
 
-        return inquiry;
-    }
+		return inquiry;
+	}
 
-    public static InquiryResponseDTO.CreateResult toCreateResult(Inquiry inquiry) {
-        return new InquiryResponseDTO.CreateResult(inquiry.getId(), inquiry.getCreatedAt());
-    }
+	public static InquiryResponseDTO.CreateResult toCreateResult(Inquiry inquiry) {
+		return new InquiryResponseDTO.CreateResult(inquiry.getId(), inquiry.getCreatedAt());
+	}
 }

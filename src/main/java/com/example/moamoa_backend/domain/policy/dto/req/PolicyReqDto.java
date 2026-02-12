@@ -10,22 +10,24 @@ import java.util.List;
  */
 public class PolicyReqDto {
 
-    /**
-     * 약관 동의 목록
-     */
-    public record AgreementListDto(
-            @NotNull
-            List<@Valid @NotNull AgreementDto> agreements
-    ) {}
+	/**
+	 * 약관 동의 목록
+	 */
+	public record AgreementListDto(
+		@NotNull
+		List<@Valid @NotNull AgreementDto> agreements
+	) {
+	}
 
-    /**
-     * 개별 약관 동의
-     */
-    public record AgreementDto(
-            @NotNull(message = "약관 ID는 필수입니다.")
-            Long policyId,
+	/**
+	 * 개별 약관 동의
+	 */
+	public record AgreementDto(
+		@NotNull(message = "약관 ID는 필수입니다.")
+		Long policyId,
 
-            @NotNull(message = "동의 여부는 필수입니다.")
-            Boolean isAgreed
-    ) {}
+		@NotNull(message = "동의 여부는 필수입니다.")
+		Boolean isAgreed
+	) {
+	}
 }

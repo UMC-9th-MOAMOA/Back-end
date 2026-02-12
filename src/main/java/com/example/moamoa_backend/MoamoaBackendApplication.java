@@ -8,8 +8,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class MoamoaBackendApplication {
 
-    public static void main(String[] args) {
-        SpringApplication.run(MoamoaBackendApplication.class, args);
-    }
+	public static void main(String[] args) {
+		SpringApplication.run(MoamoaBackendApplication.class, args);
+	}
 
 }

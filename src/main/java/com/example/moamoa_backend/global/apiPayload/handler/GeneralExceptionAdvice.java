@@ -32,8 +32,12 @@ import java.util.Map;
 @RestControllerAdvice
 public class GeneralExceptionAdvice {
 
+	// =========================================================
+	// 1) 도메인/비즈니스 예외 (커스텀 예외)
+	// =========================================================
+
 	/**
-	 *   GeneralException 처리
+	 * GeneralException 처리
 	 */
 	@ExceptionHandler(GeneralException.class)
 	public ResponseEntity<ApiResponse<Void>> handleGeneralException(GeneralException e) {
@@ -47,7 +51,7 @@ public class GeneralExceptionAdvice {
 	}
 
 	/**
-	 * walletExcetpion 처리
+	 * WalletException 처리
 	 */
 	@ExceptionHandler(WalletException.class)
 	public ResponseEntity<ApiResponse<Map<String, Integer>>> handleWalletException(WalletException e) {
@@ -63,6 +67,10 @@ public class GeneralExceptionAdvice {
 			.body(ApiResponse.onFailure(e.getCode(), result));
 	}
 
+	// =========================================================
+	// 2) 인증/쿠키 관련 예외
+	// =========================================================
+
 	/**
 	 * @CookieValue(required=true) 검증 실패 시 (쿠키 누락)
 	 */
@@ -75,6 +83,10 @@ public class GeneralExceptionAdvice {
 			.status(JwtErrorCode.REFRESH_TOKEN_MISSING.getStatus())
 			.body(ApiResponse.onFailure(JwtErrorCode.REFRESH_TOKEN_MISSING, null));
 	}
+
+	// =========================================================
+	// 3) 요청 파라미터/경로 타입 변환 예외
+	// =========================================================
 
 	/**
 	 * @RequestParam, @PathVariable 등에서 타입 변환 실패할 때 발생
@@ -90,14 +102,14 @@ public class GeneralExceptionAdvice {
 				.body(ApiResponse.onFailure(MemberErrorCode.INVALID_SCOPE, null));
 		}
 
-		//  /items?category=... (ItemCategory enum 파싱 실패)
+		// /items?category=... (ItemCategory enum 파싱 실패)
 		if ("category".equals(e.getName())) {
 			return ResponseEntity
 				.status(ItemErrorCode.ITEM_INVALID_CATEGORY.getStatus())
 				.body(ApiResponse.onFailure(ItemErrorCode.ITEM_INVALID_CATEGORY, null));
 		}
 
-		//  /items?type=... (ItemType enum 파싱 실패)
+		// /items?type=... (ItemType enum 파싱 실패)
 		if ("type".equals(e.getName())) {
 			return ResponseEntity
 				.status(ItemErrorCode.ITEM_INVALID_TYPE.getStatus())
@@ -114,10 +126,13 @@ public class GeneralExceptionAdvice {
 			.body(ApiResponse.onFailure(errorCode, null));
 	}
 
+	// =========================================================
+	// 4) 검증/바인딩 예외 (400 + 필드별 에러 result)
+	// =========================================================
+
 	/**
-	 *   예상하지 못한 모든 예외 처리
+	 * @Valid 검증 실패 (RequestBody DTO)
 	 */
-	// 검증/바인딩 실패는 400으로 내려서 필드별 오류를 result에 담는다.
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<ApiResponse<Map<String, String>>> handleMethodArgumentNotValidException(
 		MethodArgumentNotValidException e) {
@@ -129,6 +144,9 @@ public class GeneralExceptionAdvice {
 			.body(ApiResponse.onFailure(GeneralErrorCode.METHOD_ARGUMENT_NOT_VALID, errors));
 	}
 
+	/**
+	 * 바인딩 실패 (주로 @ModelAttribute, 폼/쿼리 바인딩 등)
+	 */
 	@ExceptionHandler(BindException.class)
 	public ResponseEntity<ApiResponse<Map<String, String>>> handleBindException(BindException e) {
 
@@ -139,6 +157,9 @@ public class GeneralExceptionAdvice {
 			.body(ApiResponse.onFailure(GeneralErrorCode.BINDING_ERROR, errors));
 	}
 
+	/**
+	 * 파라미터 단위 제약 조건 위반 (주로 @RequestParam/@PathVariable 등에 @Min/@NotNull 등)
+	 */
 	@ExceptionHandler(ConstraintViolationException.class)
 	public ResponseEntity<ApiResponse<Map<String, String>>> handleConstraintViolationException(
 		ConstraintViolationException e) {
@@ -156,6 +177,10 @@ public class GeneralExceptionAdvice {
 			.status(GeneralErrorCode.CONSTRAINT_VIOLATION.getStatus())
 			.body(ApiResponse.onFailure(GeneralErrorCode.CONSTRAINT_VIOLATION, errors));
 	}
+
+	// =========================================================
+	// 5) RequestBody 파싱 예외 (JSON 문법/타입 불일치 등)
+	// =========================================================
 
 	@ExceptionHandler(HttpMessageNotReadableException.class)
 	public ResponseEntity<ApiResponse<Map<String, String>>> handleHttpMessageNotReadableException(
@@ -176,6 +201,10 @@ public class GeneralExceptionAdvice {
 			.body(ApiResponse.onFailure(GeneralErrorCode.MESSAGE_NOT_READABLE, errors));
 	}
 
+	// =========================================================
+	// 6) 최종 fallback (예상치 못한 모든 예외)
+	// =========================================================
+
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<ApiResponse<Void>> handleException(Exception e) {
 		BaseErrorCode errorCode = GeneralErrorCode.INTERNAL_SERVER_ERROR;
@@ -187,7 +216,13 @@ public class GeneralExceptionAdvice {
 			.body(ApiResponse.onFailure(errorCode, null));
 	}
 
-	// BindingResult의 FieldError 목록을 field -> message로 정리한다.
+	// =========================================================
+	// Helpers
+	// =========================================================
+
+	/**
+	 * BindingResult의 FieldError 목록을 field -> message로 정리한다.
+	 */
 	private Map<String, String> extractFieldErrors(List<FieldError> fieldErrors) {
 		Map<String, String> errors = new LinkedHashMap<>();
 		for (FieldError fieldError : fieldErrors) {
@@ -200,7 +235,9 @@ public class GeneralExceptionAdvice {
 		return errors;
 	}
 
-	// ConstraintViolation 경로에서 마지막 노드명을 필드로 사용한다.
+	/**
+	 * ConstraintViolation 경로에서 마지막 노드명을 필드로 사용한다.
+	 */
 	private String resolveViolationField(ConstraintViolation<?> violation) {
 		String field = null;
 		Path path = violation.getPropertyPath();
@@ -214,4 +251,3 @@ public class GeneralExceptionAdvice {
 		return field != null ? field : "param";
 	}
 }
-

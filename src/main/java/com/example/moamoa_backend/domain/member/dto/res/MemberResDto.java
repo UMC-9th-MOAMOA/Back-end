@@ -6,25 +6,25 @@ import java.time.LocalDate;
 
 public class MemberResDto {
 
-    public record ProfileResponse(
-            Integer profileImage,
-            String name,
-            String email,
-            LocalDate birthday,
-            String gender,
-            String phoneNumber,
-            String provider
-    ) {
-        public static ProfileResponse from(Member member) {
-            return new ProfileResponse(
-                    member.getProfileImage(),
-                    member.getName(),
-                    member.getEmail(),
-                    member.getBirthday(),
-                    member.getGender() != null ? member.getGender().name() : null,
-                    member.getPhoneNumber(),
-                    member.getProvider().name()
-            );
-        }
-    }
+	public record ProfileResponse(
+		Integer profileImage,
+		String name,
+		String email,
+		LocalDate birthday,
+		String gender,
+		String phoneNumber,
+		String provider
+	) {
+		public static ProfileResponse from(Member member) {
+			return new ProfileResponse(
+				member.getProfileImage(),
+				member.getName(),
+				member.getEmail(),
+				member.getBirthday(),
+				member.getGender() != null ? member.getGender().name() : null,
+				member.getPhoneNumber(),
+				member.getProvider().name()
+			);
+		}
+	}
 }

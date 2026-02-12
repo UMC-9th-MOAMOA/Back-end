@@ -32,16 +32,17 @@ public class HomeService {
 	private final MemberSettingService memberSettingService;
 	private final WalletHistoryQueryService walletHistoryQueryService;
 
-
+	/**
+	 * 홈 조회
+	 */
 	@Transactional
 	public HomeResponseDto getHome(Long memberId) {
 		Member member = memberRepository.findById(memberId)
 			.orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
-		//  변경: 구현된 잔액 조회 서비스 재사용
 		int point = walletHistoryQueryService.getMyPoint(memberId).point();
 
-		//  다시보지않기 체크했으면 false(팝업 안띄움), 없으면 true(띄움)
+		// 다시보지않기 체크
 		boolean shouldShowTutorial = memberSettingService.shouldShowPopup(memberId, TUTORIAL_KEY);
 
 		// EntityGraph로 item까지 함께 로딩 (N+1 방지)

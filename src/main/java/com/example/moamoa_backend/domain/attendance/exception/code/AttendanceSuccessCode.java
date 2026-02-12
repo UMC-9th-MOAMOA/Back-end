@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 public enum AttendanceSuccessCode implements BaseSuccessCode {
 
+    // ============= 200 OK =============
     ATTENDANCE_CHECK_IN_SUCCESS(
             HttpStatus.OK,
             "ATTENDANCE_200_1",
@@ -24,6 +25,7 @@ public enum AttendanceSuccessCode implements BaseSuccessCode {
             "ATTENDANCE_200_3",
             "월별 출석/미션 보상 현황 조회에 성공했습니다."
     );
+
     private final HttpStatus status;
     private final String code;
     private final String message;

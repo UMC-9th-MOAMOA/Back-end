@@ -4,9 +4,10 @@ import java.time.LocalDateTime;
 
 public class InquiryResponseDTO {
 
-    public record CreateResult(
-            Long inquiryId,
-            LocalDateTime createdAt
-    ) {}
+	public record CreateResult(
+		Long inquiryId,
+		LocalDateTime createdAt
+	) {
+	}
 
 }

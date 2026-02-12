@@ -4,6 +4,6 @@ public enum EquipSlot {
 	FACE,
 	TOP,
 	BOTTOM,
-	MISC,        // 잡화는 1개만 착용
+	MISC,        // 잡화는 1개만 착용 가능
 	BACKGROUND
 }

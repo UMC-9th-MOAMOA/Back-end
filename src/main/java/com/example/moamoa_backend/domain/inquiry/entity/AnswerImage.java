@@ -1,6 +1,7 @@
 package com.example.moamoa_backend.domain.inquiry.entity;
 
 import com.example.moamoa_backend.global.entity.BaseEntity;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,17 +13,17 @@ import lombok.*;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class AnswerImage extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "inquiry_id", nullable = false)
-    private Inquiry inquiry;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "inquiry_id", nullable = false)
+	private Inquiry inquiry;
 
-    @Column(nullable = false, length = 1000)
-    private String imageUrl;
+	@Column(nullable = false, length = 1000)
+	private String imageUrl;
 
-    @Column(nullable = false)
-    private Integer sortOrder;
+	@Column(nullable = false)
+	private Integer sortOrder;
 }

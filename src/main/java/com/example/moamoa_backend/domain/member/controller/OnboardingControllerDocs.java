@@ -6,7 +6,6 @@ import com.example.moamoa_backend.domain.member.enums.OnboardingUpdateScope;
 import com.example.moamoa_backend.global.apiPayload.response.ApiResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.validation.Valid;

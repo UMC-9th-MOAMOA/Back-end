@@ -30,7 +30,7 @@ import lombok.NoArgsConstructor;
 	name = "goal_result",
 	uniqueConstraints = @UniqueConstraint(
 		name = "uk_goal_result_member_type_date",
-		columnNames = {"member_id", "goal_type", "goal_date"} // 실제 db 컬럼명으로 고정
+		columnNames = {"member_id", "goal_type", "goal_date"}
 	)
 )
 public class GoalResult extends BaseEntity {
