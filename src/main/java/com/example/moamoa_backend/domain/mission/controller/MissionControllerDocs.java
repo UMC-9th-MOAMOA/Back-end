@@ -44,30 +44,26 @@ public interface MissionControllerDocs {
 		@RequestBody @Valid MissionRequestDto.Create request
 	);
 
-	@Operation(
-		summary = "미션 상세 조회 API",
-		description = """
-			특정 미션의 상세 정보와 퀴즈 데이터를 조회합니다.
-			
-			**[프론트엔드 채점 가이드 (필독)]**
-			유저에게 즉각적인 정답/오답(O/X) 피드백을 주기 위해 quizzes 내부의 **acceptedAnswers** 필드를 사용해주세요.
-			
-			1. **단답형 채점**: 유저가 입력한 답이 **acceptedAnswers** 리스트에 포함되어 있는지 확인합니다.
-			   - 비교 시 **대소문자는 무시(LowerCase 변환)** 하고,
-			   - **모든 공백을 제거(replaceAll)** 해주세요. (예: "달러 수요" == "달러수요")
-			   - (서버에서도 띄어쓰기를 완전히 무시하고 채점합니다.)
-			
-			2. **객관식/OX 채점**: **acceptedAnswers** 리스트의 첫 번째 값과 일치하는지 확인합니다.
-			
-            3. **재시도 로직 (previousCorrectAnswer)**: 미션 재진입 시, 이전에 맞춘 문제는 정답 상태로 보여줍니다.
-                - **값이 있음**: 해당 값으로 UI를 **정답(체크/입력) 상태**로 렌더링해주세요.
-                - **값이 없음**: 틀렸거나 처음 푸는 문제입니다. **초기(빈) 상태**로 렌더링해주세요.
-                          
-			**[Response 필드 설명]**
-			- **isContentWatched**: 영상 시청 완료 여부 (true여야 도전 가능)
-			- **attemptCount**: 현재까지의 시도 횟수
-			"""
-	)
+    @Operation(
+            summary = "미션 상세 조회 API",
+            description = """
+          특정 미션의 상세 정보와 퀴즈 데이터를 조회합니다.
+          
+          **[프론트엔드 처리 가이드]**
+          
+          **1. 실시간 채점 로직 (O/X 피드백)**
+          - **단답형**: 유저 입력값이 acceptedAnswers 리스트에 포함되는지 확인 (대소문자 무시, 공백 제거 필수)
+          - **객관식/OX**: 유저 선택값이 acceptedAnswers의 첫 번째 값과 일치하는지 확인
+          
+          **2. 재시도 로직 (UI 복구)**
+          - **previousCorrectAnswer 값이 있음**: 해당 값으로 UI를 **정답(체크/입력) 상태**로 렌더링
+          - **previousCorrectAnswer 값이 없음(null)**: 틀렸거나 처음 푸는 문제입니다. **초기 상태**로 렌더링
+          
+          **[Response 필드 설명]**
+          - **isContentWatched**: 영상 시청 완료 여부 (true여야 도전 가능)
+          - **attemptCount**: 현재까지의 시도 횟수
+          """
+    )
 	@ApiResponses(value = {
 		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공"),
 		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "MISSION404_1: 해당 미션을 찾을 수 없음")
