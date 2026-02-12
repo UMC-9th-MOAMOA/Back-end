@@ -7,7 +7,7 @@ import lombok.Getter;
 
 @Getter
 public class WalletException extends GeneralException {
-	private final Integer shortfall; //  추가
+	private final Integer shortfall; //부족분
 
 	public WalletException(BaseErrorCode code) {
 		this(code, null);

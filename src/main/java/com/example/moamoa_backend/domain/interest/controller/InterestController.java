@@ -7,6 +7,7 @@ import com.example.moamoa_backend.domain.interest.exception.code.InterestSuccess
 import com.example.moamoa_backend.domain.interest.service.InterestService;
 
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

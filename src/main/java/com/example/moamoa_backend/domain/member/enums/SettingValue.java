@@ -6,5 +6,5 @@ package com.example.moamoa_backend.domain.member.enums;
  * - NEVER_SHOW: 팝업 미표시
  */
 public enum SettingValue {
-    NEVER_SHOW
+	NEVER_SHOW
 }

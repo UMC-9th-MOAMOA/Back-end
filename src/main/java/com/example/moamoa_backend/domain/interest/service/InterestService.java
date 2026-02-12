@@ -7,7 +7,9 @@ import com.example.moamoa_backend.domain.interest.exception.code.InterestErrorCo
 import com.example.moamoa_backend.domain.interest.entity.SubInterest;
 import com.example.moamoa_backend.domain.interest.repository.InterestRepository;
 import com.example.moamoa_backend.domain.interest.repository.SubInterestRepository;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +22,9 @@ public class InterestService {
 	private final InterestRepository interestRepository;
 	private final SubInterestRepository subInterestRepository;
 
+	/**
+	 * 대분류 관심사 조회
+	 */
 	@Transactional(readOnly = true)
 	public List<InterestResponseDto> getInterests() {
 		return interestRepository.findAllByOrderByIdAsc().stream()
@@ -27,6 +32,9 @@ public class InterestService {
 			.toList();
 	}
 
+	/**
+	 * 대분류 관심사에 따른 소분류 관심사 조회
+	 */
 	@Transactional(readOnly = true)
 	public List<SubInterestResponseDto> getSubInterests(Long interestId) {
 

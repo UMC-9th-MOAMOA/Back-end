@@ -12,8 +12,8 @@ public record ItemShopListResponseDto(
 ) {
 	public record ItemShopItemResponseDto(
 		Long itemId,
-		ItemCategory category, //  잡화인지
-		ItemType type,         //  안경/모자/장갑/신발 등 서브타입
+		ItemCategory category, //  잡화인지 확인용
+		ItemType type,         //  안경/모자/장갑/신발 등의 서브타입
 		String name,
 		Integer price,
 		String imageUrl,
@@ -21,5 +21,6 @@ public record ItemShopListResponseDto(
 		boolean owned,
 		boolean equipped,
 		boolean affordable
-	) {}
+	) {
+	}
 }
