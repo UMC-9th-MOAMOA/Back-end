@@ -154,29 +154,37 @@ public interface MissionControllerDocs {
 		@RequestParam String keyword
 	);
 
-	@Operation(
-		summary = "오늘의 추천 미션 리스트 조회 API",
-		description = """
-			유저의 관심사와 자투리 시간(**time**)을 반영하여 맞춤형 미션 5개를 추천합니다.
-			
-			**[추천 로직]**
-			1. **1순위**: 유저가 **찜(SCRAP)** 해둔 미션 (최상단 노출)
-			2. **2순위**: 유저의 **관심사(SubInterest)** 에 맞는 미션
-			3. **필터**: 요청한 시간(**time**) 이하의 미션만 필터링 (미입력 시 전체)
-			
-			**[Response]**
-			- **isScrapped**: 해당 미션을 유저가 찜했는지 여부
-			"""
-	)
+    @Operation(
+            summary = "오늘의 추천 미션 리스트 조회 API",
+            description = """
+           유저의 관심사와 자투리 시간(**time**)을 반영하여 맞춤형 미션 5개를 추천합니다.
+           
+           **[정렬 로직]**
+           1. **기본 진입 (isRefresh=false)**:
+              - **1순위**: 유저가 **찜(SCRAP)** 해둔 미션 (최상단 노출)
+              - **2순위**: 관심사 & 시간 조건에 맞는 미션
+              
+           2. **새로고침 (isRefresh=true)**:
+              - **찜 우선순위 해제**: 찜 여부와 상관없이 **전체 목록을 무작위로 섞어서(Shuffle)** 반환합니다.
+              - (기존의 필터링 조건은 그대로 유지됩니다)
+           
+           **[Response]**
+           - **isScrapped**: 해당 미션을 유저가 찜했는지 여부
+           """
+    )
 	@ApiResponses(value = {
 		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공"),
 		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "MEMBER404_1: 사용자를 찾을 수 없음")
 	})
-	ApiResponse<List<MissionResponseDto.RecommendResult>> getTodayRecommendMissions(
-		@Parameter(description = "여유 시간(분). 이 시간보다 짧거나 같은 미션만 추천됩니다. (입력 안 하면 전체)", example = "10")
-		@RequestParam(required = false) Integer time,
-		@Parameter(hidden = true) UserDetails userDetails
-	);
+    ApiResponse<List<MissionResponseDto.RecommendResult>> getTodayRecommendMissions(
+            @Parameter(description = "여유 시간(분). 이 시간보다 짧거나 같은 미션만 추천됩니다. (입력 안 하면 전체)", example = "10")
+            @RequestParam(required = false) Integer time,
+
+            @Parameter(description = "새로고침 여부 (true면 랜덤 섞기, false면 찜 우선)", example = "false")
+            @RequestParam(required = false, defaultValue = "false") Boolean isRefresh,
+
+            @Parameter(hidden = true) UserDetails userDetails
+    );
 
 	@Operation(
 		summary = "미션 검색 API (키워드/검색어)",

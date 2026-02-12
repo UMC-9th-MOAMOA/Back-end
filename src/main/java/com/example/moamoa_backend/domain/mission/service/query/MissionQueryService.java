@@ -13,7 +13,7 @@ public interface MissionQueryService {
 
 	MissionResponseDto.KeywordListResult getRelatedKeywords(String keyword);
 
-	List<MissionResponseDto.RecommendResult> getTodayRecommendMissions(Long memberId, Integer requestTime);
+	List<MissionResponseDto.RecommendResult> getTodayRecommendMissions(Long memberId, Integer requestTime, Boolean isRefresh);
 
 	MissionResponseDto.SearchResponse searchMissions(
 		Long memberId, String searchText, List<String> keywords, Long seed, Pageable pageable
