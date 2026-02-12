@@ -100,7 +100,7 @@ public class MissionController implements MissionControllerDocs {
 		@AuthenticationPrincipal UserDetails userDetails
 	) {
 		Long memberId = Long.parseLong(userDetails.getUsername());
-		List<MissionResponseDto.RecommendResult> result = missionQueryService.getTodayRecommendMissions(memberId, time);
+		List<MissionResponseDto.RecommendResult> result = missionQueryService.getTodayRecommendMissions(memberId, time,isRefresh);
 
 		return ApiResponse.onSuccess(GeneralSuccessCode.OK, result);
 	}
