@@ -89,7 +89,10 @@ public class MissionResponseDto {
 
 		@Schema(description = "인정 가능한 정답 리스트 (프론트 채점용 - 여기 포함되면 정답 처리)",
 			example = "[\"클럭\", \"Clock\"]")
-		List<String> acceptedAnswers
+		List<String> acceptedAnswers,
+
+        @Schema(description = "이전에 맞춘 정답 (재시도 시 UI 복구용 - 값이 있으면 정답 상태로 렌더링, 없으면 빈 상태)", example = "Clock")
+        String previousCorrectAnswer
 	) {
 	}
 

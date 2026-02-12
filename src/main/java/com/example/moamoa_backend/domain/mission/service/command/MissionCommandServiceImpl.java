@@ -7,9 +7,11 @@ import com.example.moamoa_backend.domain.keyword.enums.KeywordType;
 import com.example.moamoa_backend.domain.keyword.repository.KeywordRepository;
 import com.example.moamoa_backend.domain.member.entity.Member;
 import com.example.moamoa_backend.domain.member.entity.mapping.MemberMission;
+import com.example.moamoa_backend.domain.member.entity.mapping.MemberQuiz;
 import com.example.moamoa_backend.domain.member.exception.MemberException;
 import com.example.moamoa_backend.domain.member.exception.code.MemberErrorCode;
 import com.example.moamoa_backend.domain.member.repository.MemberMissionRepository;
+import com.example.moamoa_backend.domain.member.repository.MemberQuizRepository;
 import com.example.moamoa_backend.domain.member.repository.MemberRepository;
 import com.example.moamoa_backend.domain.mission.converter.MissionConverter;
 import com.example.moamoa_backend.domain.mission.dto.request.MissionRequestDto;
@@ -39,6 +41,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -54,6 +58,7 @@ public class MissionCommandServiceImpl implements MissionCommandService {
 	private final MemberRepository memberRepository;
 	private final WalletHistoryRepository walletHistoryRepository;
 	private final WalletRepository walletRepository;
+    private final MemberQuizRepository memberQuizRepository;
 
 	private final YoutubeUtilService youtubeUtilService;
 
@@ -246,6 +251,10 @@ public class MissionCommandServiceImpl implements MissionCommandService {
 		int earnedScore = 0;
 		boolean isAllCorrect = true;
 
+        Map<Long, MemberQuiz> existingQuizMap = memberQuizRepository.findAllByMemberIdAndMissionId(memberId, missionId)
+                .stream()
+                .collect(Collectors.toMap(mq -> mq.getQuiz().getId(), mq -> mq));
+
 		for (Quiz quiz : quizzes) {
 			String userAnswer = request.submissions().stream()
 				.filter(s -> s.quizId().equals(quiz.getId()))
@@ -274,6 +283,20 @@ public class MissionCommandServiceImpl implements MissionCommandService {
 			} else {
 				isAllCorrect = false;
 			}
+
+            MemberQuiz memberQuiz = existingQuizMap.get(quiz.getId());
+
+            if (memberQuiz == null) {
+                memberQuizRepository.save(MemberQuiz.builder()
+                        .member(member)
+                        .quiz(quiz)
+                        .mission(mission)
+                        .selectedAnswer(userAnswer)
+                        .isCorrect(isCorrect)
+                        .build());
+            } else {
+                memberQuiz.updateResult(userAnswer, isCorrect);
+            }
 		}
 
 		//기록 조회 및 첫 시도 판별
