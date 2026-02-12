@@ -3,9 +3,11 @@ package com.example.moamoa_backend.domain.mission.service.query;
 import com.example.moamoa_backend.domain.keyword.entity.Keyword;
 import com.example.moamoa_backend.domain.keyword.repository.KeywordRepository;
 import com.example.moamoa_backend.domain.member.entity.mapping.MemberMission;
+import com.example.moamoa_backend.domain.member.entity.mapping.MemberQuiz;
 import com.example.moamoa_backend.domain.member.exception.MemberException;
 import com.example.moamoa_backend.domain.member.exception.code.MemberErrorCode;
 import com.example.moamoa_backend.domain.member.repository.MemberMissionRepository;
+import com.example.moamoa_backend.domain.member.repository.MemberQuizRepository;
 import com.example.moamoa_backend.domain.member.repository.MemberRepository;
 import com.example.moamoa_backend.domain.member.repository.MemberSubInterestRepository;
 import com.example.moamoa_backend.domain.mission.converter.MissionConverter;
@@ -40,7 +42,7 @@ public class MissionQueryServiceImpl implements MissionQueryService {
 	private final KeywordRepository keywordRepository;
 	private final MemberRepository memberRepository;
 	private final MemberSubInterestRepository memberSubInterestRepository;
-
+    private final MemberQuizRepository memberQuizRepository;
 	private final MissionConverter missionConverter;
 
 	/**
@@ -54,7 +56,17 @@ public class MissionQueryServiceImpl implements MissionQueryService {
 		MemberMission memberMission = memberMissionRepository.findByMemberIdAndMissionId(memberId, missionId)
 			.orElse(null);
 
-		return missionConverter.toMissionDetail(mission, memberMission);
+        List<MemberQuiz> history = memberQuizRepository.findAllByMemberIdAndMissionId(memberId,missionId);
+
+        Map<Long, String> correctHistoryMap = history.stream()
+                .filter(MemberQuiz::isCorrect)
+                .collect(Collectors.toMap(
+                        mq -> mq.getQuiz().getId(),
+                        MemberQuiz::getSelectedAnswer,
+                        (existing, replacement) -> replacement
+                ));
+
+		return missionConverter.toMissionDetail(mission, memberMission, correctHistoryMap);
 
 	}
 

@@ -71,7 +71,7 @@ public class MissionConverter {
 		return mission;
 	}
 
-	public MissionResponseDto.MissionDetail toMissionDetail(Mission mission, MemberMission memberMission) {
+	public MissionResponseDto.MissionDetail toMissionDetail(Mission mission, MemberMission memberMission, Map<Long, String> correctHistoryMap) {
 		String interestName = "";
 		if (!mission.getMissionSubInterests().isEmpty()) {
 			MissionSubInterest link = mission.getMissionSubInterests().get(0);
@@ -84,7 +84,10 @@ public class MissionConverter {
 
 		List<MissionResponseDto.QuizDetail> quizDtos = mission.getQuizzes()
 			.stream()
-			.map(quiz -> this.toQuizDetail(quiz))
+			.map(quiz -> {
+                String prevAnswer = correctHistoryMap != null ? correctHistoryMap.get(quiz.getId()) : null;
+                return this.toQuizDetail(quiz,prevAnswer);
+            })
 			.collect(Collectors.toList());
 		boolean isWatched = (memberMission != null) && memberMission.isContentWatched();
 		int attemptCount = (memberMission != null) ? memberMission.getAttemptCount() : 0;
@@ -274,7 +277,7 @@ public class MissionConverter {
 		}
 	}
 
-	private MissionResponseDto.QuizDetail toQuizDetail(Quiz quiz) {
+	private MissionResponseDto.QuizDetail toQuizDetail(Quiz quiz, String prevAnswer) {
 		List<String> options = Collections.emptyList();
 
 		if (quiz.getDetailInformation() != null && !quiz.getDetailInformation().isEmpty()) {
@@ -301,6 +304,7 @@ public class MissionConverter {
 			.explanation(quiz.getExplanation())
 			.answer(quiz.getAnswer())
 			.acceptedAnswers(acceptedAnswers)
+                .previousCorrectAnswer(prevAnswer)
 			.build();
 	}
 

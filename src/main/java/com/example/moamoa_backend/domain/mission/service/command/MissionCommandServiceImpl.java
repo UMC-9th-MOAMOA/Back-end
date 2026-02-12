@@ -7,9 +7,11 @@ import com.example.moamoa_backend.domain.keyword.enums.KeywordType;
 import com.example.moamoa_backend.domain.keyword.repository.KeywordRepository;
 import com.example.moamoa_backend.domain.member.entity.Member;
 import com.example.moamoa_backend.domain.member.entity.mapping.MemberMission;
+import com.example.moamoa_backend.domain.member.entity.mapping.MemberQuiz;
 import com.example.moamoa_backend.domain.member.exception.MemberException;
 import com.example.moamoa_backend.domain.member.exception.code.MemberErrorCode;
 import com.example.moamoa_backend.domain.member.repository.MemberMissionRepository;
+import com.example.moamoa_backend.domain.member.repository.MemberQuizRepository;
 import com.example.moamoa_backend.domain.member.repository.MemberRepository;
 import com.example.moamoa_backend.domain.mission.converter.MissionConverter;
 import com.example.moamoa_backend.domain.mission.dto.request.MissionRequestDto;
@@ -54,6 +56,7 @@ public class MissionCommandServiceImpl implements MissionCommandService {
 	private final MemberRepository memberRepository;
 	private final WalletHistoryRepository walletHistoryRepository;
 	private final WalletRepository walletRepository;
+    private final MemberQuizRepository memberQuizRepository;
 
 	private final YoutubeUtilService youtubeUtilService;
 
@@ -274,6 +277,20 @@ public class MissionCommandServiceImpl implements MissionCommandService {
 			} else {
 				isAllCorrect = false;
 			}
+
+            MemberQuiz memberQuiz = memberQuizRepository.findByMemberAndQuiz(member,quiz).orElse(null);
+
+            if(memberQuiz == null) {
+                memberQuizRepository.save(MemberQuiz.builder()
+                                .member(member)
+                                .quiz(quiz)
+                                .mission(mission)
+                                .selectedAnswer(userAnswer)
+                                .isCorrect(isCorrect)
+                        .build());
+            }else{
+                memberQuiz.updateResult(userAnswer,isCorrect);
+            }
 		}
 
 		//기록 조회 및 첫 시도 판별

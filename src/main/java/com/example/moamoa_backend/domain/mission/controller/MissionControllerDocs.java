@@ -59,6 +59,10 @@ public interface MissionControllerDocs {
 			
 			2. **객관식/OX 채점**: **acceptedAnswers** 리스트의 첫 번째 값과 일치하는지 확인합니다.
 			
+            3. **재시도 로직 (previousCorrectAnswer)**: 미션 재진입 시, 이전에 맞춘 문제는 정답 상태로 보여줍니다.
+                - **값이 있음**: 해당 값으로 UI를 **정답(체크/입력) 상태**로 렌더링해주세요.
+                - **값이 없음**: 틀렸거나 처음 푸는 문제입니다. **초기(빈) 상태**로 렌더링해주세요.
+                          
 			**[Response 필드 설명]**
 			- **isContentWatched**: 영상 시청 완료 여부 (true여야 도전 가능)
 			- **attemptCount**: 현재까지의 시도 횟수
