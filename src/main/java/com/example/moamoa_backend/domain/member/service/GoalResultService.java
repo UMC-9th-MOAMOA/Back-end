@@ -48,6 +48,12 @@ public class GoalResultService {
 	 */
 	@Transactional
 	public GoalPopupResponseDto getGoalPopups(Long memberId) {
+		Member member = memberRepository.findById(memberId)
+			.orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+		LocalDate joinedDate = member.getCreatedAt().toLocalDate(); // BaseEntity createdAt 가정
+		LocalDate joinedWeekEnd = joinedDate.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+
 		LocalDate today = LocalDate.now(KST);
 		LocalDate yesterday = today.minusDays(1);
 
@@ -55,28 +61,32 @@ public class GoalResultService {
 
 		List<GoalPopupResponseDto.Popup> popups = new ArrayList<>();
 
-		// 1) DAILY(어제): 실패 + 미노출만 포함
-		GoalResult daily = goalResultRepository
-			.findByMemberIdAndGoalTypeAndGoalDate(memberId, GoalResultType.DAILY, yesterday)
-			.or(() -> createDailyGoalResultIfPossible(memberId, yesterday))
-			.orElse(null);
+		// 1) DAILY(어제): "가입일(포함) 이전"이면 절대 팝업/생성 안 함
+		if (yesterday.isAfter(joinedDate)) {
+			GoalResult daily = goalResultRepository
+				.findByMemberIdAndGoalTypeAndGoalDate(memberId, GoalResultType.DAILY, yesterday)
+				.or(() -> createDailyGoalResultIfPossible(member, yesterday))
+				.orElse(null);
 
-		if (daily != null
-			&& daily.getPopupShownAt() == null
-			&& daily.getStatus() == GoalResultStatus.FAIL) {
-			popups.add(GoalPopupResponseDto.Popup.from(daily));
+			if (daily != null
+				&& daily.getPopupShownAt() == null
+				&& daily.getStatus() == GoalResultStatus.FAIL) {
+				popups.add(GoalPopupResponseDto.Popup.from(daily));
+			}
 		}
 
-		// 2) WEEKLY(지난 주 종료일): 실패 + 미노출만 포함
-		GoalResult weekly = goalResultRepository
-			.findByMemberIdAndGoalTypeAndGoalDate(memberId, GoalResultType.WEEKLY, lastWeekEnd)
-			.or(() -> createWeeklyGoalResultIfPossible(memberId, lastWeekEnd))
-			.orElse(null);
+		// 2) WEEKLY(지난 주 종료일): "가입한 주의 종료일(포함) 이전"이면 팝업/생성 안 함
+		if (lastWeekEnd.isAfter(joinedWeekEnd)) {
+			GoalResult weekly = goalResultRepository
+				.findByMemberIdAndGoalTypeAndGoalDate(memberId, GoalResultType.WEEKLY, lastWeekEnd)
+				.or(() -> createWeeklyGoalResultIfPossible(member, lastWeekEnd))
+				.orElse(null);
 
-		if (weekly != null
-			&& weekly.getPopupShownAt() == null
-			&& weekly.getStatus() == GoalResultStatus.FAIL) {
-			popups.add(GoalPopupResponseDto.Popup.from(weekly));
+			if (weekly != null
+				&& weekly.getPopupShownAt() == null
+				&& weekly.getStatus() == GoalResultStatus.FAIL) {
+				popups.add(GoalPopupResponseDto.Popup.from(weekly));
+			}
 		}
 
 		return new GoalPopupResponseDto(popups);
@@ -97,6 +107,9 @@ public class GoalResultService {
 	/**
 	 * 일간 목표 결과를 일괄 확정한다. (스케줄러용)
 	 * N+1 exists 조회를 피하기 위해, 해당 날짜/타입 결과를 선조회하여 Set으로 비교한다.
+	 *
+	 * 정책:
+	 *   가입일(포함) 이전 날짜(goalDate <= joinedDate)는 생성 스킵 (첫 가입 팝업/데이터 오염 방지)
 	 */
 	@Transactional
 	public void recordDailyResults(LocalDate goalDate) {
@@ -121,6 +134,12 @@ public class GoalResultService {
 		}
 
 		for (Member member : members) {
+			// 가입일(포함) 이전 날짜는 결과 생성 스킵
+			LocalDate joinedDate = member.getCreatedAt().toLocalDate();
+			if (!goalDate.isAfter(joinedDate)) { // goalDate <= joinedDate
+				continue;
+			}
+
 			if (existingMemberIds.contains(member.getId())) {
 				continue; // 이미 존재하면 skip (exists 쿼리 제거)
 			}
@@ -133,6 +152,9 @@ public class GoalResultService {
 	 *
 	 * 입력 날짜가 주중일 수 있으므로, 주차 종료일(SUNDAY)로 정규화하여 처리한다.
 	 * N+1 exists 조회를 피하기 위해, 해당 날짜/타입 결과를 선조회하여 Set으로 비교한다.
+	 *
+	 * 정책:
+	 *   가입한 주의 종료일(포함) 이전(weekEndDate <= joinedWeekEnd)은 생성 스킵 (첫 가입 팝업/데이터 오염 방지)
 	 */
 	@Transactional
 	public void recordWeeklyResults(LocalDate weekEndDate) {
@@ -159,6 +181,13 @@ public class GoalResultService {
 		}
 
 		for (Member member : members) {
+			// 가입한 주의 종료일(포함) 이전은 결과 생성 스킵
+			LocalDate joinedDate = member.getCreatedAt().toLocalDate();
+			LocalDate joinedWeekEnd = joinedDate.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+			if (!weekEndDate.isAfter(joinedWeekEnd)) { // weekEndDate <= joinedWeekEnd
+				continue;
+			}
+
 			if (existingMemberIds.contains(member.getId())) {
 				continue; // 이미 존재하면 skip (exists 쿼리 제거)
 			}
@@ -170,16 +199,20 @@ public class GoalResultService {
 	 * (팝업 조회 경로) 일간 GoalResult가 없을 때, 생성 가능한 조건에서만 FAIL 레코드를 생성한다.
 	 *
 	 * 정책:
-	 *
+	 *   가입일(포함) 이전 날짜(goalDate <= joinedDate)는 생성 금지 (첫 가입 팝업/데이터 오염 방지)
 	 *   member.dailyGoal이 없으면 생성하지 않는다.
 	 *   오늘/미래 날짜는 FAIL 확정 금지 → 어제까지 허용.
 	 *   SUCCESS는 팝업 대상이 아니므로 생성하지 않는다.
 	 *   동시성/중복 insert는 unique 제약 + 재조회로 방어한다.
-	 *
 	 */
-	private Optional<GoalResult> createDailyGoalResultIfPossible(Long memberId, LocalDate goalDate) {
-		Member member = memberRepository.findById(memberId)
-			.orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+	private Optional<GoalResult> createDailyGoalResultIfPossible(Member member, LocalDate goalDate) {
+		Long memberId = member.getId();
+
+		// 가입일(포함) 이전은 생성 금지
+		LocalDate joinedDate = member.getCreatedAt().toLocalDate();
+		if (!goalDate.isAfter(joinedDate)) { // goalDate <= joinedDate
+			return Optional.empty();
+		}
 
 		if (member.getDailyGoal() == null) {
 			return Optional.empty();
@@ -192,7 +225,11 @@ public class GoalResultService {
 		}
 
 		int target = member.getDailyGoal();
-		int achieved = countMissionCompletions(memberId, goalDate.atStartOfDay(), goalDate.plusDays(1).atStartOfDay());
+		int achieved = countMissionCompletions(
+			memberId,
+			goalDate.atStartOfDay(),
+			goalDate.plusDays(1).atStartOfDay()
+		);
 		GoalResultStatus status = achieved >= target ? GoalResultStatus.SUCCESS : GoalResultStatus.FAIL;
 
 		// SUCCESS는 팝업 대상이 아니므로 레코드 생성도 하지 않음
@@ -206,7 +243,11 @@ public class GoalResultService {
 			));
 		} catch (DataIntegrityViolationException e) {
 			// 동시성/중복 insert 방어: 이미 생성된 경우 재조회
-			return goalResultRepository.findByMemberIdAndGoalTypeAndGoalDate(memberId, GoalResultType.DAILY, goalDate);
+			return goalResultRepository.findByMemberIdAndGoalTypeAndGoalDate(
+				memberId,
+				GoalResultType.DAILY,
+				goalDate
+			);
 		}
 	}
 
@@ -214,15 +255,22 @@ public class GoalResultService {
 	 * (팝업 조회 경로) 주간 GoalResult가 없을 때, 생성 가능한 조건에서만 FAIL 레코드를 생성한다.
 	 *
 	 * 정책:
+	 *   가입한 주의 종료일(포함) 이전(weekEndDate <= joinedWeekEnd)은 생성 금지 (첫 가입 팝업/데이터 오염 방지)
 	 *   member.weeklyGoal이 없으면 생성하지 않는다.
 	 *   이번 주는 아직 종료되지 않았으므로 FAIL 확정 금지 → 지난 주 종료일(지난 주 일요일)까지만 허용.
 	 *   SUCCESS는 팝업 대상이 아니므로 생성하지 않는다.
 	 *   동시성/중복 insert는 unique 제약 + 재조회로 방어한다.
-	 *
 	 */
-	private Optional<GoalResult> createWeeklyGoalResultIfPossible(Long memberId, LocalDate weekEndDate) {
-		Member member = memberRepository.findById(memberId)
-			.orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+	private Optional<GoalResult> createWeeklyGoalResultIfPossible(Member member, LocalDate weekEndDate) {
+		Long memberId = member.getId();
+		weekEndDate = resolveWeekEnd(weekEndDate);
+
+		// 가입한 주의 종료일(포함) 이전은 생성 금지
+		LocalDate joinedDate = member.getCreatedAt().toLocalDate();
+		LocalDate joinedWeekEnd = joinedDate.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+		if (!weekEndDate.isAfter(joinedWeekEnd)) { // weekEndDate <= joinedWeekEnd
+			return Optional.empty();
+		}
 
 		if (member.getWeeklyGoal() == null) {
 			return Optional.empty();
