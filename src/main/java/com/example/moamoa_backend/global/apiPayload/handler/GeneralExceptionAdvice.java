@@ -1,5 +1,6 @@
 package com.example.moamoa_backend.global.apiPayload.handler;
 
+import com.example.moamoa_backend.domain.inquiry.exception.code.InquiryErrorCode;
 import com.example.moamoa_backend.global.apiPayload.code.BaseErrorCode;
 import com.example.moamoa_backend.global.apiPayload.code.GeneralErrorCode;
 import com.example.moamoa_backend.global.apiPayload.exception.GeneralException;
@@ -14,6 +15,7 @@ import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Path;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -250,4 +253,19 @@ public class GeneralExceptionAdvice {
 		}
 		return field != null ? field : "param";
 	}
+
+	@ExceptionHandler(MaxUploadSizeExceededException.class)
+	public ResponseEntity<ApiResponse<Void>> handleMaxSizeException(
+			MaxUploadSizeExceededException e) {
+
+		return ResponseEntity
+				.status(HttpStatus.BAD_REQUEST)
+				.body(ApiResponse.onFailure(
+						InquiryErrorCode.FILE_SIZE_EXCEEDED,
+						null
+				));
+	}
 }
+
+
+
