@@ -22,6 +22,12 @@ public enum InquiryErrorCode implements BaseErrorCode {
 		"INQUIRY400_2",
 		"답변 이미지는 최대 5개까지 업로드할 수 있습니다."),
 
+	FILE_SIZE_EXCEEDED(
+			HttpStatus.BAD_REQUEST,
+			"INQUIRY400_5",
+			"파일 크기는 10MB를 초과할 수 없습니다."
+	),
+
 	// ============= 403 Forbidden =============
 	TERMS_NOT_AGREED(
 		HttpStatus.FORBIDDEN,

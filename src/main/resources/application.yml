@@ -9,6 +9,12 @@ spring:
   application:
     name: MOAMOA_Backend
 
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 50MB
+
 #==============Flyway==============
   flyway:
     enabled: true
