@@ -35,7 +35,7 @@ public enum MemberErrorCode implements BaseErrorCode {
 	ONBOARDING_GOAL_OUT_OF_RANGE(
 		HttpStatus.BAD_REQUEST,
 		"ONBOARDING400_4",
-		"일일 목표는 0~5 사이여야 합니다."
+		"일일 목표는 1~5 사이여야 합니다."
 	),
 
 	ONBOARDING_GOAL_RETENTION_INVALID(

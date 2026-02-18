@@ -21,31 +21,39 @@ import jakarta.persistence.LockModeType;
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
 	Optional<Member> findByProviderAndProviderId(Provider provider, String providerId);
-    List<Member> findByStatusAndDeletedAtBefore(MemberStatus status, LocalDateTime dateTime);
+
+	List<Member> findByStatusAndDeletedAtBefore(MemberStatus status, LocalDateTime dateTime);
 
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
 	@Query("select m from Member m where m.id = :memberId")
 	Optional<Member> findByIdForUpdate(@Param("memberId") Long memberId);
 
 	@Query("""
-		select m
-		from Member m
-		where (m.pendingApplyDate is not null and m.pendingApplyDate <= :today)
-		   or (m.goalEndDate is not null and m.goalEndDate < :today)
+		    select m.id
+		    from Member m
+		    where m.status = com.example.moamoa_backend.domain.member.enums.MemberStatus.ACTIVE
+		      and (
+		            (m.pendingApplyDate is not null and m.pendingApplyDate <= :today)
+		         or (m.goalEndDate is not null and m.goalEndDate < :today)
+		      )
 		""")
-	List<Member> findMembersForGoalUpdate(LocalDate today);
+	List<Long> findMemberIdsForGoalUpdate(@Param("today") LocalDate today);
 
 	@Query("""
-		select m
-		from Member m
-		where m.dailyGoal is not null
+		    select m
+		    from Member m
+		    where m.status = com.example.moamoa_backend.domain.member.enums.MemberStatus.ACTIVE
+		      and m.dailyGoal is not null
+			  and m.dailyGoal > 0
 		""")
 	List<Member> findMembersWithDailyGoal();
 
 	@Query("""
-		select m
-		from Member m
-		where m.weeklyGoal is not null
+		    select m
+		    from Member m
+		    where m.status = com.example.moamoa_backend.domain.member.enums.MemberStatus.ACTIVE
+		      and m.weeklyGoal is not null
+			  and m.weeklyGoal > 0
 		""")
 	List<Member> findMembersWithWeeklyGoal();
 
@@ -57,9 +65,9 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
 	boolean existsByIdAndPolicyAgreedTrue(Long id);
 
-    /**
-     * 레거시
-     */
+	/**
+	 * 레거시
+	 */
 	@Deprecated(forRemoval = true)
 	boolean existsByEmailAndProvider(String email, Provider provider);
 

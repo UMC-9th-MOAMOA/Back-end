@@ -5,13 +5,16 @@ import java.util.List;
 import com.example.moamoa_backend.domain.member.enums.GoalRetention;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 
 public record OnboardingPatchRequestDto(
 	@Valid
 	List<Selection> selections,   // scope=INTERESTS/ALL에서 사용 (GOAL에서는 null 허용)
 	Boolean goalEnabled,         // 추가: true/false/null(미전달)
 
-	Integer dailyMissionGoal,     // 0~5 또는 null(OFF/나중에 설정)
+	@Min(1) @Max(5)
+	Integer dailyMissionGoal,     // 1~5 또는 null(OFF/나중에 설정)
 	GoalRetention goalRetention   // null 가능 (goalEnabled=true면 daily 없이 retention-only 가능)
 ) {
 	public record Selection(

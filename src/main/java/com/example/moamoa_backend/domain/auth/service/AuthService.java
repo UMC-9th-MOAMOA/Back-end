@@ -4,6 +4,7 @@ import com.example.moamoa_backend.domain.auth.dto.req.AuthReqDto;
 import com.example.moamoa_backend.domain.auth.dto.res.AuthResDto;
 import com.example.moamoa_backend.domain.auth.exception.AuthException;
 import com.example.moamoa_backend.domain.auth.exception.code.AuthErrorCode;
+import com.example.moamoa_backend.domain.member.service.GoalMaintenanceService;
 import com.example.moamoa_backend.global.security.jwt.JwtUtil;
 import com.example.moamoa_backend.global.security.jwt.exception.JwtException;
 import com.example.moamoa_backend.global.security.jwt.exception.code.JwtErrorCode;
@@ -30,6 +31,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.UUID;
 
 @Slf4j
@@ -48,6 +51,7 @@ public class AuthService {
 
 	private final PolicyService policyService;
 	private final WalletCommandService walletCommandService;
+	private final GoalMaintenanceService goalMaintenanceService;
 
 	// 이메일과 보안코드 저장 관련 (예)AuthCode:moamoa@gmail.com : 123456
 	private static final String AUTH_CODE_PREFIX = "AuthCode:";
@@ -523,6 +527,10 @@ public class AuthService {
 
 		// 4. 상태 변경
 		member.activate();
+		goalMaintenanceService.applyGoalStateIfNeeded(
+			member,
+			LocalDate.now(ZoneId.of("Asia/Seoul"))
+		);
 
 		// 5. 토큰 발급
 		return generateTokens(member.getId(), member.getRole());

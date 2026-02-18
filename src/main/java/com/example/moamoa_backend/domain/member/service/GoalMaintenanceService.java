@@ -2,11 +2,8 @@ package com.example.moamoa_backend.domain.member.service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.temporal.TemporalAdjusters;
-import java.util.List;
 
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,46 +17,29 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class GoalMaintenanceService {
 
-	private static final ZoneId KST = ZoneId.of("Asia/Seoul");
-
 	private final MemberRepository memberRepository;
-	private final GoalResultService goalResultService;
+
+	// 스케줄러/복구용 (memberId로 호출)
+	@Transactional
+	public void applyGoalStateIfNeeded(Long memberId, LocalDate today) {
+		Member member = memberRepository.findById(memberId).orElse(null);
+		if (member == null)
+			return;
+
+		applyGoalStateIfNeeded(member, today); // 아래 공통 로직 호출
+	}
 
 	/**
 	 * 목표 상태(예약 적용/만료)를 즉시 반영.
 	 * 로그인/온보딩 조회 등 사용자 요청 시점에도 호출하는 용도.
 	 */
-	@Transactional
 	public void applyGoalStateIfNeeded(Member member, LocalDate today) {
+
+		if (member == null)
+			return;
+
 		applyPendingIfDue(member, today);
 		expireGoalIfNeeded(member, today);
-	}
-
-	/**
-	 * 하루 마감 직후(00:01 KST)에 전일/전주 결과 확정 및 목표 상태를 반영.
-	 *  전일 DAILY 결과 확정
-	 *  월요일이면 전주 종료(일요일) WEEKLY 결과 확정
-	 *  예약 적용/만료 대상 멤버를 조회하여 목표 상태 반영
-	 *
-	 */
-	@Transactional
-	@Scheduled(cron = "0 1 0 * * *", zone = "Asia/Seoul")
-	public void processDueGoals() {
-		LocalDate today = LocalDate.now(KST);
-
-		// 1) 전일 DAILY 목표 결과 확정
-		goalResultService.recordDailyResults(today.minusDays(1));
-
-		// 2) 월요일이면 전주(일요일 종료) WEEKLY 목표 결과 확정
-		if (today.getDayOfWeek() == DayOfWeek.MONDAY) {
-			goalResultService.recordWeeklyResults(today.minusDays(1));
-		}
-
-		// 3) 예약 적용/만료 목표 반영
-		List<Member> members = memberRepository.findMembersForGoalUpdate(today);
-		for (Member member : members) {
-			applyGoalStateIfNeeded(member, today);
-		}
 	}
 
 	/**
