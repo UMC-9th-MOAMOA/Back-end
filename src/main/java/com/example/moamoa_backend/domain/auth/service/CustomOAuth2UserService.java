@@ -89,7 +89,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 			if (member.getStatus() == MemberStatus.WITHDRAWN) {
 				member.activate();
 				goalMaintenanceService.applyGoalStateIfNeeded(
-					member.getId(),
+					member,
 					LocalDate.now(ZoneId.of("Asia/Seoul"))
 				);
 			}

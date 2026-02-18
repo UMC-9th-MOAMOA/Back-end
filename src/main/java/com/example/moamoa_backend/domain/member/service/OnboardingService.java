@@ -52,7 +52,7 @@ public class OnboardingService {
 			.orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 		LocalDate today = LocalDate.now(KST);
 		// 요청 시점에 예약 적용/만료를 우선 반영
-		goalMaintenanceService.applyGoalStateIfNeeded(memberId, today);
+		goalMaintenanceService.applyGoalStateIfNeeded(member, today);
 
 		return switch (scope) {
 			case ALL -> {
@@ -129,7 +129,7 @@ public class OnboardingService {
 		Member member = memberRepository.findById(memberId)
 			.orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 		// 조회 시점에도 목표 상태를 최신으로 맞춘다.
-		goalMaintenanceService.applyGoalStateIfNeeded(memberId, LocalDate.now(KST));
+		goalMaintenanceService.applyGoalStateIfNeeded(member, LocalDate.now(KST));
 
 		return switch (scope) {
 			case ALL -> toOnboardingResponse(loadSelections(memberId), member);

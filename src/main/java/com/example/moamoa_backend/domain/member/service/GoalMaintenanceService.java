@@ -19,13 +19,22 @@ public class GoalMaintenanceService {
 
 	private final MemberRepository memberRepository;
 
+	// 스케줄러/복구용 (memberId로 호출)
+	@Transactional
+	public void applyGoalStateIfNeeded(Long memberId, LocalDate today) {
+		Member member = memberRepository.findById(memberId).orElse(null);
+		if (member == null)
+			return;
+
+		applyGoalStateIfNeeded(member, today); // 아래 공통 로직 호출
+	}
+
 	/**
 	 * 목표 상태(예약 적용/만료)를 즉시 반영.
 	 * 로그인/온보딩 조회 등 사용자 요청 시점에도 호출하는 용도.
 	 */
-	@Transactional
-	public void applyGoalStateIfNeeded(Long memberId, LocalDate today) {
-		Member member = memberRepository.findById(memberId).orElse(null);
+	public void applyGoalStateIfNeeded(Member member, LocalDate today) {
+
 		if (member == null)
 			return;
 

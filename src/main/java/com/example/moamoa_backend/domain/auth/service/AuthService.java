@@ -528,10 +528,10 @@ public class AuthService {
 		// 4. 상태 변경
 		member.activate();
 		goalMaintenanceService.applyGoalStateIfNeeded(
-			member.getId(),
+			member,
 			LocalDate.now(ZoneId.of("Asia/Seoul"))
 		);
-		
+
 		// 5. 토큰 발급
 		return generateTokens(member.getId(), member.getRole());
 	}
