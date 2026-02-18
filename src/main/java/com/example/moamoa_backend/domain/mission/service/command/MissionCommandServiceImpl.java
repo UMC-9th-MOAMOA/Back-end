@@ -386,12 +386,6 @@ public class MissionCommandServiceImpl implements MissionCommandService {
 			memberMission.changeMissionStatus(MissionStatus.SUCCESS);
 		}
 
-		// --- 목표 달성 체크 ---
-        // [수정 전 코드 위치]
-// // --- 목표 달성 체크 --- 그 아래 끝까지
-
-// ▼▼▼ 이렇게 교체하세요 ▼▼▼
-// --- 목표 달성 체크 ---
         int earnedGoalReward = 0;
         boolean isDailyGoalAchievedNow = false;
         boolean isWeeklyGoalAchievedNow = false;
