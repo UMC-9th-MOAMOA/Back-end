@@ -290,6 +290,8 @@ public class MissionCommandServiceImpl implements MissionCommandService {
                 } else {
                     earnedScore += missionConverter.getRewardByType(quiz.getType());
                 }
+            } else {
+                isAllCorrect = false;
             }
 // 데모데이 후 아래 코드로 변경.
 //			if (isCorrect) {
@@ -365,9 +367,9 @@ public class MissionCommandServiceImpl implements MissionCommandService {
 				earnedScore,
 				0,
 				(int)currentDailyCount,
-				(member.getDailyGoal() != null && currentDailyCount >= member.getDailyGoal()),
+                false,
 				(int)currentWeeklyCount,
-				(member.getWeeklyGoal() != null && currentWeeklyCount >= member.getWeeklyGoal())
+                false
 			);
 		}
 
@@ -385,52 +387,59 @@ public class MissionCommandServiceImpl implements MissionCommandService {
 		}
 
 		// --- 목표 달성 체크 ---
-		int earnedGoalReward = 0;
+        // [수정 전 코드 위치]
+// // --- 목표 달성 체크 --- 그 아래 끝까지
 
-		long dailyCount = countMissionCompleteBetween(memberId, today, tomorrow);
-		long weeklyCount = countMissionCompleteBetween(memberId, thisMonday, tomorrow);
+// ▼▼▼ 이렇게 교체하세요 ▼▼▼
+// --- 목표 달성 체크 ---
+        int earnedGoalReward = 0;
+        boolean isDailyGoalAchievedNow = false;
+        boolean isWeeklyGoalAchievedNow = false;
 
-		if(member.getDailyGoal()!=null && dailyCount >= member.getDailyGoal()){
+        long dailyCount = countMissionCompleteBetween(memberId, today, tomorrow);
+        long weeklyCount = countMissionCompleteBetween(memberId, thisMonday, tomorrow);
 
-            //이미 오늘 목표 보상 받았는지
+        if(member.getDailyGoal() != null && dailyCount >= member.getDailyGoal()){
             boolean alreadyDailyRewarded = walletHistoryRepository.countByMemberAndTypeBetween(
-                    memberId,
-                    TransactionType.DAILY_REWARD,
-                    today.atStartOfDay(),
-                    tomorrow.atStartOfDay()
-                    )>0;
+                    memberId, TransactionType.DAILY_REWARD, today.atStartOfDay(), tomorrow.atStartOfDay()
+            ) > 0;
 
             if(!alreadyDailyRewarded){
                 int reward = member.getDailyGoal() * 5;
                 earnedGoalReward += reward;
-                updateWalletAndSaveHistory(wallet,null,TransactionType.DAILY_REWARD,reward,"일간 목표 달성");
+                updateWalletAndSaveHistory(wallet, null, TransactionType.DAILY_REWARD, reward, "일간 목표 달성");
+
+                isDailyGoalAchievedNow = true;
             }
         }
+
         if (member.getWeeklyGoal() != null && weeklyCount >= member.getWeeklyGoal()) {
-            // 이미 이번 주 주간 보상을 받았는지 확인
             boolean alreadyWeeklyRewarded = walletHistoryRepository.countByMemberAndTypeBetween(
-                    memberId,
-                    TransactionType.WEEKLY_REWARD,
-                    thisMonday.atStartOfDay(),
-                    tomorrow.atStartOfDay()
+                    memberId, TransactionType.WEEKLY_REWARD, thisMonday.atStartOfDay(), tomorrow.atStartOfDay()
             ) > 0;
 
             if (!alreadyWeeklyRewarded) {
                 int reward = member.getWeeklyGoal() * 10;
                 earnedGoalReward += reward;
                 updateWalletAndSaveHistory(wallet, null, TransactionType.WEEKLY_REWARD, reward, "주간 목표 달성");
+
+                isWeeklyGoalAchievedNow = true;
             }
         }
 
-		if (earnedGoalReward > 0)
-			walletHistoryRepository.flush();
+        if (earnedGoalReward > 0) {
+            walletHistoryRepository.flush();
+        }
 
-		return missionConverter.toSubmitResult(
-			true, finalMissionReward, earnedGoalReward,
-			(int)dailyCount, (member.getDailyGoal() != null && dailyCount >= member.getDailyGoal()),
-			(int)weeklyCount, (member.getWeeklyGoal() != null && weeklyCount >= member.getWeeklyGoal())
-		);
-
+        return missionConverter.toSubmitResult(
+                true,
+                finalMissionReward,
+                earnedGoalReward,
+                (int)dailyCount,
+                isDailyGoalAchievedNow,
+                (int)weeklyCount,
+                isWeeklyGoalAchievedNow
+        );
 	}
 
 	// [신규 생성] 기록이 아예 없을 때
