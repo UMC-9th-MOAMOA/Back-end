@@ -1,6 +1,7 @@
 package com.example.moamoa_backend.domain.member.repository;
 
 import com.example.moamoa_backend.domain.member.entity.Member;
+import com.example.moamoa_backend.domain.member.enums.MemberStatus;
 import com.example.moamoa_backend.domain.member.enums.Provider;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,6 +21,7 @@ import jakarta.persistence.LockModeType;
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
 	Optional<Member> findByProviderAndProviderId(Provider provider, String providerId);
+    List<Member> findByStatusAndDeletedAtBefore(MemberStatus status, LocalDateTime dateTime);
 
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
 	@Query("select m from Member m where m.id = :memberId")
