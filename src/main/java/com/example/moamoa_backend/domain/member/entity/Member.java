@@ -226,6 +226,18 @@ public class Member extends BaseEntity {
 		this.gender = gender;
 	}
 
+    public void anonymize() {
+        this.email = null;
+        this.password = null;
+        this.name = "탈퇴회원";
+        this.providerId = "DELETED_" + this.id;
+        this.phoneNumber = null;
+        this.gender = null;
+        this.birthday = null;
+        this.status = MemberStatus.ANONYMIZED;
+        this.turnOffGoals();
+    }
+
 	/**
 	 * (레거시) 월요일에만 전체 목표(daily+weekly)를 한 번에 적용할 때 사용.
 	 * startDate는 반드시 월요일이어야 한다.
