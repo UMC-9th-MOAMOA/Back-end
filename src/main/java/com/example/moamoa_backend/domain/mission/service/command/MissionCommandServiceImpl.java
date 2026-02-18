@@ -393,7 +393,7 @@ public class MissionCommandServiceImpl implements MissionCommandService {
         long dailyCount = countMissionCompleteBetween(memberId, today, tomorrow);
         long weeklyCount = countMissionCompleteBetween(memberId, thisMonday, tomorrow);
 
-        if(member.getDailyGoal() != null && dailyCount >= member.getDailyGoal()){
+        if(member.getDailyGoal() != null && member.getDailyGoal() > 0 && dailyCount >= member.getDailyGoal()){
             boolean alreadyDailyRewarded = walletHistoryRepository.countByMemberAndTypeBetween(
                     memberId, TransactionType.DAILY_REWARD, today.atStartOfDay(), tomorrow.atStartOfDay()
             ) > 0;
@@ -407,7 +407,7 @@ public class MissionCommandServiceImpl implements MissionCommandService {
             }
         }
 
-        if (member.getWeeklyGoal() != null && weeklyCount >= member.getWeeklyGoal()) {
+        if (member.getWeeklyGoal() != null && member.getWeeklyGoal() > 0 && weeklyCount >= member.getWeeklyGoal()) {
             boolean alreadyWeeklyRewarded = walletHistoryRepository.countByMemberAndTypeBetween(
                     memberId, TransactionType.WEEKLY_REWARD, thisMonday.atStartOfDay(), tomorrow.atStartOfDay()
             ) > 0;
