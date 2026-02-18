@@ -4,6 +4,7 @@ import com.example.moamoa_backend.domain.auth.dto.oauth.OAuthAttributes;
 import com.example.moamoa_backend.domain.member.entity.Member;
 import com.example.moamoa_backend.domain.member.enums.MemberStatus;
 import com.example.moamoa_backend.domain.member.repository.MemberRepository;
+import com.example.moamoa_backend.domain.member.service.GoalMaintenanceService;
 import com.example.moamoa_backend.domain.wallet.service.command.WalletCommandService;
 
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,8 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,6 +38,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
 	private final MemberRepository memberRepository;
 	private final WalletCommandService walletCommandService;
+	private final GoalMaintenanceService goalMaintenanceService;
 
 	@Override
 	@Transactional
@@ -84,6 +88,10 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 			// WITHDRAWN 상태 재로그인 시 자동 복구
 			if (member.getStatus() == MemberStatus.WITHDRAWN) {
 				member.activate();
+				goalMaintenanceService.applyGoalStateIfNeeded(
+					member.getId(),
+					LocalDate.now(ZoneId.of("Asia/Seoul"))
+				);
 			}
 			return member;
 		}

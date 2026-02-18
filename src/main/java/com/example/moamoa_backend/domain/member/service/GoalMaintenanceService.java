@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.moamoa_backend.domain.member.entity.Member;
 import com.example.moamoa_backend.domain.member.enums.GoalRetention;
+import com.example.moamoa_backend.domain.member.repository.MemberRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -16,12 +17,18 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class GoalMaintenanceService {
 
+	private final MemberRepository memberRepository;
+
 	/**
 	 * 목표 상태(예약 적용/만료)를 즉시 반영.
 	 * 로그인/온보딩 조회 등 사용자 요청 시점에도 호출하는 용도.
 	 */
 	@Transactional
-	public void applyGoalStateIfNeeded(Member member, LocalDate today) {
+	public void applyGoalStateIfNeeded(Long memberId, LocalDate today) {
+		Member member = memberRepository.findById(memberId).orElse(null);
+		if (member == null)
+			return;
+
 		applyPendingIfDue(member, today);
 		expireGoalIfNeeded(member, today);
 	}

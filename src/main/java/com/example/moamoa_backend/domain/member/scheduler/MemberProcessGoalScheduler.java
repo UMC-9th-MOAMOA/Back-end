@@ -15,7 +15,9 @@ import com.example.moamoa_backend.domain.member.service.GoalMaintenanceService;
 import com.example.moamoa_backend.domain.member.service.GoalResultService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class MemberProcessGoalScheduler {
@@ -33,23 +35,37 @@ public class MemberProcessGoalScheduler {
 	 *  예약 적용/만료 대상 멤버를 조회하여 목표 상태 반영
 	 *
 	 */
-	@Transactional
 	@Scheduled(cron = "0 1 0 * * *", zone = "Asia/Seoul")
 	public void processDueGoals() {
 		LocalDate today = LocalDate.now(KST);
 
 		// 1) 전일 DAILY 목표 결과 확정
-		goalResultService.recordDailyResults(today.minusDays(1));
+		LocalDate dailyDate = today.minusDays(1);
+		try {
+			goalResultService.recordDailyResults(dailyDate);
+		} catch (Exception e) {
+			log.error("DAILY 결과 확정 실패 goalDate={}", dailyDate, e);
+		}
 
 		// 2) 월요일이면 전주(일요일 종료) WEEKLY 목표 결과 확정
+
 		if (today.getDayOfWeek() == DayOfWeek.MONDAY) {
-			goalResultService.recordWeeklyResults(today.minusDays(1));
+			LocalDate baseDate = today.minusDays(1); // 일요일
+			try {
+				goalResultService.recordWeeklyResults(baseDate);
+			} catch (Exception e) {
+				log.error("WEEKLY 결과 확정 실패 baseDate={}", baseDate, e);
+			}
 		}
 
 		// 3) 예약 적용/만료 목표 반영
-		List<Member> members = memberRepository.findMembersForGoalUpdate(today);
-		for (Member member : members) {
-			goalMaintenanceService.applyGoalStateIfNeeded(member, today);
+		List<Long> memberIds = memberRepository.findMemberIdsForGoalUpdate(today);
+		for (Long memberId : memberIds) {
+			try {
+				goalMaintenanceService.applyGoalStateIfNeeded(memberId, today);
+			} catch (Exception e) {
+				log.error("목표 상태 반영 실패 memberId={}", memberId, e);
+			}
 		}
 	}
 }

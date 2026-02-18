@@ -29,7 +29,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 	Optional<Member> findByIdForUpdate(@Param("memberId") Long memberId);
 
 	@Query("""
-		    select m
+		    select m.id
 		    from Member m
 		    where m.status = com.example.moamoa_backend.domain.member.enums.MemberStatus.ACTIVE
 		      and (
@@ -37,7 +37,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 		         or (m.goalEndDate is not null and m.goalEndDate < :today)
 		      )
 		""")
-	List<Member> findMembersForGoalUpdate(@Param("today") LocalDate today);
+	List<Long> findMemberIdsForGoalUpdate(@Param("today") LocalDate today);
 
 	@Query("""
 		    select m
