@@ -150,7 +150,7 @@ public class OnboardingService {
 	}
 
 	private void validateGoalRange(Integer goal) {
-		if (goal < 0 || goal > 5) {
+		if (goal < 1 || goal > 5) {
 			throw new MemberException(MemberErrorCode.ONBOARDING_GOAL_OUT_OF_RANGE);
 		}
 	}

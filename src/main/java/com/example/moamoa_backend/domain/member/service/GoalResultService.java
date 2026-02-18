@@ -26,7 +26,9 @@ import com.example.moamoa_backend.domain.wallet.enums.TransactionType;
 import com.example.moamoa_backend.domain.wallet.repository.WalletHistoryRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class GoalResultService {
@@ -143,7 +145,12 @@ public class GoalResultService {
 			if (existingMemberIds.contains(member.getId())) {
 				continue; // 이미 존재하면 skip (exists 쿼리 제거)
 			}
-			createDailyGoalResult(member, goalDate);
+			try {
+				createDailyGoalResult(member, goalDate);
+			} catch (Exception e) {
+				log.error("DAILY GoalResult 생성 실패 memberId={} goalDate={} dailyGoal={}",
+					member.getId(), goalDate, member.getDailyGoal(), e);
+			}
 		}
 	}
 
@@ -191,7 +198,12 @@ public class GoalResultService {
 			if (existingMemberIds.contains(member.getId())) {
 				continue; // 이미 존재하면 skip (exists 쿼리 제거)
 			}
-			createWeeklyGoalResult(member, weekEndDate);
+			try {
+				createWeeklyGoalResult(member, weekEndDate);
+			} catch (Exception e) {
+				log.error("WEEKLY GoalResult 생성 실패 memberId={} weekEndDate={} weeklyGoal={}",
+					member.getId(), weekEndDate, member.getWeeklyGoal(), e);
+			}
 		}
 	}
 
@@ -214,7 +226,7 @@ public class GoalResultService {
 			return Optional.empty();
 		}
 
-		if (member.getDailyGoal() == null) {
+		if (member.getDailyGoal() == null || member.getDailyGoal() <= 0) {
 			return Optional.empty();
 		}
 
@@ -272,7 +284,7 @@ public class GoalResultService {
 			return Optional.empty();
 		}
 
-		if (member.getWeeklyGoal() == null) {
+		if (member.getWeeklyGoal() == null || member.getWeeklyGoal() <= 0) {
 			return Optional.empty();
 		}
 
