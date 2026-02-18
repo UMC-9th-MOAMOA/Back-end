@@ -214,7 +214,7 @@ public class GoalResultService {
 			return Optional.empty();
 		}
 
-		if (member.getDailyGoal() == null) {
+		if (member.getDailyGoal() == null || member.getDailyGoal() <= 0) {
 			return Optional.empty();
 		}
 
@@ -272,7 +272,7 @@ public class GoalResultService {
 			return Optional.empty();
 		}
 
-		if (member.getWeeklyGoal() == null) {
+		if (member.getWeeklyGoal() == null || member.getWeeklyGoal() <= 0) {
 			return Optional.empty();
 		}
 
