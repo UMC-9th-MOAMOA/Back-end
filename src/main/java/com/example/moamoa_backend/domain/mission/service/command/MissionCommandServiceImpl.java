@@ -282,9 +282,9 @@ public class MissionCommandServiceImpl implements MissionCommandService {
                 // [부스 미션 특수 배점 적용]
                 if (missionId == 140L) {
                     earnedScore += switch (quiz.getType()) {
-                        case OX -> 100;
-                        case MULTIPLE -> 200;
-                        case SHORT -> 300;
+                        case OX -> 2000;
+                        case MULTIPLE -> 3000;
+                        case SHORT -> 5000;
                         default -> missionConverter.getRewardByType(quiz.getType());
                     };
                 } else {
