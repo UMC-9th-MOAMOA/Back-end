@@ -278,27 +278,11 @@ public class MissionCommandServiceImpl implements MissionCommandService {
 				}
 			}
 
-            if (isCorrect) {
-                // [부스 미션 특수 배점 적용]
-                if (missionId == 140L) {
-                    earnedScore += switch (quiz.getType()) {
-                        case OX -> 2000;
-                        case MULTIPLE -> 3000;
-                        case SHORT -> 5000;
-                        default -> missionConverter.getRewardByType(quiz.getType());
-                    };
-                } else {
-                    earnedScore += missionConverter.getRewardByType(quiz.getType());
-                }
-            } else {
-                isAllCorrect = false;
-            }
-// 데모데이 후 아래 코드로 변경.
-//			if (isCorrect) {
-//				earnedScore += missionConverter.getRewardByType(quiz.getType());
-//			} else {
-//				isAllCorrect = false;
-//			}
+			if (isCorrect) {
+				earnedScore += missionConverter.getRewardByType(quiz.getType());
+			} else {
+				isAllCorrect = false;
+			}
 
             MemberQuiz memberQuiz = existingQuizMap.get(quiz.getId());
 
